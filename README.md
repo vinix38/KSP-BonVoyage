@@ -2,6 +2,10 @@
 Rovers background processing for KSP.
 
 # Changelog
+## 0.13.3
+### Changes
+- Recompile for KSP 1.4.1
+
 ## 0.13.2
 ### Changes
 - KSP 1.3.1 compatibility
