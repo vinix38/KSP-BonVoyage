@@ -2,6 +2,12 @@
 Rovers background processing for KSP.
 
 # Changelog
+## 0.14.0 - New voyage
+### Changes
+- KSP 1.5.1 compatibility
+- Major overhaul
+- Localization support
+
 ## 0.13.3
 ### Changes
 - Recompile for KSP 1.4.1
