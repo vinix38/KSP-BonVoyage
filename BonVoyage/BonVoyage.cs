@@ -17,7 +17,9 @@ namespace BonVoyage
 
         public static BonVoyage Instance; // Mod's instance
 
-        public MainWindowModel mainModel;
+        public MainWindowModel mainModel; // Main view's model
+
+        public const string Name = "BonVoyage"; // Name of the mod
 
         #endregion
 
@@ -165,7 +167,7 @@ namespace BonVoyage
                     ApplicationLauncher.AppScenes.TRACKSTATION |
                     ApplicationLauncher.AppScenes.FLIGHT |
                     ApplicationLauncher.AppScenes.MAPVIEW,
-                    GameDatabase.Instance.GetTexture("BonVoyage/Textures/bon-voyage-icon", false)
+                    GameDatabase.Instance.GetTexture(Tools.TextureFilePath("bon-voyage-icon"), false)
                 );
             }
         }
@@ -217,7 +219,7 @@ namespace BonVoyage
                 {
                     mainModel = new MainWindowModel(this);
                 }
-                MainView = new MainWindowView(mainModel);
+                MainView = new MainWindowView(mainModel, ShowSettingsWindow, () => { appLauncherButton.SetFalse(true); });
                 MainView.Show();
             }
         }
@@ -233,6 +235,19 @@ namespace BonVoyage
                 MainView.Dismiss();
                 MainView = null;
             }
+        }
+
+        #endregion
+
+
+        #region Settings view
+
+        /// <summary>
+        /// Show settings window dialog
+        /// </summary>
+        private void ShowSettingsWindow()
+        {
+            ScreenMessages.PostScreenMessage("Settings");
         }
 
         #endregion
@@ -264,31 +279,6 @@ namespace BonVoyage
                     HideMainWindow();
                 }
             }
-
-            //if (GameSettings.MODIFIER_KEY.GetKey() && Input.GetKeyDown(KeyCode.F11))
-            //{
-            //    PopupDialog.SpawnPopupDialog(
-            //        new Vector2(0.5f, 0.5f),
-            //        new Vector2(0.5f, 0.5f),
-            //        new MultiOptionDialog(
-            //            "",
-            //            "",
-            //            "Bon Voyage",
-            //            HighLogic.UISkin,
-            //            new Rect(0.5f, 0.5f, 150f, 60f),
-            //            new DialogGUIFlexibleSpace(),
-            //            new DialogGUIVerticalLayout(
-            //                new DialogGUIFlexibleSpace(),
-            //                new DialogGUILabel("test"),
-            //                new DialogGUIFlexibleSpace(),
-            //                new DialogGUIButton("Close", () => { }, 140.0f, 30.0f, true)
-            //            )
-            //        ),
-            //        false,
-            //        HighLogic.UISkin,
-            //        false
-            //    );
-            //}
         }
 
     }

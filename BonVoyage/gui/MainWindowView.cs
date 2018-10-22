@@ -4,22 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace BonVoyage
 {
     /// <summary>
-    /// Main mod's window - view part
-    /// For emmbeding in a MultiOptionDialog
+    /// Main mod's window - view part.
+    /// For emmbeding in a MultiOptionDialog.
     /// </summary>
     public class MainWindowView : DialogGUIVerticalLayout
     {
+        public delegate void SettingsCallback();
+
         private PopupDialog dialog { get; set; }
         private MainWindowModel model;
+        private UnityAction closeCallback { get; set; }
+        private SettingsCallback settingsCallback { get; set; }
+
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public MainWindowView(MainWindowModel m) : base(
+        public MainWindowView(MainWindowModel m, SettingsCallback settings, UnityAction close) : base(
             CommonWindowProperties.mainListMinWidth + 20, // min width
             CommonWindowProperties.mainListMinHeight, // min height
             CommonWindowProperties.mainWindowSpacing, // spacing
@@ -28,14 +34,16 @@ namespace BonVoyage
         )
         {
             model = m;
+            settingsCallback = settings;
+            closeCallback = close;
 
             // Filter
             AddChild(new DialogGUIHorizontalLayout(
-                new DialogGUIToggle(true, Localizer.Format("#LOC_BV_ActiveVessels"), model.ActiveVesselsChecked, 130f),
-                new DialogGUIToggle(false, Localizer.Format("#LOC_BV_DisabledVessels"), model.DisabledVesselsChecked, 130f),
+                new DialogGUIToggle(model.GetActiveVesselsToggleState(), Localizer.Format("#LOC_BV_ActiveVessels"), model.ActiveVesselsChecked, 130f),
+                new DialogGUIToggle(model.GetDisabledVesselsToggleState(), Localizer.Format("#LOC_BV_DisabledVessels"), model.DisabledVesselsChecked, 130f),
                 new DialogGUIFlexibleSpace()
             ));
-            
+
             // Column headers
             AddChild(new DialogGUIHorizontalLayout(
                 new DialogGUISpace(0f),
@@ -76,10 +84,10 @@ namespace BonVoyage
                 new DialogGUISpace(10f),
                 new DialogGUILabel("999 km", 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                 new DialogGUISpace(10f),
-                new DialogGUIButton("->", model.GotoVessel, 22f, 16f, false) { tooltipText = "tooltip" }
+                TooltipExtension.DeferTooltip(new DialogGUIButton("->", model.GotoVessel, 22f, 16f, false) { tooltipText = Localizer.Format("#LOC_BV_GoToVessel") })
             );
 
-            AddChild(new DialogGUIScrollList(new Vector2(CommonWindowProperties.mainListMinWidth, CommonWindowProperties.mainListMinHeight), false, true,
+            AddChild(new DialogGUIScrollList(new Vector2(CommonWindowProperties.mainListMinWidth, CommonWindowProperties.mainListMinHeight + 220), false, true,
                 new DialogGUIVerticalLayout(
                     CommonWindowProperties.mainListMinWidth,
                     CommonWindowProperties.mainListMinHeight,
@@ -92,19 +100,26 @@ namespace BonVoyage
         }
 
 
+        private void ShowSettings()
+        {
+            settingsCallback();
+        }
+
+
+        #region Window geometry
         private static Rect geometry
         {
             get
             {
-                Vector2 pos = MainWindowModel.MainWindowPosition;
+                Vector2 pos = CommonWindowProperties.MainWindowPosition;
                 return new Rect(
                     pos.x / GameSettings.UI_SCALE,
                     pos.y / GameSettings.UI_SCALE,
-                    CommonWindowProperties.mainListMinWidth + 20, CommonWindowProperties.mainListMinHeight);
+                    CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
             }
             set
             {
-                MainWindowModel.MainWindowPosition = new Vector2(
+                CommonWindowProperties.MainWindowPosition = new Vector2(
                     value.x * GameSettings.UI_SCALE,
                     value.y * GameSettings.UI_SCALE
                 );
@@ -120,9 +135,10 @@ namespace BonVoyage
                 return new Rect(
                     rt.x / GameSettings.UI_SCALE / Screen.width + 0.5f,
                     rt.y / GameSettings.UI_SCALE / Screen.height + 0.5f,
-                    CommonWindowProperties.mainListMinWidth + 20, CommonWindowProperties.mainListMinHeight);
+                    CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
             }
         }
+        #endregion
 
 
         /// <summary>
@@ -148,6 +164,24 @@ namespace BonVoyage
                     CommonWindowProperties.ActiveSkin, // skin
                     false // is modal
                 );
+
+                CommonWindowProperties.AddFloatingButton(
+                    dialog.transform,
+                    -CommonWindowProperties.mainElementPadding.right - CommonWindowProperties.mainWindowSpacing, -CommonWindowProperties.mainElementPadding.top,
+                    CommonWindowProperties.ActiveSkin.button,
+                    "X",
+                    Localizer.Format("#LOC_BV_Close"),
+                    closeCallback
+                );
+
+                CommonWindowProperties.AddFloatingButton(
+                    dialog.transform,
+                    -CommonWindowProperties.mainElementPadding.right - 3 * CommonWindowProperties.mainWindowSpacing - CommonWindowProperties.buttonIconWidth, -CommonWindowProperties.mainElementPadding.top,
+                    CommonWindowProperties.ActiveSkin.button,
+                    "S",
+                    Localizer.Format("#LOC_BV_Settings"),
+                    ShowSettings
+                );
             }
 
             return dialog;
@@ -161,7 +195,7 @@ namespace BonVoyage
         {
             if (dialog != null)
             {
-                geometry = new Rect(currentGeometry.x, currentGeometry.y, CommonWindowProperties.mainListMinWidth + 20, CommonWindowProperties.mainListMinHeight);
+                geometry = new Rect(currentGeometry.x, currentGeometry.y, CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
 
                 dialog.Dismiss();
                 dialog = null;

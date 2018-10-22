@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
+using TMPro;
 
 namespace BonVoyage
 {
@@ -17,12 +20,18 @@ namespace BonVoyage
         public static RectOffset mainElementPadding = new RectOffset(5, 5, 10, 10);
         public static RectOffset mainListPadding = new RectOffset(4, 4, 3, 3);
 
-        public static readonly Vector2 mainWindowAnchorMin = new Vector2(0.5f, 1f);
-        public static readonly Vector2 mainWindowAnchorMax = new Vector2(0.5f, 1f);
+        public static readonly Vector2 mainWindowAnchorMin = new Vector2(0.5f, 0.5f);
+        public static readonly Vector2 mainWindowAnchorMax = new Vector2(0.5f, 0.5f);
+        public static Vector2 MainWindowPosition = new Vector2(0.5f, 0.5f);
+        public const float mainWindowWidth = mainListMinWidth + 20;
+        public const float mainWindowHeight = mainListMinHeight + 330f;
 
         public const float mainWindowSpacing = 3f;
         public const float mainListMinWidth = 570f;
-        public const float mainListMinHeight = 320f;
+        public const float mainListMinHeight = 100f;
+
+        public const int buttonIconWidth = 20;
+
 
         #region Styles
 
@@ -41,7 +50,47 @@ namespace BonVoyage
         public static UIStyle Style_Label_Normal_Center_Red;
         public static UIStyle Style_Label_Normal_Center_Grey;
 
-        #endregion
+
+        /// <summary>
+        /// Get sprite form texture
+        /// </summary>
+        /// <param name="tex"></param>
+        /// <returns></returns>
+        private static Sprite SpriteFromTexture(Texture2D tex)
+        {
+            if (tex != null)
+            {
+                return Sprite.Create(
+                    tex,
+                    new Rect(0, 0, tex.width, tex.height),
+                    new Vector2(0.5f, 0.5f),
+                    tex.width
+                );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        /// <returns>
+		/// A texture object for the image file at the given path.
+		/// </returns>
+		/// <param name="filepath">Path to image file to load</param>
+		private static Texture2D GetImage(string filepath)
+        {
+            return GameDatabase.Instance.GetTexture(filepath, false);
+        }
+
+
+        /// <returns>
+		/// A sprite object for the image at the given path.
+		/// </returns>
+        private static Sprite GetSprite(string filepath)
+        {
+            return SpriteFromTexture(GetImage(filepath));
+        }
 
 
         /// <summary>
@@ -101,6 +150,74 @@ namespace BonVoyage
             Style_Label_Normal_Center_Grey.normal = StyleState_Grey;
             Style_Label_Normal_Center_Grey.disabled = StyleState_Grey;
             Style_Label_Normal_Center_Grey.highlight = StyleState_Grey;
+        }
+
+        #endregion
+
+
+        /// <summary>
+		/// Add a button outside of the normal DialogGUI* flow layout,
+		/// with positioning relative to edges of a parent element.
+		/// By DMagic, with modifications by HebaruSan.
+		/// </summary>
+		/// <param name="parentTransform">Transform of UI object within which to place this button</param>
+		/// <param name="innerHorizOffset">Horizontal position; if positive, number of pixels between left edge of window and left edge of button, if negative, then vice versa on right side</param>
+		/// <param name="innerVertOffset">Vertical position; if positive, number of pixels between bottom edge of window and bottom edge of button, if negative, then vice versa on top side</param>
+		/// <param name="style">Style object containing the sprites for the button</param>
+		/// <param name="tooltip">String to show when user hovers on button</param>
+		/// <param name="onClick">Function to call when the user clicks the button</param>
+		public static void AddFloatingButton(Transform parentTransform, float innerHorizOffset, float innerVertOffset, UIStyle style, string text, string tooltip, UnityAction onClick)
+        {
+            // This creates a new button object using the prefab from KSP's UISkinManager.
+            // The same prefab is used for the PopupDialog system buttons.
+            // Anything we set on this object will be reflected in the button we create.
+            GameObject btnGameObj = GameObject.Instantiate<GameObject>(UISkinManager.GetPrefab("UIButtonPrefab"));
+
+            // Set the button's parent transform.
+            btnGameObj.transform.SetParent(parentTransform, false);
+
+            // Add a layout element and set it to be ignored.
+            // Otherwise the button will end up on the bottom of the window.
+            btnGameObj.AddComponent<LayoutElement>().ignoreLayout = true;
+
+            // This is how we position the button.
+            // The anchors and pivot make the button positioned relative to the top-right corner.
+            // The anchored position sets the position with values in pixels.
+            RectTransform rect = btnGameObj.GetComponent<RectTransform>();
+            rect.anchoredPosition = new Vector2(innerHorizOffset, innerVertOffset);
+            rect.sizeDelta = new Vector2(buttonIconWidth, buttonIconWidth);
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(
+                rect.anchoredPosition.x < 0 ? 1 : 0,
+                rect.anchoredPosition.y < 0 ? 1 : 0
+            );
+
+            // Set the button's image component to the normal sprite.
+            // Since this object comes from the button's GameObject,
+            // changing it affects the button directly!
+            Image btnImg = btnGameObj.GetComponent<Image>();
+            btnImg.sprite = style.normal.background;
+
+            // Now set the different states to their respective sprites.
+            Button button = btnGameObj.GetComponent<Button>();
+            button.transition = Selectable.Transition.SpriteSwap;
+            button.spriteState = new SpriteState()
+            {
+                highlightedSprite = style.highlight.background,
+                pressedSprite = style.active.background,
+                disabledSprite = style.disabled.background
+            };
+
+            // The text will be "Button" if we don't clear it.
+            btnGameObj.GetChild("Text").GetComponent<TextMeshProUGUI>().text = text;
+
+            // Set the tooltip
+            btnGameObj.SetTooltip(tooltip);
+
+            // Set the code to call when clicked.
+            button.onClick.AddListener(onClick);
+
+            // Activate the button object, making it visible.
+            btnGameObj.SetActive(true);
         }
 
     }

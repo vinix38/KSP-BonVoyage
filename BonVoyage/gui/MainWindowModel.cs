@@ -12,10 +12,8 @@ namespace BonVoyage
     public class MainWindowModel
     {
         private BonVoyage module;
-
-        #region Window position
-        public static Vector2 MainWindowPosition = new Vector2(0.5f, 0.7f);
-        #endregion
+        private bool activeVesselsChecked = true;
+        private bool disabledVesselsChecked = false;
 
 
         /// <summary>
@@ -25,8 +23,8 @@ namespace BonVoyage
         {
             module = m;
 
-            //CommonWindowProperties.ActiveSkin = CommonWindowProperties.UnitySkin;
-            //CommonWindowProperties.RefreshStyles();
+            CommonWindowProperties.ActiveSkin = CommonWindowProperties.UnitySkin;
+            CommonWindowProperties.RefreshStyles();
         }
 
 
@@ -36,7 +34,17 @@ namespace BonVoyage
         /// <param name="value"></param>
         public void ActiveVesselsChecked(bool value)
         {
-            ScreenMessages.PostScreenMessage("ActiveVesselsChecked = " + value.ToString());
+            activeVesselsChecked = value;
+        }
+
+
+        /// <summary>
+        /// Get the state of Active vessels toggle
+        /// </summary>
+        /// <returns></returns>
+        public bool GetActiveVesselsToggleState()
+        {
+            return activeVesselsChecked;
         }
 
 
@@ -46,7 +54,17 @@ namespace BonVoyage
         /// <param name="value"></param>
         public void DisabledVesselsChecked(bool value)
         {
-            ScreenMessages.PostScreenMessage("DisabledVesselsChecked = " + value.ToString());
+            disabledVesselsChecked = value;
+        }
+
+
+        /// <summary>
+        /// Get the state of Disabled vessels toggle
+        /// </summary>
+        /// <returns></returns>
+        public bool GetDisabledVesselsToggleState()
+        {
+            return disabledVesselsChecked;
         }
 
 
