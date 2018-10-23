@@ -22,9 +22,6 @@ namespace BonVoyage
         public MainWindowModel(BonVoyage m)
         {
             module = m;
-
-            CommonWindowProperties.ActiveSkin = CommonWindowProperties.UnitySkin;
-            CommonWindowProperties.RefreshStyles();
         }
 
 

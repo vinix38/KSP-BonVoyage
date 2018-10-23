@@ -19,16 +19,25 @@ namespace BonVoyage
 
         public static RectOffset mainElementPadding = new RectOffset(5, 5, 10, 10);
         public static RectOffset mainListPadding = new RectOffset(4, 4, 3, 3);
-
         public static readonly Vector2 mainWindowAnchorMin = new Vector2(0.5f, 0.5f);
         public static readonly Vector2 mainWindowAnchorMax = new Vector2(0.5f, 0.5f);
         public static Vector2 MainWindowPosition = new Vector2(0.5f, 0.5f);
-        public const float mainWindowWidth = mainListMinWidth + 20;
+        public const float mainWindowWidth = mainListMinWidth + 20f;
         public const float mainWindowHeight = mainListMinHeight + 330f;
-
         public const float mainWindowSpacing = 3f;
         public const float mainListMinWidth = 570f;
         public const float mainListMinHeight = 100f;
+
+        public static RectOffset settingsElementPadding = new RectOffset(5, 5, 10, 10);
+        public const float settingsWindowSpacing = 3f;
+        public const float settingsMinWidth = 140f;
+        public const float settingsMinHeight = 200f;
+        public const float settingsWindowWidth = settingsMinWidth + 20f;
+        public const float settingsWindowHeight = settingsMinHeight + 20f;
+        public static readonly Vector2 settingsWindowAnchorMin = new Vector2(0.5f, 0.5f);
+        public static readonly Vector2 settingsWindowAnchorMax = new Vector2(0.5f, 0.5f);
+
+        public static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
 
         public const int buttonIconWidth = 20;
 

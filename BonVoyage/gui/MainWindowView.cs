@@ -112,17 +112,11 @@ namespace BonVoyage
             get
             {
                 Vector2 pos = CommonWindowProperties.MainWindowPosition;
-                return new Rect(
-                    pos.x / GameSettings.UI_SCALE,
-                    pos.y / GameSettings.UI_SCALE,
-                    CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
+                return new Rect(pos.x, pos.y, CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
             }
             set
             {
-                CommonWindowProperties.MainWindowPosition = new Vector2(
-                    value.x * GameSettings.UI_SCALE,
-                    value.y * GameSettings.UI_SCALE
-                );
+                CommonWindowProperties.MainWindowPosition = new Vector2(value.x, value.y);
             }
         }
 
@@ -137,6 +131,16 @@ namespace BonVoyage
                     rt.y / GameSettings.UI_SCALE / Screen.height + 0.5f,
                     CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
             }
+        }
+
+
+        /// <summary>
+        /// Get position of the window
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 GetWindowPosition()
+        {
+            return dialog.GetComponent<RectTransform>().position;
         }
         #endregion
 
@@ -195,7 +199,8 @@ namespace BonVoyage
         {
             if (dialog != null)
             {
-                geometry = new Rect(currentGeometry.x, currentGeometry.y, CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
+                Rect g = currentGeometry;
+                geometry = new Rect(g.x, g.y, CommonWindowProperties.mainWindowWidth, CommonWindowProperties.mainWindowHeight);
 
                 dialog.Dismiss();
                 dialog = null;

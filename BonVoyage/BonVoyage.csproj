@@ -53,6 +53,8 @@
     <Compile Include="gui\CommonWindowProperties.cs" />
     <Compile Include="gui\MainWindowModel.cs" />
     <Compile Include="gui\MainWindowView.cs" />
+    <Compile Include="gui\SettingsWindowModel.cs" />
+    <Compile Include="gui\SettingsWindowView.cs" />
     <Compile Include="gui\StyleConverter.cs" />
     <Compile Include="gui\TooltipExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

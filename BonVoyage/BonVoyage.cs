@@ -17,7 +17,8 @@ namespace BonVoyage
 
         public static BonVoyage Instance; // Mod's instance
 
-        public MainWindowModel mainModel; // Main view's model
+        public MainWindowModel MainModel; // Main view's model
+        public SettingsWindowModel SettingsModel; // Main view's model
 
         public const string Name = "BonVoyage"; // Name of the mod
 
@@ -29,9 +30,14 @@ namespace BonVoyage
         private ApplicationLauncherButton appLauncherButton; // Button in the game's toolbar
         private bool gamePaused; // Is game paused?
         private bool showUI; // Is UI vissible? (F2 pressed)
-        private bool mainViewVisible; // Is main view visible?
 
+        //private bool mainViewVisible; // Is main view visible?
+        private bool showMainView;
+        private bool hideMainView;
         private MainWindowView MainView { get; set; } // Mod's main view
+
+        private bool setttingsViewVisible; // Is main view visible?
+        private SettingsWindowView SettingsView { get; set; } // Mod's main view
 
         #endregion
 
@@ -51,11 +57,16 @@ namespace BonVoyage
             CommonWindowProperties.ActiveSkin = UISkinManager.defaultSkin;
             CommonWindowProperties.UnitySkin = null;
             MainView = null;
-            mainModel = null;
+            MainModel = null;
+            SettingsView = null;
+            SettingsModel = null;
 
             gamePaused = false;
             showUI = true;
-            mainViewVisible = false;
+            //mainViewVisible = false;
+            showMainView = false;
+            hideMainView = false;
+            setttingsViewVisible = false;
 
             CommonWindowProperties.RefreshStyles();
         }
@@ -191,7 +202,7 @@ namespace BonVoyage
         /// </summary>
         public void OnAppLaunchToggleOn()
         {
-            mainViewVisible = true;
+            showMainView = true;
         }
 
 
@@ -200,7 +211,7 @@ namespace BonVoyage
         /// </summary>
         public void OnAppLaunchToggleOff()
         {
-            mainViewVisible = false;
+            hideMainView = true;
         }
 
         #endregion
@@ -215,11 +226,10 @@ namespace BonVoyage
         {
             if (MainView == null)
             {
-                if (mainModel == null) // Create model for the Main View
-                {
-                    mainModel = new MainWindowModel(this);
-                }
-                MainView = new MainWindowView(mainModel, ShowSettingsWindow, () => { appLauncherButton.SetFalse(true); });
+                if (MainModel == null) // Create model for the Main View
+                    MainModel = new MainWindowModel(this);
+                
+                MainView = new MainWindowView(MainModel, ToggleSettingsWindow, () => { appLauncherButton.SetFalse(true); });
                 MainView.Show();
             }
         }
@@ -232,6 +242,9 @@ namespace BonVoyage
         {
             if (MainView != null)
             {
+                if (setttingsViewVisible) // hide settings, when hiding main view
+                    ToggleSettingsWindow();
+
                 MainView.Dismiss();
                 MainView = null;
             }
@@ -243,11 +256,54 @@ namespace BonVoyage
         #region Settings view
 
         /// <summary>
+        /// Toggle state of the settings window dialog
+        /// </summary>
+        private void ToggleSettingsWindow()
+        {
+            setttingsViewVisible = !setttingsViewVisible;
+
+            if (setttingsViewVisible)
+            {
+                if (SettingsView == null)
+                {
+                    ShowSettingsWindow();
+                }
+            }
+            else
+            {
+                if (SettingsView != null)
+                {
+                    HideSettingsWindow();
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Show settings window dialog
         /// </summary>
         private void ShowSettingsWindow()
         {
-            ScreenMessages.PostScreenMessage("Settings");
+            if (SettingsView == null)
+            {
+                if (SettingsModel == null) // Create model for the Settings View
+                    SettingsModel = new SettingsWindowModel(this);
+                
+                SettingsView = new SettingsWindowView(SettingsModel, MainView.GetWindowPosition(), ToggleSettingsWindow);
+                SettingsView.Show();
+            }
+        }
+
+        /// <summary>
+        /// Hide settings window dialog
+        /// </summary>
+        private void HideSettingsWindow()
+        {
+            if (SettingsView != null)
+            {
+                SettingsView.Dismiss();
+                SettingsView = null;
+            }
         }
 
         #endregion
@@ -259,26 +315,38 @@ namespace BonVoyage
         public void Update()
         {
             // Escape was pressed -> close opened windows (set launcher state to false, so next time a window will be opened)
-            if (Input.GetKeyDown(KeyCode.Escape) && mainViewVisible)
+            if (Input.GetKeyDown(KeyCode.Escape) && (MainView != null))
             {
                 appLauncherButton.SetFalse(true);
             }
 
             // Main window
-            if (mainViewVisible)
+            if (showMainView && (MainView == null))
             {
-                if (MainView == null)
-                {
-                    ShowMainWindow();
-                }
+                showMainView = false;
+                ShowMainWindow();
             }
-            else
+            if (hideMainView && (MainView != null))
             {
-                if (MainView != null)
-                {
-                    HideMainWindow();
-                }
+                hideMainView = false;
+                HideMainWindow();
             }
+        }
+
+
+        /// <summary>
+        /// Reset windows when skin was changed
+        /// </summary>
+        public void ResetWindows()
+        {
+            bool settings = setttingsViewVisible; // Settings are closed by HideMainWindow automatically, so we need to store the value
+            if (MainView != null)
+            {
+                HideMainWindow();
+                ShowMainWindow();
+            }
+            if (settings)
+                ToggleSettingsWindow();
         }
 
     }
