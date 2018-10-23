@@ -4,6 +4,7 @@ using UnityEngine;
 using KSP.UI.Screens;
 using KSP.IO;
 using UI;
+using KSP.Localization;
 
 namespace BonVoyage
 {
@@ -31,10 +32,9 @@ namespace BonVoyage
         private bool gamePaused; // Is game paused?
         private bool showUI; // Is UI vissible? (F2 pressed)
 
-        //private bool mainViewVisible; // Is main view visible?
+        private MainWindowView MainView { get; set; } // Mod's main view
         private bool showMainView;
         private bool hideMainView;
-        private MainWindowView MainView { get; set; } // Mod's main view
 
         private bool setttingsViewVisible; // Is main view visible?
         private SettingsWindowView SettingsView { get; set; } // Mod's main view
@@ -56,6 +56,7 @@ namespace BonVoyage
 
             CommonWindowProperties.ActiveSkin = UISkinManager.defaultSkin;
             CommonWindowProperties.UnitySkin = null;
+
             MainView = null;
             MainModel = null;
             SettingsView = null;
@@ -63,11 +64,11 @@ namespace BonVoyage
 
             gamePaused = false;
             showUI = true;
-            //mainViewVisible = false;
             showMainView = false;
             hideMainView = false;
             setttingsViewVisible = false;
 
+            Configuration.Load();
             CommonWindowProperties.RefreshStyles();
         }
 
@@ -79,6 +80,7 @@ namespace BonVoyage
         {
             DontDestroyOnLoad(this);
             GameEvents.onGUIApplicationLauncherReady.Add(AddLauncher);
+            GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveLauncher);
             GameEvents.onHideUI.Add(OnHideUI);
             GameEvents.onShowUI.Add(OnShowUI);
             GameEvents.onGamePause.Add(OnGamePause);
@@ -92,12 +94,15 @@ namespace BonVoyage
         public void OnDestroy()
         {
             GameEvents.onGUIApplicationLauncherReady.Remove(AddLauncher);
+            GameEvents.onGUIApplicationLauncherDestroyed.Remove(RemoveLauncher);
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
             GameEvents.onGamePause.Remove(OnGamePause);
             GameEvents.onGameUnpause.Remove(OnGameUnpause);
 
             RemoveLauncher();
+
+            Configuration.Save();
         }
 
 
@@ -109,6 +114,13 @@ namespace BonVoyage
             if (CommonWindowProperties.UnitySkin == null)
             {
                 CommonWindowProperties.UnitySkin = StyleConverter.Convert(GUI.skin);
+
+                // Load Unity skin, if it was saved in config
+                if (Configuration.Skin == 1)
+                {
+                    CommonWindowProperties.ActiveSkin = CommonWindowProperties.UnitySkin;
+                    CommonWindowProperties.RefreshStyles();
+                }
             }
         }
 
@@ -180,6 +192,9 @@ namespace BonVoyage
                     ApplicationLauncher.AppScenes.MAPVIEW,
                     GameDatabase.Instance.GetTexture(Tools.TextureFilePath("bon-voyage-icon"), false)
                 );
+
+                appLauncherButton.gameObject.SetTooltip(Localizer.Format("#LOC_BV_Title"), Localizer.Format("#LOC_BV_Tooltip"));
+                appLauncherButton.onRightClick = OnRightClick;
             }
         }
 
@@ -187,7 +202,7 @@ namespace BonVoyage
         /// <summary>
         /// Destroy button for the plugin
         /// </summary>
-        private void RemoveLauncher()
+        public void RemoveLauncher()
         {
             if (appLauncherButton != null)
             {
@@ -212,6 +227,15 @@ namespace BonVoyage
         public void OnAppLaunchToggleOff()
         {
             hideMainView = true;
+        }
+
+
+        /// <summary>
+        /// Roght click on the application button
+        /// </summary>
+        public void OnRightClick()
+        {
+            ScreenMessages.PostScreenMessage("right click");
         }
 
         #endregion

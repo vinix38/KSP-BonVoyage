@@ -117,6 +117,7 @@ namespace BonVoyage
             set
             {
                 CommonWindowProperties.MainWindowPosition = new Vector2(value.x, value.y);
+                Configuration.MainWindowPosition = CommonWindowProperties.MainWindowPosition;
             }
         }
 

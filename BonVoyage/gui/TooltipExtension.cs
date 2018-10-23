@@ -8,8 +8,31 @@ namespace BonVoyage
     /// </summary>
     static class TooltipExtension
     {
-        private static readonly Tooltip_Text textTooltipPrefab = AssetBase.GetPrefab<Tooltip_Text>("Tooltip_Text");
+        private static readonly Tooltip_TitleAndText titleAndTextTooltipPrefab = AssetBase.GetPrefab<Tooltip_TitleAndText>("Tooltip_TitleAndText");
 
+        /// <summary>
+        /// Create a tooltip object for a given GameObject, containing both
+        /// a title and a subtitle.
+        /// </summary>
+        /// <param name="gameObj">GameObject to which we want to add a tooltip</param>
+        /// <param name="title">Highlighted text for the tooltip</param>
+        /// <param name="text">Less emphasized text for the tooltip</param>
+        public static void SetTooltip(this GameObject gameObj, string title, string text)
+        {
+            if (gameObj != null)
+            {
+                TooltipController_TitleAndText tt = (gameObj?.GetComponent<TooltipController_TitleAndText>() ?? gameObj?.AddComponent<TooltipController_TitleAndText>());
+                if (tt != null)
+                {
+                    tt.prefab = titleAndTextTooltipPrefab;
+                    tt.titleString = title;
+                    tt.textString = text;
+                }
+            }
+        }
+
+
+        private static readonly Tooltip_Text textTooltipPrefab = AssetBase.GetPrefab<Tooltip_Text>("Tooltip_Text");
 
         /// <summary>
         /// Create a tooltip object for a given GameObject

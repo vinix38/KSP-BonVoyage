@@ -13,8 +13,8 @@ namespace BonVoyage
         private BonVoyage module;
         private bool dewarpChecked = false;
         private bool kspSkin = true;
-        private bool kspToolbar = true;
-        private bool toolbarContinued = false;
+        private bool kspToolbarChecked = true;
+        private bool toolbarContinuedChecked = false;
 
 
         /// <summary>
@@ -23,6 +23,15 @@ namespace BonVoyage
         public SettingsWindowModel(BonVoyage m)
         {
             module = m;
+
+            // Load from configuration
+            if (Configuration.Skin == 1)
+                kspSkin = false;
+            else
+                kspSkin = true;
+            dewarpChecked = Configuration.AutomaticDewarp;
+            kspToolbarChecked = Configuration.KSPToolbar;
+            toolbarContinuedChecked = Configuration.ToolbarContinued;
         }
 
 
@@ -33,6 +42,7 @@ namespace BonVoyage
         public void DewarpChecked(bool value)
         {
             dewarpChecked = value;
+            Configuration.AutomaticDewarp = value;
         }
 
 
@@ -52,9 +62,15 @@ namespace BonVoyage
         private void ChangeSkin()
         {
             if (kspSkin)
+            {
                 CommonWindowProperties.ActiveSkin = UISkinManager.defaultSkin;
+                Configuration.Skin = 0;
+            }
             else
+            {
                 CommonWindowProperties.ActiveSkin = CommonWindowProperties.UnitySkin;
+                Configuration.Skin = 1;
+            }
             CommonWindowProperties.RefreshStyles();
             module.ResetWindows();
         }
@@ -108,7 +124,13 @@ namespace BonVoyage
         /// <param name="value"></param>
         public void KSPToolbarChecked(bool value)
         {
-            kspToolbar = value;
+            kspToolbarChecked = value;
+            Configuration.KSPToolbar = value;
+
+            if (kspToolbarChecked)
+                module.AddLauncher();
+            else
+                module.RemoveLauncher();
         }
 
 
@@ -118,7 +140,8 @@ namespace BonVoyage
         /// <param name="value"></param>
         public void TCChecked(bool value)
         {
-            toolbarContinued = value;
+            toolbarContinuedChecked = value;
+            Configuration.ToolbarContinued = value;
         }
 
 
@@ -128,7 +151,7 @@ namespace BonVoyage
         /// <returns></returns>
         public bool GetKSPToolbarToggleState()
         {
-            return kspToolbar;
+            return kspToolbarChecked;
         }
 
 
@@ -138,7 +161,7 @@ namespace BonVoyage
         /// <returns></returns>
         public bool GetTCToggleState()
         {
-            return toolbarContinued;
+            return toolbarContinuedChecked;
         }
 
     }

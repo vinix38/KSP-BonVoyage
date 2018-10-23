@@ -22,6 +22,11 @@ namespace BonVoyage
         public MainWindowModel(BonVoyage m)
         {
             module = m;
+
+            // Load from configuration
+            CommonWindowProperties.MainWindowPosition = Configuration.MainWindowPosition;
+            activeVesselsChecked = Configuration.ActiveVessels;
+            disabledVesselsChecked = Configuration.DisabledVessels;
         }
 
 
@@ -32,6 +37,7 @@ namespace BonVoyage
         public void ActiveVesselsChecked(bool value)
         {
             activeVesselsChecked = value;
+            Configuration.ActiveVessels = value;
         }
 
 
@@ -52,6 +58,7 @@ namespace BonVoyage
         public void DisabledVesselsChecked(bool value)
         {
             disabledVesselsChecked = value;
+            Configuration.DisabledVessels = value;
         }
 
 
