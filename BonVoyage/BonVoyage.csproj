@@ -50,6 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BonVoyage.cs" />
+    <Compile Include="BonVoyageModule.cs" />
+    <Compile Include="BVController.cs" />
     <Compile Include="GUI\CommonWindowProperties.cs" />
     <Compile Include="GUI\MainWindowModel.cs" />
     <Compile Include="GUI\MainWindowView.cs" />

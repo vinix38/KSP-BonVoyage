@@ -40,6 +40,8 @@ namespace BonVoyage
         private bool setttingsViewVisible; // Is settings view visible?
         private SettingsWindowView SettingsView { get; set; } // Mod's main view
 
+        private List<BVController> bvControllers;
+
         #endregion
 
 
@@ -70,6 +72,8 @@ namespace BonVoyage
 
             gamePaused = false;
             showUI = true;
+
+            bvControllers = new List<BVController>();
 
             Configuration.Load();
         }
@@ -421,6 +425,15 @@ namespace BonVoyage
             }
             if (settings)
                 ToggleSettingsWindow();
+        }
+
+
+        /// <summary>
+        /// Load BV controllers from config
+        /// </summary>
+        public void LoadControllers()
+        {
+
         }
 
     }
