@@ -5,6 +5,7 @@ using KSP.UI.Screens;
 using KSP.IO;
 using UI;
 using KSP.Localization;
+using ToolbarWrapper;
 
 namespace BonVoyage
 {
@@ -17,11 +18,10 @@ namespace BonVoyage
         #region Public properties
 
         public static BonVoyage Instance; // Mod's instance
+        public const string Name = "BonVoyage"; // Name of the mod
 
         public MainWindowModel MainModel; // Main view's model
-        public SettingsWindowModel SettingsModel; // Main view's model
-
-        public const string Name = "BonVoyage"; // Name of the mod
+        public SettingsWindowModel SettingsModel; // Settings view's model
 
         #endregion
 
@@ -29,14 +29,15 @@ namespace BonVoyage
         #region Private properties
 
         private ApplicationLauncherButton appLauncherButton; // Button in the game's toolbar
+        private IButton toolbarButton; // Toolbar Continued button
+
         private bool gamePaused; // Is game paused?
         private bool showUI; // Is UI vissible? (F2 pressed)
 
+        private bool mainViewVisible; // Is main view visible?
         private MainWindowView MainView { get; set; } // Mod's main view
-        private bool showMainView;
-        private bool hideMainView;
 
-        private bool setttingsViewVisible; // Is main view visible?
+        private bool setttingsViewVisible; // Is settings view visible?
         private SettingsWindowView SettingsView { get; set; } // Mod's main view
 
         #endregion
@@ -56,20 +57,21 @@ namespace BonVoyage
 
             CommonWindowProperties.ActiveSkin = UISkinManager.defaultSkin;
             CommonWindowProperties.UnitySkin = null;
+            CommonWindowProperties.RefreshStyles();
 
             MainView = null;
             MainModel = null;
+            mainViewVisible = false;
             SettingsView = null;
             SettingsModel = null;
+            setttingsViewVisible = false;
+
+            toolbarButton = null;
 
             gamePaused = false;
             showUI = true;
-            showMainView = false;
-            hideMainView = false;
-            setttingsViewVisible = false;
 
             Configuration.Load();
-            CommonWindowProperties.RefreshStyles();
         }
 
 
@@ -89,7 +91,7 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Cleanup
+        /// Clean up
         /// </summary>
         public void OnDestroy()
         {
@@ -115,7 +117,7 @@ namespace BonVoyage
             {
                 CommonWindowProperties.UnitySkin = StyleConverter.Convert(GUI.skin);
 
-                // Load Unity skin, if it was saved in config
+                // Load Unity skin, if it was saved in the config
                 if (Configuration.Skin == 1)
                 {
                     CommonWindowProperties.ActiveSkin = CommonWindowProperties.UnitySkin;
@@ -173,11 +175,12 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Create button for the plugin
+        /// Create buttons for the plugin
         /// </summary>
         private void CreatePluginButton()
         {
-            if (appLauncherButton == null)
+            // Create button in the KSP toolbar if the check is selected or Toolbar Continued is unavailable
+            if ((appLauncherButton == null) && (Configuration.KSPToolbar || !ToolbarManager.ToolbarAvailable))
             {
                 appLauncherButton = ApplicationLauncher.Instance.AddModApplication(
                     OnAppLaunchToggleOn,
@@ -196,13 +199,24 @@ namespace BonVoyage
                 appLauncherButton.gameObject.SetTooltip(Localizer.Format("#LOC_BV_Title"), Localizer.Format("#LOC_BV_Tooltip"));
                 appLauncherButton.onRightClick = OnRightClick;
             }
+
+            // Create button in the Toolbar Continued
+            if ((toolbarButton == null) && Configuration.ToolbarContinued && ToolbarManager.ToolbarAvailable)
+            {
+                toolbarButton = ToolbarManager.Instance.add(Name, "AppLauncherButton");
+                toolbarButton.TexturePath = Tools.TextureFilePath("bon-voyage-icon-toolbar");
+                toolbarButton.ToolTip = Localizer.Format("#LOC_BV_Title") + "\n" + Localizer.Format("#LOC_BV_Tooltip");
+                toolbarButton.Visibility = new GameScenesVisibility(GameScenes.SPACECENTER, GameScenes.TRACKSTATION, GameScenes.FLIGHT);
+                toolbarButton.Visible = true;
+                toolbarButton.OnClick += (ClickEvent e) => { OnTCClick(e); };
+            }
         }
 
 
         /// <summary>
-        /// Destroy button for the plugin
+        /// Destroy app launcher button
         /// </summary>
-        public void RemoveLauncher()
+        public void RemoveAppLauncherButton()
         {
             if (appLauncherButton != null)
             {
@@ -213,11 +227,35 @@ namespace BonVoyage
 
 
         /// <summary>
+        /// Destroy Toolbar Continued button
+        /// </summary>
+        public void RemoveToolbarContinuedButton()
+        {
+            if (toolbarButton != null)
+            {
+                toolbarButton.Destroy();
+                toolbarButton = null;
+            }
+        }
+
+
+        /// <summary>
+        /// Destroy buttons for the plugin
+        /// </summary>
+        public void RemoveLauncher()
+        {
+            RemoveAppLauncherButton();
+
+            RemoveToolbarContinuedButton();
+        }
+
+
+        /// <summary>
         /// Show GUI when button is clicked first time
         /// </summary>
         public void OnAppLaunchToggleOn()
         {
-            showMainView = true;
+            mainViewVisible = true;
         }
 
 
@@ -226,16 +264,28 @@ namespace BonVoyage
         /// </summary>
         public void OnAppLaunchToggleOff()
         {
-            hideMainView = true;
+            mainViewVisible = false;
         }
 
 
         /// <summary>
-        /// Roght click on the application button
+        /// Right click on the application button
         /// </summary>
         public void OnRightClick()
         {
             ScreenMessages.PostScreenMessage("right click");
+        }
+
+
+        /// <summary>
+        /// Click on the application button in Toolbar Continued
+        /// </summary>
+        public void OnTCClick(ClickEvent e)
+        {
+            if (e.MouseButton == 1)
+                ScreenMessages.PostScreenMessage("right click");
+            else
+                mainViewVisible = !mainViewVisible;
         }
 
         #endregion
@@ -345,15 +395,15 @@ namespace BonVoyage
             }
 
             // Main window
-            if (showMainView && (MainView == null))
+            if (mainViewVisible)
             {
-                showMainView = false;
-                ShowMainWindow();
+                if (MainView == null)
+                    ShowMainWindow();
             }
-            if (hideMainView && (MainView != null))
+            else
             {
-                hideMainView = false;
-                HideMainWindow();
+                if (MainView != null)
+                    HideMainWindow();
             }
         }
 

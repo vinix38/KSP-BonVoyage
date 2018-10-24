@@ -130,7 +130,7 @@ namespace BonVoyage
             if (kspToolbarChecked)
                 module.AddLauncher();
             else
-                module.RemoveLauncher();
+                module.RemoveAppLauncherButton();
         }
 
 
@@ -142,6 +142,11 @@ namespace BonVoyage
         {
             toolbarContinuedChecked = value;
             Configuration.ToolbarContinued = value;
+
+            if (toolbarContinuedChecked)
+                module.AddLauncher();
+            else
+                module.RemoveToolbarContinuedButton();
         }
 
 

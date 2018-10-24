@@ -14,6 +14,8 @@ namespace BonVoyage
     /// </summary>
     static class CommonWindowProperties
     {
+        #region Public properties
+
         public static UISkinDef UnitySkin { get; set; }
         public static UISkinDef ActiveSkin { get; set; } // Actual skin used
 
@@ -40,6 +42,8 @@ namespace BonVoyage
         public static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
 
         public const int buttonIconWidth = 20;
+
+        #endregion
 
 
         #region Styles
