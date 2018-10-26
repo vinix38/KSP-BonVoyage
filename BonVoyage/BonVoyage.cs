@@ -10,7 +10,7 @@ using ToolbarWrapper;
 namespace BonVoyage
 {
     /// <summary>
-    /// Main mod's class
+    /// Mod's main class
     /// </summary>
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class BonVoyage : MonoBehaviour
@@ -22,6 +22,8 @@ namespace BonVoyage
 
         public MainWindowModel MainModel; // Main view's model
         public SettingsWindowModel SettingsModel; // Settings view's model
+
+        public List<BVController> BVControllers; // Controllers list
 
         #endregion
 
@@ -39,8 +41,6 @@ namespace BonVoyage
 
         private bool setttingsViewVisible; // Is settings view visible?
         private SettingsWindowView SettingsView { get; set; } // Mod's main view
-
-        private List<BVController> bvControllers;
 
         #endregion
 
@@ -73,7 +73,7 @@ namespace BonVoyage
             gamePaused = false;
             showUI = true;
 
-            bvControllers = new List<BVController>();
+            BVControllers = new List<BVController>();
 
             Configuration.Load();
         }
@@ -91,6 +91,8 @@ namespace BonVoyage
             GameEvents.onShowUI.Add(OnShowUI);
             GameEvents.onGamePause.Add(OnGamePause);
             GameEvents.onGameUnpause.Add(OnGameUnpause);
+
+            LoadControllers();
         }
 
 
@@ -433,7 +435,44 @@ namespace BonVoyage
         /// </summary>
         public void LoadControllers()
         {
+            Vessel vessel = null;
+            ProtoPartSnapshot part = null;
 
+            BVControllers.Clear();
+
+            for (int i = 0; i < FlightGlobals.Vessels.Count; i++)
+            {
+                vessel = FlightGlobals.Vessels[i];
+                ConfigNode vesselConfigNode = new ConfigNode();
+                vessel.protoVessel.Save(vesselConfigNode);
+
+                for (int k = 0; k < vessel.protoVessel.protoPartSnapshots.Count; k++)
+                {
+                    part = vessel.protoVessel.protoPartSnapshots[k];
+                    ProtoPartModuleSnapshot module = part.FindModule("BonVoyageModule");
+                    if (module != null)
+                    {
+                        ConfigNode BVModule = module.moduleValues;
+                        string vesselType = BVModule.GetValue("vesselType");
+                        if (vessel.isActiveVessel)
+                            vesselType = vessel.FindPartModuleImplementing<BonVoyageModule>().vesselType;
+                        BVController controller = null;
+                        switch (vesselType)
+                        {
+                            case "0": // rover
+                                controller = new RoverController(vessel, BVModule);
+                                break;
+                            case "1": // ship
+                                controller = new ShipController(vessel, BVModule);
+                                break;
+                            default: // default to rover
+                                controller = new RoverController(vessel, BVModule);
+                                break;
+                        }
+                        BVControllers.Add(controller);
+                    }
+                }
+            }
         }
 
     }

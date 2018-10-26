@@ -39,8 +39,8 @@ namespace BonVoyage
 
             // Filter
             AddChild(new DialogGUIHorizontalLayout(
-                new DialogGUIToggle(model.GetActiveVesselsToggleState(), Localizer.Format("#LOC_BV_ActiveVessels"), model.ActiveVesselsChecked, 130f),
-                new DialogGUIToggle(model.GetDisabledVesselsToggleState(), Localizer.Format("#LOC_BV_DisabledVessels"), model.DisabledVesselsChecked, 130f),
+                new DialogGUIToggle(model.GetActiveControllersToggleState(), Localizer.Format("#LOC_BV_ActiveControllers"), model.ActiveControllersChecked, 130f),
+                new DialogGUIToggle(model.GetDisabledControllersToggleState(), Localizer.Format("#LOC_BV_DisabledControllers"), model.DisabledControllersChecked, 130f),
                 new DialogGUIFlexibleSpace()
             ));
 
@@ -58,45 +58,7 @@ namespace BonVoyage
                 new DialogGUILabel(Localizer.Format("#LOC_BV_ColumnHeader_Distance"), 90f) { guiStyle = CommonWindowProperties.Style_Label_Bold_Center }
             ));
 
-            DialogGUIBase[] list = new DialogGUIBase[2 + 1];
-            list[0] = new DialogGUIContentSizer(UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained, UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize, true);
-            list[1] = new DialogGUIHorizontalLayout(
-                new DialogGUILabel("long vessel name", 150f),
-                new DialogGUISpace(10f),
-                new DialogGUILabel("awaiting sunlight", 70f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center_White },
-                new DialogGUISpace(10f),
-                new DialogGUILabel("Kerbin", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                new DialogGUISpace(10f),
-                new DialogGUILabel("45.5 m/s", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                new DialogGUISpace(10f),
-                new DialogGUILabel("999 km", 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                new DialogGUISpace(10f),
-                TooltipExtension.DeferTooltip(new DialogGUIButton("->", model.GotoVessel, 22f, 16f, false) { tooltipText = Localizer.Format("#LOC_BV_GoToVessel") })
-            );
-            list[2] = new DialogGUIHorizontalLayout(
-                new DialogGUILabel("long vessel name", 150f),
-                new DialogGUISpace(10f),
-                new DialogGUILabel("awaiting sunlight", 70f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center_White },
-                new DialogGUISpace(10f),
-                new DialogGUILabel("Kerbin", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                new DialogGUISpace(10f),
-                new DialogGUILabel("45.5 m/s", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                new DialogGUISpace(10f),
-                new DialogGUILabel("999 km", 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                new DialogGUISpace(10f),
-                TooltipExtension.DeferTooltip(new DialogGUIButton("->", model.GotoVessel, 22f, 16f, false) { tooltipText = Localizer.Format("#LOC_BV_GoToVessel") })
-            );
-
-            AddChild(new DialogGUIScrollList(new Vector2(CommonWindowProperties.mainListMinWidth, CommonWindowProperties.mainListMinHeight + 220), false, true,
-                new DialogGUIVerticalLayout(
-                    CommonWindowProperties.mainListMinWidth,
-                    CommonWindowProperties.mainListMinHeight,
-                    CommonWindowProperties.mainWindowSpacing,
-                    CommonWindowProperties.mainListPadding,
-                    TextAnchor.UpperLeft,
-                    list
-                )
-            ));
+            AddChild(new DialogGUIScrollList(new Vector2(CommonWindowProperties.mainListMinWidth, CommonWindowProperties.mainListMinHeight + 220), false, true, model.GetVesselListLayout()));
         }
 
 
@@ -205,6 +167,7 @@ namespace BonVoyage
 
                 dialog.Dismiss();
                 dialog = null;
+                model.ClearVesselListLayout();
             }
         }
 

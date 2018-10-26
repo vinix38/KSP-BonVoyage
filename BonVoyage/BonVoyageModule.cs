@@ -6,6 +6,9 @@ using System.Text;
 
 namespace BonVoyage
 {
+    /// <summary>
+    /// Part module of Bon Voyage
+    /// </summary>
     class BonVoyageModule : PartModule
     {
         #region KSP Fields
@@ -82,13 +85,13 @@ namespace BonVoyage
         /// Vessel is only solar powered
         /// </summary>
         [KSPField(isPersistant = true)]
-        public bool solarPowered = true;
+        public bool solarPowered = false;
 
         /// <summary>
         /// Vessel is manned
         /// </summary>
         [KSPField(isPersistant = true)]
-        public bool manned = true;
+        public bool manned = false;
 
         /// <summary>
         /// Root part height from the terrain

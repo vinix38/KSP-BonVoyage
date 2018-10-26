@@ -90,12 +90,12 @@ namespace BonVoyage
         /// <summary>
         /// Active vessels
         /// </summary>
-        public static bool ActiveVessels
+        public static bool ActiveControllers
         {
-            get { return configuration.GetValue<bool>("activeVessels", true); }
+            get { return configuration.GetValue<bool>("activeControllers", true); }
             set
             {
-                configuration.SetValue("activeVessels", value);
+                configuration.SetValue("activeControllers", value);
                 configuration.save();
             }
         }
@@ -104,12 +104,12 @@ namespace BonVoyage
         /// <summary>
         /// Disabled vessels
         /// </summary>
-        public static bool DisabledVessels
+        public static bool DisabledControllers
         {
-            get { return configuration.GetValue<bool>("disabledVessels", false); }
+            get { return configuration.GetValue<bool>("disabledControllers", false); }
             set
             {
-                configuration.SetValue("disabledVessels", value);
+                configuration.SetValue("disabledControllers", value);
                 configuration.save();
             }
         }
