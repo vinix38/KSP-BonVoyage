@@ -125,7 +125,7 @@ namespace BonVoyage
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
-                Fields["vesselType"].guiActive = !shutdown;
+                //Fields["vesselType"].guiActive = !shutdown;
                 Events["BVControlPanel"].guiActive = !shutdown;
                 Events["BVControlPanel"].guiName = Localizer.Format("#LOC_BV_ContextMenu_Panel");
             }
@@ -152,7 +152,7 @@ namespace BonVoyage
                     //    Deactivate();
                     //BonVoyage.Instance.HideModuleControl();
                 }
-                //BonVoyage.Instance.LoadRovers();
+                BonVoyage.Instance.SetShutdownState(this.vessel.id, shutdown);
             }
             else
             {

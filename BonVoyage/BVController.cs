@@ -7,6 +7,19 @@ using System.Text;
 namespace BonVoyage
 {
     /// <summary>
+    /// Enum of vessel states
+    /// </summary>
+    public enum VesselState
+    {
+        Idle = 0,
+        ControllerDisabled = 1,
+        Current = 2,
+        Moving = 3,
+        AwaitingSunlight = 4
+    }
+
+
+    /// <summary>
     /// Basic controller
     /// </summary>
     public class BVController
@@ -18,6 +31,14 @@ namespace BonVoyage
         public bool Shutdown
         {
             get { return shutdown; }
+            set
+            {
+                shutdown = value;
+                if (shutdown)
+                    state = VesselState.ControllerDisabled;
+                else
+                    state = VesselState.Idle;
+            }
         }
 
         #endregion
@@ -44,7 +65,7 @@ namespace BonVoyage
         
         private List<PathUtils.WayPoint> path = null; // Path to destination
 
-        private byte status;
+        private VesselState state;
 
         #endregion
 
@@ -75,7 +96,9 @@ namespace BonVoyage
             if (BVModule.GetValue("pathEncoded") != null)
                 path = PathUtils.DecodePath(BVModule.GetValue("pathEncoded"));
 
-            status = 0;
+            state = VesselState.Idle;
+            if (shutdown)
+                state = VesselState.ControllerDisabled;
         }
 
 
@@ -92,12 +115,14 @@ namespace BonVoyage
         #region Main window texts
 
         /// <summary>
-        /// Get vessel status
+        /// Get vessel state
         /// </summary>
         /// <returns></returns>
-        public byte GetVesselStatus()
+        public VesselState GetVesselState()
         {
-            return status;
+            if (vessel.isActiveVessel)
+                return VesselState.Current;
+            return state;
         }
 
 
@@ -105,12 +130,20 @@ namespace BonVoyage
         /// Get textual reprezentation of the vessel status
         /// </summary>
         /// <returns></returns>
-        public string GetVesselStatusText()
+        public string GetVesselStateText()
         {
-            switch (status)
+            if (vessel.isActiveVessel)
+                return Localizer.Format("#LOC_BV_Status_Current");
+            switch (state)
             {
-                case 0:
+                case VesselState.Idle:
                     return Localizer.Format("#LOC_BV_Status_Idle");
+                case VesselState.ControllerDisabled:
+                    return Localizer.Format("#LOC_BV_Status_Disabled");
+                case VesselState.AwaitingSunlight:
+                    return Localizer.Format("#LOC_BV_Status_AwaitingSunlight");
+                case VesselState.Moving:
+                    return Localizer.Format("#LOC_BV_Status_Moving");
                 default:
                     return Localizer.Format("#LOC_BV_Status_Idle");
             }

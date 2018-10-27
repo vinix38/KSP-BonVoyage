@@ -12,7 +12,7 @@ namespace BonVoyage
     /// </summary>
     public class MainWindowModel
     {
-        private BonVoyage module;
+        //private BonVoyage module;
         private bool activeControllersChecked = true;
         private bool disabledControllersChecked = false;
 
@@ -23,10 +23,8 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public MainWindowModel(BonVoyage m)
+        public MainWindowModel()
         {
-            module = m;
-
             // Load from configuration
             CommonWindowProperties.MainWindowPosition = Configuration.MainWindowPosition;
             activeControllersChecked = Configuration.ActiveControllers;
@@ -42,6 +40,7 @@ namespace BonVoyage
         {
             activeControllersChecked = value;
             Configuration.ActiveControllers = value;
+            RefreshVesselListLayout();
         }
 
 
@@ -63,6 +62,7 @@ namespace BonVoyage
         {
             disabledControllersChecked = value;
             Configuration.DisabledControllers = value;
+            RefreshVesselListLayout();
         }
 
 
@@ -82,13 +82,15 @@ namespace BonVoyage
         /// <param name="vesselId"></param>
         public void SwitchToVessel(Guid vesselId)
         {
-            for (int i = 0; i < module.BVControllers.Count; i++)
+            for (int i = 0; i < BonVoyage.Instance.BVControllers.Count; i++)
             {
-                if (module.BVControllers[i].vessel.id == vesselId)
+                if (BonVoyage.Instance.BVControllers[i].vessel.id == vesselId)
                 {
-                    Vessel v = module.BVControllers[i].vessel;
+                    Vessel v = BonVoyage.Instance.BVControllers[i].vessel;
                     if (v.loaded)
+                    {
                         FlightGlobals.SetActiveVessel(v);
+                    }
                     else
                     {
                         GamePersistence.SaveGame("persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
@@ -100,6 +102,69 @@ namespace BonVoyage
 
 
         /// <summary>
+        /// Create table row for controller
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <returns>DialogGUIHorizontalLayout row or null if controller state don't equals to selected filter</returns>
+        private DialogGUIHorizontalLayout CreateListLayoutRow(BVController controller)
+        {
+            DialogGUIHorizontalLayout row = null;
+
+            if ((activeControllersChecked && !controller.Shutdown) || (disabledControllersChecked && controller.Shutdown))
+            {
+                UIStyle statusStyle;
+                switch (controller.GetVesselState())
+                {
+                    case VesselState.Current:
+                        statusStyle = CommonWindowProperties.Style_Label_Normal_Center_White;
+                        break;
+                    case VesselState.Idle:
+                        statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Grey;
+                        break;
+                    case VesselState.ControllerDisabled:
+                        statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Red;
+                        break;
+                    case VesselState.AwaitingSunlight:
+                        statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Yellow;
+                        break;
+                    case VesselState.Moving:
+                        statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Green;
+                        break;
+                    default:
+                        statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Grey;
+                        break;
+                }
+
+                row = new DialogGUIHorizontalLayout(
+                    new DialogGUILabel(controller.vessel.GetDisplayName(), 150f),
+                    new DialogGUISpace(10f),
+                    new DialogGUILabel(controller.GetVesselStateText(), 70f) { guiStyle = statusStyle },
+                    new DialogGUISpace(10f),
+                    new DialogGUILabel(controller.vessel.mainBody.bodyDisplayName.Replace("^N", ""), 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUISpace(10f),
+                    new DialogGUILabel("-", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUISpace(10f),
+                    new DialogGUILabel("-", 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUISpace(10f),
+                    (
+                        !controller.vessel.isActiveVessel
+                        ?
+                        TooltipExtension.DeferTooltip(new DialogGUIButton("->",
+                            delegate { SwitchToVessel(controller.vessel.id); }, 22f, 16f, false)
+                        { tooltipText = (Localizer.Format("#LOC_BV_SwitchToVessel") + " " + controller.vessel.GetDisplayName()) })
+                        :
+                        new DialogGUISpace(10f)
+                    )
+
+                );
+                row.SetOptionText(controller.vessel.id.ToString()); // ID of the row (vessel ID)
+            }
+
+            return row;
+        }
+
+
+        /// <summary>
         /// Get layout of the list of vessels
         /// </summary>
         /// <returns></returns>
@@ -107,10 +172,10 @@ namespace BonVoyage
         {
             // Count disabled controllers
             int disabledControllersCount = 0;
-            int controllersCount = module.BVControllers.Count;
+            int controllersCount = BonVoyage.Instance.BVControllers.Count;
             for (int i = 0; i < controllersCount; i++)
             {
-                if (module.BVControllers[i].Shutdown)
+                if (BonVoyage.Instance.BVControllers[i].Shutdown)
                     disabledControllersCount++;
             }
 
@@ -128,45 +193,7 @@ namespace BonVoyage
                 int counter = 1;
                 for (int i = 0; i < controllersCount; i++)
                 {
-                    DialogGUIHorizontalLayout row = null;
-                    BVController controller = module.BVControllers[i];
-
-                    if ((activeControllersChecked && !controller.Shutdown) || (disabledControllersChecked && controller.Shutdown))
-                    {
-                        UIStyle statusStyle;
-                        switch (controller.GetVesselStatus())
-                        {
-                            case 0:
-                                statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Grey;
-                                break;
-                            default:
-                                statusStyle = CommonWindowProperties.Style_Label_Normal_Center_Grey;
-                                break;
-                        }
-
-                        row =  new DialogGUIHorizontalLayout(
-                            new DialogGUILabel(controller.vessel.GetDisplayName(), 150f),
-                            new DialogGUISpace(10f),
-                            new DialogGUILabel(controller.GetVesselStatusText(), 70f) { guiStyle = statusStyle },
-                            new DialogGUISpace(10f),
-                            new DialogGUILabel(controller.vessel.mainBody.bodyDisplayName.Replace("^N", ""), 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                            new DialogGUISpace(10f),
-                            new DialogGUILabel("-", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                            new DialogGUISpace(10f),
-                            new DialogGUILabel("-", 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
-                            new DialogGUISpace(10f),
-                            (
-                                !controller.vessel.isActiveVessel
-                                ?
-                                TooltipExtension.DeferTooltip(new DialogGUIButton("->", delegate { SwitchToVessel(controller.vessel.id); }, 22f, 16f, false) { tooltipText = Localizer.Format("#LOC_BV_SwitchToVessel") })
-                                :
-                                new DialogGUISpace(10f)
-                            )
-
-                        );
-                        row.SetOptionText(controller.vessel.id.ToString()); // ID of the row (vessel ID)
-                    }
-
+                    DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i]); 
                     if (row != null)
                     {
                         list[counter] = row;
@@ -196,6 +223,38 @@ namespace BonVoyage
         public void ClearVesselListLayout()
         {
             vesselListLayout = null;
+        }
+
+
+        /// <summary>
+        /// Refresh list of vessels without reloading the list of controllers
+        /// </summary>
+        public void RefreshVesselListLayout()
+        {
+            Stack<Transform> stack = new Stack<Transform>();﻿ // some data on hierarchy of GUI components
+            stack.Push(vesselListLayout.uiItem.gameObject.transform); // need the reference point of the parent GUI component for position and size
+
+            List<DialogGUIBase> rows = vesselListLayout.children;
+
+            // Clear list. We are skiping DialogGUIContentSizer
+            while (rows.Count > 1)
+            {
+                DialogGUIBase child = rows.ElementAt(1); // Get child
+                rows.RemoveAt(1); // Drop row
+                child.uiItem.gameObject.DestroyGameObjectImmediate(); // Free memory up
+            }
+
+            // Add rows
+            int controllersCount = BonVoyage.Instance.BVControllers.Count;
+            for (int i = 0; i < controllersCount; i++)
+            {
+                DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i]);
+                if (row != null)
+                {
+                    rows.Add(row);
+                    rows.Last().Create(ref stack, CommonWindowProperties.ActiveSkin); // required to force the GUI creatio﻿n
+                }
+            }
         }
 
     }

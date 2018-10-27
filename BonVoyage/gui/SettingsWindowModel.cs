@@ -10,7 +10,6 @@ namespace BonVoyage
     /// </summary>
     public class SettingsWindowModel
     {
-        private BonVoyage module;
         private bool dewarpChecked = false;
         private bool kspSkin = true;
         private bool kspToolbarChecked = true;
@@ -20,10 +19,8 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public SettingsWindowModel(BonVoyage m)
+        public SettingsWindowModel()
         {
-            module = m;
-
             // Load from configuration
             if (Configuration.Skin == 1)
                 kspSkin = false;
@@ -72,7 +69,7 @@ namespace BonVoyage
                 Configuration.Skin = 1;
             }
             CommonWindowProperties.RefreshStyles();
-            module.ResetWindows();
+            BonVoyage.Instance.ResetWindows();
         }
 
 
@@ -128,9 +125,9 @@ namespace BonVoyage
             Configuration.KSPToolbar = value;
 
             if (kspToolbarChecked)
-                module.AddLauncher();
+                BonVoyage.Instance.AddLauncher();
             else
-                module.RemoveAppLauncherButton();
+                BonVoyage.Instance.RemoveAppLauncherButton();
         }
 
 
@@ -144,9 +141,9 @@ namespace BonVoyage
             Configuration.ToolbarContinued = value;
 
             if (toolbarContinuedChecked)
-                module.AddLauncher();
+                BonVoyage.Instance.AddLauncher();
             else
-                module.RemoveToolbarContinuedButton();
+                BonVoyage.Instance.RemoveToolbarContinuedButton();
         }
 
 

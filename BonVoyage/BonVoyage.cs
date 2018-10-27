@@ -87,10 +87,20 @@ namespace BonVoyage
             DontDestroyOnLoad(this);
             GameEvents.onGUIApplicationLauncherReady.Add(AddLauncher);
             GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveLauncher);
+            GameEvents.onGameSceneSwitchRequested.Add(OnGameSceneSwitchRequested);
+            GameEvents.onVesselChange.Add(OnVesselChange);
+            GameEvents.onLevelWasLoaded.Add(OnLevelWasLoaded);
             GameEvents.onHideUI.Add(OnHideUI);
             GameEvents.onShowUI.Add(OnShowUI);
             GameEvents.onGamePause.Add(OnGamePause);
             GameEvents.onGameUnpause.Add(OnGameUnpause);
+
+
+            // test
+            //GameEvents.onGameSceneLoadRequested.Add(onGameSceneLoadRequested); // GameScenes
+            //GameEvents.onVesselGoOffRails.Add(onVesselGoOffRails); // Vessel
+            //GameEvents.onVesselLoaded.Add(onVesselLoaded); // Vessel
+            // test
 
             LoadControllers();
         }
@@ -103,15 +113,40 @@ namespace BonVoyage
         {
             GameEvents.onGUIApplicationLauncherReady.Remove(AddLauncher);
             GameEvents.onGUIApplicationLauncherDestroyed.Remove(RemoveLauncher);
+            GameEvents.onGameSceneSwitchRequested.Add(OnGameSceneSwitchRequested);
+            GameEvents.onVesselChange.Remove(OnVesselChange);
+            GameEvents.onLevelWasLoaded.Remove(OnLevelWasLoaded);
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
             GameEvents.onGamePause.Remove(OnGamePause);
             GameEvents.onGameUnpause.Remove(OnGameUnpause);
 
+            // test
+            //GameEvents.onGameSceneLoadRequested.Remove(onGameSceneLoadRequested); // GameScenes
+            //GameEvents.onVesselGoOffRails.Remove(onVesselGoOffRails); // Vessel
+            //GameEvents.onVesselLoaded.Remove(onVesselLoaded); // Vessel
+            // test
+
             RemoveLauncher();
 
             Configuration.Save();
         }
+
+
+        // test
+        public void onGameSceneLoadRequested(GameScenes scenes)
+        {
+            Debug.LogWarning("BV: onGameSceneLoadRequested");
+        }
+        public void onVesselGoOffRails(Vessel vessel)
+        {
+            Debug.LogWarning("BV: onVesselGoOffRails");
+        }
+        public void onVesselLoaded(Vessel vessel)
+        {
+            Debug.LogWarning("BV: onVesselLoaded");
+        }
+        // test
 
 
         /// <summary>
@@ -166,6 +201,43 @@ namespace BonVoyage
         private void OnHideUI()
         {
             showUI = false;
+        }
+
+
+        /// <summary>
+        /// Change UI state to hidden to prevent app button weirdness (PopupDialog is automatically hidden on scene change)
+        /// </summary>
+        /// <param name="ev"></param>
+        public void OnGameSceneSwitchRequested(GameEvents.FromToAction<GameScenes, GameScenes> ev)
+        {
+            if (appLauncherButton != null)
+                appLauncherButton.SetFalse(true);
+            else
+                mainViewVisible = false;
+        }
+
+
+        /// <summary>
+        /// Vessel changed. Refresh vessel list in the main window if it's still visible (scene was not switched)
+        /// </summary>
+        /// <param name="vessel"></param>
+        public void OnVesselChange(Vessel vessel)
+        {
+            if (MainView != null)
+                MainModel.RefreshVesselListLayout();
+        }
+
+
+        /// <summary>
+        /// Reload list of controllers when new scene is loaded
+        /// </summary>
+        /// <param name="scenes"></param>
+        public void OnLevelWasLoaded(GameScenes scene)
+        {
+            if ((scene == GameScenes.FLIGHT) || (scene == GameScenes.SPACECENTER) || (scene == GameScenes.TRACKSTATION))
+            {
+                LoadControllers();
+            }
         }
 
 
@@ -291,7 +363,17 @@ namespace BonVoyage
             if (e.MouseButton == 1)
                 ScreenMessages.PostScreenMessage("right click");
             else
-                mainViewVisible = !mainViewVisible;
+            {
+                if (appLauncherButton != null) // If KSP app launcher button is created, then use his events
+                {
+                    if (mainViewVisible) // visible? -> hide
+                        appLauncherButton.SetFalse(true);
+                    else // show
+                        appLauncherButton.SetTrue(true);
+                }
+                else
+                    mainViewVisible = !mainViewVisible;
+            }
         }
 
         #endregion
@@ -307,7 +389,7 @@ namespace BonVoyage
             if (MainView == null)
             {
                 if (MainModel == null) // Create model for the Main View
-                    MainModel = new MainWindowModel(this);
+                    MainModel = new MainWindowModel();
                 
                 MainView = new MainWindowView(MainModel, ToggleSettingsWindow, () => { appLauncherButton.SetFalse(true); });
                 MainView.Show();
@@ -367,7 +449,7 @@ namespace BonVoyage
             if (SettingsView == null)
             {
                 if (SettingsModel == null) // Create model for the Settings View
-                    SettingsModel = new SettingsWindowModel(this);
+                    SettingsModel = new SettingsWindowModel();
                 
                 SettingsView = new SettingsWindowView(SettingsModel, MainView.GetWindowPosition(), ToggleSettingsWindow);
                 SettingsView.Show();
@@ -431,7 +513,25 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Load BV controllers from config
+        /// Set value of shutdown in a controller and refresh the main view after a change in the BonVoyageModule
+        /// </summary>
+        public void SetShutdownState(Guid vesselId, bool value)
+        {
+            for (int i = 0; i < BVControllers.Count; i++)
+            {
+                if (BVControllers[i].vessel.id == vesselId)
+                {
+                    BVControllers[i].Shutdown = value;
+                    break;
+                }
+            }
+            if (MainView != null)
+                MainModel.RefreshVesselListLayout();
+        }
+
+
+        /// <summary>
+        /// Load BV controllers from the config
         /// </summary>
         public void LoadControllers()
         {
