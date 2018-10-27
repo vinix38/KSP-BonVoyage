@@ -20,15 +20,15 @@ namespace BonVoyage
         public static UISkinDef ActiveSkin { get; set; } // Actual skin used
 
         public static RectOffset mainElementPadding = new RectOffset(5, 5, 10, 10);
+        public const float mainWindowSpacing = 3f;
         public static RectOffset mainListPadding = new RectOffset(4, 4, 3, 3);
+        public const float mainListMinWidth = 570f;
+        public const float mainListMinHeight = 100f;
+        public const float mainWindowWidth = mainListMinWidth + 20f;
+        public const float mainWindowHeight = mainListMinHeight + 330f;
         public static readonly Vector2 mainWindowAnchorMin = new Vector2(0.5f, 0.5f);
         public static readonly Vector2 mainWindowAnchorMax = new Vector2(0.5f, 0.5f);
         public static Vector2 MainWindowPosition = new Vector2(0.5f, 0.5f);
-        public const float mainWindowWidth = mainListMinWidth + 20f;
-        public const float mainWindowHeight = mainListMinHeight + 330f;
-        public const float mainWindowSpacing = 3f;
-        public const float mainListMinWidth = 570f;
-        public const float mainListMinHeight = 100f;
 
         public static RectOffset settingsElementPadding = new RectOffset(5, 5, 10, 10);
         public const float settingsWindowSpacing = 3f;
@@ -38,6 +38,16 @@ namespace BonVoyage
         public const float settingsWindowHeight = settingsMinHeight + 20f;
         public static readonly Vector2 settingsWindowAnchorMin = new Vector2(0.5f, 0.5f);
         public static readonly Vector2 settingsWindowAnchorMax = new Vector2(0.5f, 0.5f);
+
+        public static RectOffset controlElementPadding = new RectOffset(5, 5, 10, 10);
+        public const float controlWindowSpacing = 3f;
+        public const float controlMinWidth = 140f;
+        public const float controlMinHeight = 200f;
+        public const float controlWindowWidth = controlMinWidth + 20f;
+        public const float controlWindowHeight = controlMinHeight + 20f;
+        public static readonly Vector2 controlWindowAnchorMin = new Vector2(0.5f, 0.5f);
+        public static readonly Vector2 controlWindowAnchorMax = new Vector2(0.5f, 0.5f);
+        public static Vector2 ControlWindowPosition = new Vector2(0.5f, 0.5f);
 
         public static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
 

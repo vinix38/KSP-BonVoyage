@@ -30,7 +30,7 @@ namespace BonVoyage
         /// </summary>
         // localize, when ship part is ready
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Vessel type")]
-        [UI_ChooseOption(scene = UI_Scene.All, options = new[] { "0", "1" }, display = new[] { "Rover", "Ship" })]
+        [UI_ChooseOption(scene = UI_Scene.None, options = new[] { "0", "1" }, display = new[] { "Rover", "Ship" })]
         public string vesselType = "0";
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace BonVoyage
         [KSPEvent(guiActive = true, guiName = "Bon Voyage Control Panel", category = "Bon Voyage")]
         public void BVControlPanel()
         {
-            //BonVoyage.Instance.ShowModuleControl();
+            BonVoyage.Instance.ToggleControlWindow();
         }
 
         #endregion

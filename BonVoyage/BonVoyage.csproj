@@ -53,6 +53,8 @@
     <Compile Include="BonVoyageModule.cs" />
     <Compile Include="BVController.cs" />
     <Compile Include="GUI\CommonWindowProperties.cs" />
+    <Compile Include="GUI\ControlWindowModel.cs" />
+    <Compile Include="GUI\ControlWindowView.cs" />
     <Compile Include="GUI\MainWindowModel.cs" />
     <Compile Include="GUI\MainWindowView.cs" />
     <Compile Include="GUI\SettingsWindowModel.cs" />

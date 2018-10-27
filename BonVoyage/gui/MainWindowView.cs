@@ -15,17 +15,19 @@ namespace BonVoyage
     public class MainWindowView : DialogGUIVerticalLayout
     {
         public delegate void SettingsCallback();
+        public delegate void ControlCallback();
 
         private PopupDialog dialog { get; set; }
         private MainWindowModel model;
         private UnityAction closeCallback { get; set; }
         private SettingsCallback settingsCallback { get; set; }
+        private ControlCallback controlCallback { get; set; }
 
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public MainWindowView(MainWindowModel m, SettingsCallback settings, UnityAction close) : base(
+        public MainWindowView(MainWindowModel m, SettingsCallback settings, ControlCallback control, UnityAction close) : base(
             CommonWindowProperties.mainListMinWidth + 20, // min width
             CommonWindowProperties.mainListMinHeight, // min height
             CommonWindowProperties.mainWindowSpacing, // spacing
@@ -35,13 +37,15 @@ namespace BonVoyage
         {
             model = m;
             settingsCallback = settings;
+            controlCallback = control;
             closeCallback = close;
 
             // Filter
             AddChild(new DialogGUIHorizontalLayout(
                 new DialogGUIToggle(model.GetActiveControllersToggleState(), Localizer.Format("#LOC_BV_ActiveControllers"), model.ActiveControllersChecked, 130f),
                 new DialogGUIToggle(model.GetDisabledControllersToggleState(), Localizer.Format("#LOC_BV_DisabledControllers"), model.DisabledControllersChecked, 130f),
-                new DialogGUIFlexibleSpace()
+                new DialogGUIFlexibleSpace(),
+                new DialogGUIButton(model.GetControlButtonText, ToggleControl, model.ControlButtonCanBeEnabled, 150f, 24f, false, CommonWindowProperties.ActiveSkin.button)
             ));
 
             // Column headers
@@ -62,9 +66,21 @@ namespace BonVoyage
         }
 
 
+        /// <summary>
+        /// Settings callback encapsulation
+        /// </summary>
         private void ShowSettings()
         {
             settingsCallback();
+        }
+
+
+        /// <summary>
+        /// Control callback encapsulation
+        /// </summary>
+        private void ToggleControl()
+        {
+            controlCallback();
         }
 
 

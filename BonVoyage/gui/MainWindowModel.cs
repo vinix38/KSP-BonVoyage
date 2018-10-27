@@ -77,6 +77,32 @@ namespace BonVoyage
 
 
         /// <summary>
+        /// Return text of the control button
+        /// </summary>
+        /// <returns></returns>
+        public string GetControlButtonText()
+        {
+            if (BonVoyage.Instance.ControlViewVisible)
+                return Localizer.Format("#LOC_BV_HideControl");
+            else
+                return Localizer.Format("#LOC_BV_ShowControl");
+        }
+
+
+        /// <summary>
+        /// Detect, if can be control button enabled
+        /// </summary>
+        /// <returns></returns>
+        public bool ControlButtonCanBeEnabled()
+        {
+            if (HighLogic.LoadedSceneIsFlight)
+                return BonVoyage.Instance.CheckActiveControllerForVessel(FlightGlobals.ActiveVessel);
+            else
+                return false;
+        }
+
+
+        /// <summary>
         /// Switch to vessel
         /// </summary>
         /// <param name="vesselId"></param>

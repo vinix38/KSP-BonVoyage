@@ -6,6 +6,7 @@ using KSP.IO;
 using UI;
 using KSP.Localization;
 using ToolbarWrapper;
+using UnityEngine.SceneManagement;
 
 namespace BonVoyage
 {
@@ -22,6 +23,8 @@ namespace BonVoyage
 
         public MainWindowModel MainModel; // Main view's model
         public SettingsWindowModel SettingsModel; // Settings view's model
+        public ControlWindowModel ControlModel; // Control view's model
+        public bool ControlViewVisible { get { return controlViewVisible; } }
 
         public List<BVController> BVControllers; // Controllers list
 
@@ -40,7 +43,10 @@ namespace BonVoyage
         private MainWindowView MainView { get; set; } // Mod's main view
 
         private bool setttingsViewVisible; // Is settings view visible?
-        private SettingsWindowView SettingsView { get; set; } // Mod's main view
+        private SettingsWindowView SettingsView { get; set; } // Mod's settings view
+
+        private bool controlViewVisible; // Is control view visible?
+        private ControlWindowView ControlView { get; set; } // Mod's control view
 
         #endregion
 
@@ -67,6 +73,9 @@ namespace BonVoyage
             SettingsView = null;
             SettingsModel = null;
             setttingsViewVisible = false;
+            ControlView = null;
+            ControlModel = null;
+            controlViewVisible = false;
 
             toolbarButton = null;
 
@@ -149,6 +158,8 @@ namespace BonVoyage
         // test
 
 
+        #region Game events
+
         /// <summary>
         /// Get Unity skin - only accessible in OnGUI
         /// </summary>
@@ -214,22 +225,27 @@ namespace BonVoyage
                 appLauncherButton.SetFalse(true);
             else
                 mainViewVisible = false;
+            if (controlViewVisible)
+                ToggleControlWindow();
         }
 
 
         /// <summary>
-        /// Vessel changed. Refresh vessel list in the main window if it's still visible (scene was not switched)
+        /// Vessel changed. Refresh vessel list in the main window if it's still visible and hide control window (scene was not switched)
         /// </summary>
         /// <param name="vessel"></param>
         public void OnVesselChange(Vessel vessel)
         {
             if (MainView != null)
                 MainModel.RefreshVesselListLayout();
+            if (controlViewVisible)
+                ToggleControlWindow();
         }
 
 
         /// <summary>
         /// Reload list of controllers when new scene is loaded
+        /// Deprecated?
         /// </summary>
         /// <param name="scenes"></param>
         public void OnLevelWasLoaded(GameScenes scene)
@@ -239,6 +255,8 @@ namespace BonVoyage
                 LoadControllers();
             }
         }
+
+        #endregion
 
 
         #region App launcher
@@ -351,7 +369,7 @@ namespace BonVoyage
         /// </summary>
         public void OnRightClick()
         {
-            ScreenMessages.PostScreenMessage("right click");
+            ToggleControlWindow();
         }
 
 
@@ -361,7 +379,7 @@ namespace BonVoyage
         public void OnTCClick(ClickEvent e)
         {
             if (e.MouseButton == 1)
-                ScreenMessages.PostScreenMessage("right click");
+                ToggleControlWindow();
             else
             {
                 if (appLauncherButton != null) // If KSP app launcher button is created, then use his events
@@ -391,7 +409,7 @@ namespace BonVoyage
                 if (MainModel == null) // Create model for the Main View
                     MainModel = new MainWindowModel();
                 
-                MainView = new MainWindowView(MainModel, ToggleSettingsWindow, () => { appLauncherButton.SetFalse(true); });
+                MainView = new MainWindowView(MainModel, ToggleSettingsWindow, ToggleControlWindow, () => { appLauncherButton.SetFalse(true); });
                 MainView.Show();
             }
         }
@@ -427,16 +445,12 @@ namespace BonVoyage
             if (setttingsViewVisible)
             {
                 if (SettingsView == null)
-                {
                     ShowSettingsWindow();
-                }
             }
             else
             {
                 if (SettingsView != null)
-                {
                     HideSettingsWindow();
-                }
             }
         }
 
@@ -465,6 +479,68 @@ namespace BonVoyage
             {
                 SettingsView.Dismiss();
                 SettingsView = null;
+            }
+        }
+
+        #endregion
+
+
+        #region Control view
+
+        /// <summary>
+        /// Toggle state of the control window dialog
+        /// </summary>
+        public void ToggleControlWindow()
+        {
+            controlViewVisible = !controlViewVisible;
+
+            if (controlViewVisible)
+            {
+                // Check if we are in flight and active vessel has BV controller and is not shutted down
+                bool active = false;
+                if (HighLogic.LoadedSceneIsFlight)
+                {
+                    Vessel vessel = FlightGlobals.ActiveVessel;
+                    active = CheckActiveControllerForVessel(FlightGlobals.ActiveVessel);
+                }
+
+                if (active && (ControlView == null))
+                    ShowControlWindow();
+                else
+                    controlViewVisible = false;
+            }
+            else
+            {
+                if (ControlView != null)
+                    HideControlWindow();
+            }
+        }
+
+
+        /// <summary>
+        /// Show control window dialog
+        /// </summary>
+        private void ShowControlWindow()
+        {
+            if (ControlView == null)
+            {
+                if (ControlModel == null) // Create model for the Settings View
+                    ControlModel = new ControlWindowModel();
+
+                ControlView = new ControlWindowView(ControlModel, ToggleControlWindow);
+                ControlView.Show();
+            }
+        }
+
+        /// <summary>
+        /// Hide control window dialog
+        /// </summary>
+        private void HideControlWindow()
+        {
+            if (ControlView != null)
+            {
+                ControlView.Dismiss();
+                ControlView = null;
             }
         }
 
@@ -509,6 +585,11 @@ namespace BonVoyage
             }
             if (settings)
                 ToggleSettingsWindow();
+            if (ControlView != null)
+            {
+                ToggleControlWindow(); // Close
+                ToggleControlWindow(); // Open
+            }
         }
 
 
@@ -527,6 +608,8 @@ namespace BonVoyage
             }
             if (MainView != null)
                 MainModel.RefreshVesselListLayout();
+            if ((ControlView != null) && value)
+                ToggleControlWindow();
         }
 
 
@@ -573,6 +656,30 @@ namespace BonVoyage
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Check if vessel has controller and is active
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public bool CheckActiveControllerForVessel(Vessel v)
+        {
+            bool active = false;
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                for (int i = 0; i < BVControllers.Count; i++)
+                {
+                    if (BVControllers[i].vessel.id == v.id)
+                    {
+                        if (!BVControllers[i].Shutdown)
+                            active = true;
+                        break;
+                    }
+                }
+            }
+            return active;
         }
 
     }

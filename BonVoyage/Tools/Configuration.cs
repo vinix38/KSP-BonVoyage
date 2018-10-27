@@ -88,6 +88,20 @@ namespace BonVoyage
 
 
         /// <summary>
+        /// Control window position
+        /// </summary>
+        public static Vector2 ControlWindowPosition
+        {
+            get { return configuration.GetValue<Vector2>("controlWindow", new Vector2(0.5f, 0.5f)); }
+            set
+            {
+                configuration.SetValue("controlWindow", value);
+                configuration.save();
+            }
+        }
+
+
+        /// <summary>
         /// Active vessels
         /// </summary>
         public static bool ActiveControllers
