@@ -42,8 +42,8 @@ namespace BonVoyage
 
             // Filter
             AddChild(new DialogGUIHorizontalLayout(
-                new DialogGUIToggle(model.GetActiveControllersToggleState(), Localizer.Format("#LOC_BV_ActiveControllers"), model.ActiveControllersChecked, 130f),
-                new DialogGUIToggle(model.GetDisabledControllersToggleState(), Localizer.Format("#LOC_BV_DisabledControllers"), model.DisabledControllersChecked, 130f),
+                new DialogGUIToggle(model.GetActiveControllersToggleState(), Localizer.Format("#LOC_BV_ActiveControllers"), model.ActiveControllersChecked, 140f),
+                new DialogGUIToggle(model.GetDisabledControllersToggleState(), Localizer.Format("#LOC_BV_DisabledControllers"), model.DisabledControllersChecked, 140f),
                 new DialogGUIFlexibleSpace(),
                 new DialogGUIButton(model.GetControlButtonText, ToggleControl, model.ControlButtonCanBeEnabled, 150f, 24f, false, CommonWindowProperties.ActiveSkin.button)
             ));

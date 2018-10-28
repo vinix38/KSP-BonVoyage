@@ -177,7 +177,7 @@ namespace BonVoyage
                         ?
                         TooltipExtension.DeferTooltip(new DialogGUIButton("->",
                             delegate { SwitchToVessel(controller.vessel.id); }, 22f, 16f, false)
-                        { tooltipText = (Localizer.Format("#LOC_BV_SwitchToVessel") + " " + controller.vessel.GetDisplayName()) })
+                        { tooltipText = (Localizer.Format("#LOC_BV_SwitchTo") + " " + controller.vessel.GetDisplayName()) })
                         :
                         new DialogGUISpace(10f)
                     )

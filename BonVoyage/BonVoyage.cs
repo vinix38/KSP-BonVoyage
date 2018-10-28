@@ -352,6 +352,7 @@ namespace BonVoyage
         public void OnAppLaunchToggleOn()
         {
             mainViewVisible = true;
+            ShowMainWindow();
         }
 
 
@@ -361,6 +362,7 @@ namespace BonVoyage
         public void OnAppLaunchToggleOff()
         {
             mainViewVisible = false;
+            HideMainWindow();
         }
 
 
@@ -390,7 +392,7 @@ namespace BonVoyage
                         appLauncherButton.SetTrue(true);
                 }
                 else
-                    mainViewVisible = !mainViewVisible;
+                    ToggleMainWindow();
             }
         }
 
@@ -398,6 +400,19 @@ namespace BonVoyage
 
 
         #region Main View
+
+        /// <summary>
+        /// Toggle state of the main window dialog
+        /// </summary>
+        private void ToggleMainWindow()
+        {
+            mainViewVisible = !mainViewVisible;
+
+            if (mainViewVisible)
+                ShowMainWindow();
+            else
+                HideMainWindow();
+        }
 
         /// <summary>
         /// Show main window dialog
@@ -443,15 +458,9 @@ namespace BonVoyage
             setttingsViewVisible = !setttingsViewVisible;
 
             if (setttingsViewVisible)
-            {
-                if (SettingsView == null)
-                    ShowSettingsWindow();
-            }
+                ShowSettingsWindow();
             else
-            {
-                if (SettingsView != null)
-                    HideSettingsWindow();
-            }
+                HideSettingsWindow();
         }
 
 
@@ -510,10 +519,7 @@ namespace BonVoyage
                     controlViewVisible = false;
             }
             else
-            {
-                if (ControlView != null)
-                    HideControlWindow();
-            }
+                HideControlWindow();
         }
 
 
@@ -557,18 +563,6 @@ namespace BonVoyage
             {
                 appLauncherButton.SetFalse(true);
             }
-
-            // Main window
-            if (mainViewVisible)
-            {
-                if (MainView == null)
-                    ShowMainWindow();
-            }
-            else
-            {
-                if (MainView != null)
-                    HideMainWindow();
-            }
         }
 
 
@@ -587,8 +581,8 @@ namespace BonVoyage
                 ToggleSettingsWindow();
             if (ControlView != null)
             {
-                ToggleControlWindow(); // Close
-                ToggleControlWindow(); // Open
+                HideControlWindow();
+                ShowControlWindow();
             }
         }
 
