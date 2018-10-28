@@ -10,6 +10,13 @@ namespace BonVoyage
     /// </summary>
     public class RoverController : BVController
     {
+        #region Public properties
+
+        public override double AverageSpeed { get { return ((angle <= 90) ? (averageSpeed * speedMultiplier) : (averageSpeedAtNight * speedMultiplier)); } }
+
+        #endregion
+
+
         #region Private properties
 
         // Config values
@@ -19,6 +26,9 @@ namespace BonVoyage
         private bool manned = false;
         private double vesselHeightFromTerrain = 0;
         // Config values
+
+        private double speedMultiplier;
+        private double angle; // Angle between the main body and the main sun
 
         #endregion
 
@@ -36,6 +46,9 @@ namespace BonVoyage
             solarPowered = bool.Parse(BVModule.GetValue("solarPowered") != null ? BVModule.GetValue("solarPowered") : "false");
             manned = bool.Parse(BVModule.GetValue("manned") != null ? BVModule.GetValue("manned") : "false");
             vesselHeightFromTerrain = double.Parse(BVModule.GetValue("vesselHeightFromTerrain") != null ? BVModule.GetValue("vesselHeightFromTerrain") : "0");
+
+            speedMultiplier = 1.0;
+            angle = 0;
         }
 
 

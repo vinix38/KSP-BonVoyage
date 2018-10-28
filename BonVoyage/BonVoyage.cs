@@ -122,7 +122,7 @@ namespace BonVoyage
         {
             GameEvents.onGUIApplicationLauncherReady.Remove(AddLauncher);
             GameEvents.onGUIApplicationLauncherDestroyed.Remove(RemoveLauncher);
-            GameEvents.onGameSceneSwitchRequested.Add(OnGameSceneSwitchRequested);
+            GameEvents.onGameSceneSwitchRequested.Remove(OnGameSceneSwitchRequested);
             GameEvents.onVesselChange.Remove(OnVesselChange);
             GameEvents.onLevelWasLoaded.Remove(OnLevelWasLoaded);
             GameEvents.onHideUI.Remove(OnHideUI);
@@ -338,7 +338,7 @@ namespace BonVoyage
         /// <summary>
         /// Destroy buttons for the plugin
         /// </summary>
-        public void RemoveLauncher()
+        private void RemoveLauncher()
         {
             RemoveAppLauncherButton();
 
@@ -349,7 +349,7 @@ namespace BonVoyage
         /// <summary>
         /// Show GUI when button is clicked first time
         /// </summary>
-        public void OnAppLaunchToggleOn()
+        private void OnAppLaunchToggleOn()
         {
             mainViewVisible = true;
             ShowMainWindow();
@@ -359,7 +359,7 @@ namespace BonVoyage
         /// <summary>
         /// Hide GUI when button is clicked second time
         /// </summary>
-        public void OnAppLaunchToggleOff()
+        private void OnAppLaunchToggleOff()
         {
             mainViewVisible = false;
             HideMainWindow();
@@ -369,7 +369,7 @@ namespace BonVoyage
         /// <summary>
         /// Right click on the application button
         /// </summary>
-        public void OnRightClick()
+        private void OnRightClick()
         {
             ToggleControlWindow();
         }
@@ -378,9 +378,9 @@ namespace BonVoyage
         /// <summary>
         /// Click on the application button in Toolbar Continued
         /// </summary>
-        public void OnTCClick(ClickEvent e)
+        private void OnTCClick(ClickEvent e)
         {
-            if (e.MouseButton == 1)
+            if (e.MouseButton == 1) // Right click
                 ToggleControlWindow();
             else
             {
@@ -610,7 +610,7 @@ namespace BonVoyage
         /// <summary>
         /// Load BV controllers from the config
         /// </summary>
-        public void LoadControllers()
+        private void LoadControllers()
         {
             Vessel vessel = null;
             ProtoPartSnapshot part = null;

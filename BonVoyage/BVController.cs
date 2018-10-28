@@ -35,11 +35,17 @@ namespace BonVoyage
             {
                 shutdown = value;
                 if (shutdown)
-                    state = VesselState.ControllerDisabled;
+                    State = VesselState.ControllerDisabled;
                 else
-                    state = VesselState.Idle;
+                    State = VesselState.Idle;
             }
         }
+
+        public double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
+
+        public virtual double AverageSpeed { get { return 0; } }
+
+        public event EventHandler OnStateChanged;
 
         #endregion
 
@@ -60,7 +66,17 @@ namespace BonVoyage
         
         private List<PathUtils.WayPoint> path = null; // Path to destination
 
-        private VesselState state;
+        private VesselState _state;
+        public VesselState State
+        {
+            get { return _state; }
+            set
+            {
+                _state = value;
+                if (OnStateChanged != null)
+                    OnStateChanged(this, EventArgs.Empty);
+            }
+        }
 
         #endregion
 
@@ -86,9 +102,9 @@ namespace BonVoyage
             if (BVModule.GetValue("pathEncoded") != null)
                 path = PathUtils.DecodePath(BVModule.GetValue("pathEncoded"));
 
-            state = VesselState.Idle;
+            State = VesselState.Idle;
             if (shutdown)
-                state = VesselState.ControllerDisabled;
+                State = VesselState.ControllerDisabled;
         }
 
 
@@ -112,7 +128,7 @@ namespace BonVoyage
         {
             if (vessel.isActiveVessel)
                 return VesselState.Current;
-            return state;
+            return State;
         }
 
 
@@ -124,7 +140,7 @@ namespace BonVoyage
         {
             if (vessel.isActiveVessel)
                 return Localizer.Format("#LOC_BV_Status_Current");
-            switch (state)
+            switch (State)
             {
                 case VesselState.Idle:
                     return Localizer.Format("#LOC_BV_Status_Idle");

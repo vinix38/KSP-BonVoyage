@@ -12,7 +12,7 @@ namespace BonVoyage
     /// </summary>
     public class MainWindowModel
     {
-        //private BonVoyage module;
+        private readonly object refreshLock = new object(); // Object to lock access during refreshing of the list. Multiple events can be raised at the same time to request refresh.
         private bool activeControllersChecked = true;
         private bool disabledControllersChecked = false;
 
@@ -106,7 +106,7 @@ namespace BonVoyage
         /// Switch to vessel
         /// </summary>
         /// <param name="vesselId"></param>
-        public void SwitchToVessel(Guid vesselId)
+        private void SwitchToVessel(Guid vesselId)
         {
             for (int i = 0; i < BonVoyage.Instance.BVControllers.Count; i++)
             {
@@ -128,11 +128,70 @@ namespace BonVoyage
 
 
         /// <summary>
+        /// Event raised by controller, if it's state changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnControllerStateChanged(object sender, EventArgs e)
+        {
+            RefreshVesselListLayout();
+        }
+
+
+        /// <summary>
+        /// Get speed of a vessel based on the index in list of controllers
+        /// </summary>
+        /// <param name="controllerIndex"></param>
+        /// <returns></returns>
+        private string GetSpeed(int controllerIndex)
+        {
+            string result = "-";
+            BVController controller = BonVoyage.Instance.BVControllers[controllerIndex];
+
+            if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
+            {
+                result = controller.AverageSpeed.ToString("0.##") + " m/s";
+            }
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// Get distance to a target of a vessel based on the index in list of controllers
+        /// </summary>
+        /// <param name="controllerIndex"></param>
+        /// <returns></returns>
+        private string GetDistanceToTarget(int controllerIndex)
+        {
+            string result = "-";
+            BVController controller = BonVoyage.Instance.BVControllers[controllerIndex];
+
+            if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
+            {
+                double n = controller.RemainingDistanceToTarget;
+                if (n > 0)
+                {
+                    if (n < 1000)
+                        result = n.ToString("N0") + " m";
+                    else
+                    {
+                        n = n / 1000;
+                        result = n.ToString("0.##") + " km";
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+        /// <summary>
         /// Create table row for controller
         /// </summary>
         /// <param name="controller"></param>
         /// <returns>DialogGUIHorizontalLayout row or null if controller state don't equals to selected filter</returns>
-        private DialogGUIHorizontalLayout CreateListLayoutRow(BVController controller)
+        private DialogGUIHorizontalLayout CreateListLayoutRow(BVController controller, int index)
         {
             DialogGUIHorizontalLayout row = null;
 
@@ -168,9 +227,9 @@ namespace BonVoyage
                     new DialogGUISpace(10f),
                     new DialogGUILabel(controller.vessel.mainBody.bodyDisplayName.Replace("^N", ""), 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                     new DialogGUISpace(10f),
-                    new DialogGUILabel("-", 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUILabel(delegate { return GetSpeed(index); }, 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                     new DialogGUISpace(10f),
-                    new DialogGUILabel("-", 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUILabel(delegate { return GetDistanceToTarget(index); }, 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                     new DialogGUISpace(10f),
                     (
                         !controller.vessel.isActiveVessel
@@ -184,6 +243,7 @@ namespace BonVoyage
 
                 );
                 row.SetOptionText(controller.vessel.id.ToString()); // ID of the row (vessel ID)
+                controller.OnStateChanged += OnControllerStateChanged; // Register state changed event
             }
 
             return row;
@@ -219,7 +279,7 @@ namespace BonVoyage
                 int counter = 1;
                 for (int i = 0; i < controllersCount; i++)
                 {
-                    DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i]); 
+                    DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i], i); 
                     if (row != null)
                     {
                         list[counter] = row;
@@ -248,6 +308,11 @@ namespace BonVoyage
         /// </summary>
         public void ClearVesselListLayout()
         {
+            // Clear events
+            int controllersCount = BonVoyage.Instance.BVControllers.Count;
+            for (int i = 0; i < controllersCount; i++)
+                BonVoyage.Instance.BVControllers[i].OnStateChanged -= OnControllerStateChanged;
+
             vesselListLayout = null;
         }
 
@@ -257,28 +322,32 @@ namespace BonVoyage
         /// </summary>
         public void RefreshVesselListLayout()
         {
-            Stack<Transform> stack = new Stack<Transform>();﻿ // some data on hierarchy of GUI components
-            stack.Push(vesselListLayout.uiItem.gameObject.transform); // need the reference point of the parent GUI component for position and size
-
-            List<DialogGUIBase> rows = vesselListLayout.children;
-
-            // Clear list. We are skiping DialogGUIContentSizer
-            while (rows.Count > 1)
+            lock (refreshLock) // Only one refresh at a time
             {
-                DialogGUIBase child = rows.ElementAt(1); // Get child
-                rows.RemoveAt(1); // Drop row
-                child.uiItem.gameObject.DestroyGameObjectImmediate(); // Free memory up
-            }
+                Stack<Transform> stack = new Stack<Transform>();  // some data on hierarchy of GUI components
+                stack.Push(vesselListLayout.uiItem.gameObject.transform); // need the reference point of the parent GUI component for position and size
 
-            // Add rows
-            int controllersCount = BonVoyage.Instance.BVControllers.Count;
-            for (int i = 0; i < controllersCount; i++)
-            {
-                DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i]);
-                if (row != null)
+                List<DialogGUIBase> rows = vesselListLayout.children;
+
+                // Clear list. We are skiping DialogGUIContentSizer
+                while (rows.Count > 1)
                 {
-                    rows.Add(row);
-                    rows.Last().Create(ref stack, CommonWindowProperties.ActiveSkin); // required to force the GUI creatio﻿n
+                    DialogGUIBase child = rows.ElementAt(1); // Get child
+                    rows.RemoveAt(1); // Drop row
+                    child.uiItem.gameObject.DestroyGameObjectImmediate(); // Free memory up
+                }
+
+                // Add rows
+                int controllersCount = BonVoyage.Instance.BVControllers.Count;
+                for (int i = 0; i < controllersCount; i++)
+                {
+                    BonVoyage.Instance.BVControllers[i].OnStateChanged -= OnControllerStateChanged; // Clear possible event
+                    DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i], i);
+                    if (row != null)
+                    {
+                        rows.Add(row);
+                        rows.Last().Create(ref stack, CommonWindowProperties.ActiveSkin); // required to force the GUI creatio﻿n
+                    }
                 }
             }
         }
