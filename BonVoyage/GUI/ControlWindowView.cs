@@ -28,6 +28,37 @@ namespace BonVoyage
         {
             model = m;
             closeCallback = close;
+
+            DialogGUITextInput latField = new DialogGUITextInput("", false, 20, (string s) => { model.Latitude = s; return s; }, model.GetLatitude, TMPro.TMP_InputField.ContentType.DecimalNumber, 24f);
+            model.AddLockControlToTextField(latField);
+            DialogGUITextInput lonField = new DialogGUITextInput("", false, 20, (string s) => { model.Longitude = s; return s; }, model.GetLongitude, TMPro.TMP_InputField.ContentType.DecimalNumber, 24f);
+            model.AddLockControlToTextField(lonField);
+
+            AddChild(new DialogGUILabel(Localizer.Format("#LOC_BV_Control_SetTarget") + ":"));
+            AddChild(new DialogGUIHorizontalLayout(TextAnchor.MiddleLeft,
+                new DialogGUILabel(Localizer.Format("#LOC_BV_Control_Lat") + ":"),
+                latField,
+                new DialogGUISpace(2f),
+                new DialogGUILabel(Localizer.Format("#LOC_BV_Control_Lon") + ":"),
+                lonField,
+                new DialogGUIButton(Localizer.Format("#LOC_BV_Control_Set"), model.SetButtonClicked, model.EnableButtons, 40f, 20f, false)
+            ));
+
+            AddChild(new DialogGUISpace(5f));
+
+            AddChild(new DialogGUIHorizontalLayout(
+                new DialogGUIFlexibleSpace(),
+                new DialogGUIButton(Localizer.Format("#LOC_BV_Control_Check"), model.SystemCheckButtonClicked, model.EnableButtons, 120f, CommonWindowProperties.buttonHeight, false),
+                new DialogGUIFlexibleSpace()
+            ));
+
+            AddChild(new DialogGUISpace(5f));
+
+            AddChild(new DialogGUIHorizontalLayout(
+                new DialogGUIFlexibleSpace(),
+                new DialogGUIButton(model.GetGoButtonText, model.GoButtonClicked, null, 120f, 28f, false, CommonWindowProperties.Style_Button_Bold_Yellow),
+                new DialogGUIFlexibleSpace()
+            ));
         }
 
 

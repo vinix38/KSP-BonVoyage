@@ -45,7 +45,7 @@ namespace BonVoyage
                 new DialogGUIToggle(model.GetActiveControllersToggleState(), Localizer.Format("#LOC_BV_ActiveControllers"), model.ActiveControllersChecked, 140f),
                 new DialogGUIToggle(model.GetDisabledControllersToggleState(), Localizer.Format("#LOC_BV_DisabledControllers"), model.DisabledControllersChecked, 140f),
                 new DialogGUIFlexibleSpace(),
-                new DialogGUIButton(model.GetControlButtonText, ToggleControl, model.ControlButtonCanBeEnabled, 150f, 24f, false, CommonWindowProperties.ActiveSkin.button)
+                new DialogGUIButton(model.GetControlButtonText, ToggleControl, model.ControlButtonCanBeEnabled, 150f, CommonWindowProperties.buttonHeight, false, CommonWindowProperties.ActiveSkin.button)
             ));
 
             // Column headers

@@ -41,7 +41,7 @@ namespace BonVoyage
 
         public static RectOffset controlElementPadding = new RectOffset(5, 5, 10, 10);
         public const float controlWindowSpacing = 3f;
-        public const float controlMinWidth = 140f;
+        public const float controlMinWidth = 250f;
         public const float controlMinHeight = 200f;
         public const float controlWindowWidth = controlMinWidth + 20f;
         public const float controlWindowHeight = controlMinHeight + 20f;
@@ -50,6 +50,7 @@ namespace BonVoyage
         public static Vector2 ControlWindowPosition = new Vector2(0.5f, 0.5f);
 
         public static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
+        public static float buttonHeight = 24f;
 
         public const int buttonIconWidth = 20;
 
@@ -61,6 +62,10 @@ namespace BonVoyage
         public static readonly UIStyleState StyleState_White = new UIStyleState() { textColor = Color.white };
         public static readonly UIStyleState StyleState_Green = new UIStyleState() { textColor = Color.green };
         public static readonly UIStyleState StyleState_Yellow = new UIStyleState() { textColor = Color.yellow };
+        public static UIStyleState StyleState_Yellow_Active;
+        public static UIStyleState StyleState_Yellow_Normal;
+        public static UIStyleState StyleState_Yellow_Disabled;
+        public static UIStyleState StyleState_Yellow_Highlight;
         public static readonly UIStyleState StyleState_Red = new UIStyleState() { textColor = Color.red };
         public static readonly UIStyleState StyleState_Grey = new UIStyleState() { textColor = Color.grey };
 
@@ -72,6 +77,8 @@ namespace BonVoyage
         public static UIStyle Style_Label_Normal_Center_Yellow;
         public static UIStyle Style_Label_Normal_Center_Red;
         public static UIStyle Style_Label_Normal_Center_Grey;
+
+        public static UIStyle Style_Button_Bold_Yellow;
 
 
         /// <summary>
@@ -122,57 +129,87 @@ namespace BonVoyage
         public static void RefreshStyles()
         {
             // Style_Label_Bold_Left
-            Style_Label_Bold_Left = new UIStyle(ActiveSkin.label);
-            Style_Label_Bold_Left.fontStyle = FontStyle.Bold;
+            Style_Label_Bold_Left = new UIStyle(ActiveSkin.label)
+            {
+                fontStyle = FontStyle.Bold
+            };
 
             // Style_Label_Bold_Center
-            Style_Label_Bold_Center = new UIStyle(ActiveSkin.label);
-            Style_Label_Bold_Center.fontStyle = FontStyle.Bold;
-            Style_Label_Bold_Center.alignment = TextAnchor.UpperCenter;
+            Style_Label_Bold_Center = new UIStyle(ActiveSkin.label)
+            {
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.UpperCenter
+            };
 
             // Style_Label_Normal_Center
-            Style_Label_Normal_Center = new UIStyle(ActiveSkin.label);
-            Style_Label_Normal_Center.alignment = TextAnchor.UpperCenter;
+            Style_Label_Normal_Center = new UIStyle(ActiveSkin.label)
+            {
+                alignment = TextAnchor.UpperCenter
+            };
 
             // Style_Label_Normal_Center_White
-            Style_Label_Normal_Center_White = new UIStyle(ActiveSkin.label);
-            Style_Label_Normal_Center_White.alignment = TextAnchor.UpperCenter;
-            Style_Label_Normal_Center_White.active = StyleState_White;
-            Style_Label_Normal_Center_White.normal = StyleState_White;
-            Style_Label_Normal_Center_White.disabled = StyleState_White;
-            Style_Label_Normal_Center_White.highlight = StyleState_White;
+            Style_Label_Normal_Center_White = new UIStyle(ActiveSkin.label)
+            {
+                alignment = TextAnchor.UpperCenter,
+                active = StyleState_White,
+                normal = StyleState_White,
+                disabled = StyleState_White,
+                highlight = StyleState_White
+            };
 
             // Style_Label_Normal_Center_Green
-            Style_Label_Normal_Center_Green = new UIStyle(ActiveSkin.label);
-            Style_Label_Normal_Center_Green.alignment = TextAnchor.UpperCenter;
-            Style_Label_Normal_Center_Green.active = StyleState_Green;
-            Style_Label_Normal_Center_Green.normal = StyleState_Green;
-            Style_Label_Normal_Center_Green.disabled = StyleState_Green;
-            Style_Label_Normal_Center_Green.highlight = StyleState_Green;
+            Style_Label_Normal_Center_Green = new UIStyle(ActiveSkin.label)
+            {
+                alignment = TextAnchor.UpperCenter,
+                active = StyleState_Green,
+                normal = StyleState_Green,
+                disabled = StyleState_Green,
+                highlight = StyleState_Green
+            };
 
             // Style_Label_Normal_Center_Yellow
-            Style_Label_Normal_Center_Yellow = new UIStyle(ActiveSkin.label);
-            Style_Label_Normal_Center_Yellow.alignment = TextAnchor.UpperCenter;
-            Style_Label_Normal_Center_Yellow.active = StyleState_Yellow;
-            Style_Label_Normal_Center_Yellow.normal = StyleState_Yellow;
-            Style_Label_Normal_Center_Yellow.disabled = StyleState_Yellow;
-            Style_Label_Normal_Center_Yellow.highlight = StyleState_Yellow;
+            Style_Label_Normal_Center_Yellow = new UIStyle(ActiveSkin.label)
+            {
+                alignment = TextAnchor.UpperCenter,
+                active = StyleState_Yellow,
+                normal = StyleState_Yellow,
+                disabled = StyleState_Yellow,
+                highlight = StyleState_Yellow
+            };
 
             // Style_Label_Normal_Center_Red
-            Style_Label_Normal_Center_Red = new UIStyle(ActiveSkin.label);
-            Style_Label_Normal_Center_Red.alignment = TextAnchor.UpperCenter;
-            Style_Label_Normal_Center_Red.active = StyleState_Red;
-            Style_Label_Normal_Center_Red.normal = StyleState_Red;
-            Style_Label_Normal_Center_Red.disabled = StyleState_Red;
-            Style_Label_Normal_Center_Red.highlight = StyleState_Red;
+            Style_Label_Normal_Center_Red = new UIStyle(ActiveSkin.label)
+            {
+                alignment = TextAnchor.UpperCenter,
+                active = StyleState_Red,
+                normal = StyleState_Red,
+                disabled = StyleState_Red,
+                highlight = StyleState_Red
+            };
 
             // Style_Label_Normal_Center_Grey
-            Style_Label_Normal_Center_Grey = new UIStyle(ActiveSkin.label);
-            Style_Label_Normal_Center_Grey.alignment = TextAnchor.UpperCenter;
-            Style_Label_Normal_Center_Grey.active = StyleState_Grey;
-            Style_Label_Normal_Center_Grey.normal = StyleState_Grey;
-            Style_Label_Normal_Center_Grey.disabled = StyleState_Grey;
-            Style_Label_Normal_Center_Grey.highlight = StyleState_Grey;
+            Style_Label_Normal_Center_Grey = new UIStyle(ActiveSkin.label)
+            {
+                alignment = TextAnchor.UpperCenter,
+                active = StyleState_Grey,
+                normal = StyleState_Grey,
+                disabled = StyleState_Grey,
+                highlight = StyleState_Grey
+            };
+
+            // Style_Button_Bold_Yellow
+            StyleState_Yellow_Active = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.active.background };
+            StyleState_Yellow_Normal = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.normal.background };
+            StyleState_Yellow_Disabled = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.disabled.background };
+            StyleState_Yellow_Highlight = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.highlight.background };
+            Style_Button_Bold_Yellow = new UIStyle(ActiveSkin.button)
+            {
+                fontStyle = FontStyle.Bold,
+                active = StyleState_Yellow_Active,
+                normal = StyleState_Yellow_Normal,
+                disabled = StyleState_Yellow_Disabled,
+                highlight = StyleState_Yellow_Highlight
+            };
         }
 
         #endregion
