@@ -41,8 +41,8 @@ namespace BonVoyage
 
         public static RectOffset controlElementPadding = new RectOffset(5, 5, 10, 10);
         public const float controlWindowSpacing = 3f;
-        public const float controlMinWidth = 250f;
-        public const float controlMinHeight = 200f;
+        public const float controlMinWidth = 201f;
+        public const float controlMinHeight = 190f;
         public const float controlWindowWidth = controlMinWidth + 20f;
         public const float controlWindowHeight = controlMinHeight + 20f;
         public static readonly Vector2 controlWindowAnchorMin = new Vector2(0.5f, 0.5f);
@@ -62,10 +62,6 @@ namespace BonVoyage
         public static readonly UIStyleState StyleState_White = new UIStyleState() { textColor = Color.white };
         public static readonly UIStyleState StyleState_Green = new UIStyleState() { textColor = Color.green };
         public static readonly UIStyleState StyleState_Yellow = new UIStyleState() { textColor = Color.yellow };
-        public static UIStyleState StyleState_Yellow_Active;
-        public static UIStyleState StyleState_Yellow_Normal;
-        public static UIStyleState StyleState_Yellow_Disabled;
-        public static UIStyleState StyleState_Yellow_Highlight;
         public static readonly UIStyleState StyleState_Red = new UIStyleState() { textColor = Color.red };
         public static readonly UIStyleState StyleState_Grey = new UIStyleState() { textColor = Color.grey };
 
@@ -79,6 +75,7 @@ namespace BonVoyage
         public static UIStyle Style_Label_Normal_Center_Grey;
 
         public static UIStyle Style_Button_Bold_Yellow;
+        public static UIStyle Style_Button_Label;
 
 
         /// <summary>
@@ -104,23 +101,36 @@ namespace BonVoyage
         }
 
 
-        /// <returns>
-		/// A texture object for the image file at the given path.
+        /// <summary>
+		/// Borrowed from Astrogator
+		/// </summary>
+		/// <param name="c">The color to use</param>
+		/// <returns>
+		/// A 1x1 texture
 		/// </returns>
-		/// <param name="filepath">Path to image file to load</param>
-		private static Texture2D GetImage(string filepath)
+		private static Texture2D SolidColorTexture(Color c)
         {
-            return GameDatabase.Instance.GetTexture(filepath, false);
+            Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            tex.SetPixel(1, 1, c);
+            tex.Apply();
+            return tex;
         }
 
 
         /// <returns>
-		/// A sprite object for the image at the given path.
+		/// A 1x1 sprite object of the given color.
 		/// </returns>
-        private static Sprite GetSprite(string filepath)
+		private static Sprite SolidColorSprite(Color c)
         {
-            return SpriteFromTexture(GetImage(filepath));
+            return SpriteFromTexture(SolidColorTexture(c));
         }
+
+
+        /// <value>
+		/// Completely transparent sprite so we can use buttons for the headers
+		/// without the default button graphic.
+		/// </value>
+		public static readonly Sprite transparent = SolidColorSprite(new Color(0f, 0f, 0f, 0f));
 
 
         /// <summary>
@@ -198,17 +208,22 @@ namespace BonVoyage
             };
 
             // Style_Button_Bold_Yellow
-            StyleState_Yellow_Active = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.active.background };
-            StyleState_Yellow_Normal = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.normal.background };
-            StyleState_Yellow_Disabled = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.disabled.background };
-            StyleState_Yellow_Highlight = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.highlight.background };
             Style_Button_Bold_Yellow = new UIStyle(ActiveSkin.button)
             {
                 fontStyle = FontStyle.Bold,
-                active = StyleState_Yellow_Active,
-                normal = StyleState_Yellow_Normal,
-                disabled = StyleState_Yellow_Disabled,
-                highlight = StyleState_Yellow_Highlight
+                active = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.active.background },
+                normal = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.normal.background },
+                disabled = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.disabled.background },
+                highlight = new UIStyleState() { textColor = Color.yellow, background = ActiveSkin.button.highlight.background }
+            };
+
+            // Style_Button_Label
+            Style_Button_Label = new UIStyle(ActiveSkin.label)
+            {
+                active = new UIStyleState() { textColor = ActiveSkin.label.normal.textColor, background = transparent },
+                normal = new UIStyleState() { textColor = ActiveSkin.label.normal.textColor, background = transparent },
+                disabled = new UIStyleState() { textColor = ActiveSkin.label.normal.textColor, background = transparent },
+                highlight = new UIStyleState() { textColor = ActiveSkin.label.normal.textColor, background = transparent }
             };
         }
 

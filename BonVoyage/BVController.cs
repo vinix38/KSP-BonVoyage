@@ -20,6 +20,17 @@ namespace BonVoyage
 
 
     /// <summary>
+    /// Result for display in the Control Window
+    /// </summary>
+    public struct DisplayedSystemCheckResult
+    {
+        public string Label;
+        public string Text;
+        public string Tooltip;
+    }
+
+
+    /// <summary>
     /// Basic controller
     /// </summary>
     public class BVController
@@ -42,10 +53,9 @@ namespace BonVoyage
         }
 
         public double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
-
         public virtual double AverageSpeed { get { return 0; } }
-
         public event EventHandler OnStateChanged;
+        protected List<DisplayedSystemCheckResult> displayedSystemCheckResults;
 
         #endregion
 
@@ -90,6 +100,7 @@ namespace BonVoyage
         {
             vessel = v;
             BVModule = module;
+            displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
 
             // Load values from config
             active = bool.Parse(BVModule.GetValue("active") != null ? BVModule.GetValue("active") : "false");
@@ -153,6 +164,45 @@ namespace BonVoyage
                 default:
                     return Localizer.Format("#LOC_BV_Status_Idle");
             }
+        }
+
+        #endregion
+
+
+        #region Status window texts
+
+        public virtual List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        {
+            if (displayedSystemCheckResults == null) // Just to be sure
+                displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
+
+            displayedSystemCheckResults.Clear();
+
+            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
+            {
+                Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
+                Text = targetLatitude.ToString(),
+                Tooltip = ""
+            };
+            displayedSystemCheckResults.Add(result);
+
+            result = new DisplayedSystemCheckResult
+            {
+                Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
+                Text = targetLongitude.ToString(),
+                Tooltip = ""
+            };
+            displayedSystemCheckResults.Add(result);
+
+            result = new DisplayedSystemCheckResult
+            {
+                Label = Localizer.Format("#LOC_BV_Control_Distance"),
+                Text = Tools.ConvertDistanceToText(RemainingDistanceToTarget),
+                Tooltip = ""
+            };
+            displayedSystemCheckResults.Add(result);
+
+            return displayedSystemCheckResults;
         }
 
         #endregion

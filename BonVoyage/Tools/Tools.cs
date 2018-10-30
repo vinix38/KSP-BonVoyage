@@ -26,6 +26,29 @@ namespace BonVoyage
             }
         }
 
+
+        /// <summary>
+        /// Convert distance in meters to text (meters or kilometers)
+        /// </summary>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        public static string ConvertDistanceToText(double distance)
+        {
+            string result = "-";
+            double n = distance;
+            if (n > 0)
+            {
+                if (n < 1000)
+                    result = n.ToString("N0") + " m";
+                else
+                {
+                    n = n / 1000;
+                    result = n.ToString("0.##") + " km";
+                }
+            }
+            return result;
+        }
+
     }
 
 }

@@ -510,7 +510,7 @@ namespace BonVoyage
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     Vessel vessel = FlightGlobals.ActiveVessel;
-                    active = CheckActiveControllerForVessel(FlightGlobals.ActiveVessel);
+                    active = CheckActiveControllerOfVessel(FlightGlobals.ActiveVessel);
                 }
 
                 if (active && (ControlView == null))
@@ -533,6 +533,10 @@ namespace BonVoyage
                 if (ControlModel == null) // Create model for the Settings View
                     ControlModel = new ControlWindowModel();
 
+                if (HighLogic.LoadedSceneIsFlight)
+                    ControlModel.SetController(GetControllerOfVessel(FlightGlobals.ActiveVessel));
+                else
+                    ControlModel.SetController(null);
                 ControlView = new ControlWindowView(ControlModel, ToggleControlWindow);
                 ControlView.Show();
             }
@@ -547,6 +551,7 @@ namespace BonVoyage
             {
                 ControlView.Dismiss();
                 ControlView = null;
+                ControlModel.SetController(null);
             }
         }
 
@@ -562,6 +567,11 @@ namespace BonVoyage
             if (Input.GetKeyDown(KeyCode.Escape) && (MainView != null))
             {
                 appLauncherButton.SetFalse(true);
+                if (controlViewVisible)
+                {
+                    controlViewVisible = false;
+                    HideControlWindow();
+                }
             }
         }
 
@@ -658,7 +668,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public bool CheckActiveControllerForVessel(Vessel v)
+        public bool CheckActiveControllerOfVessel(Vessel v)
         {
             bool active = false;
             if (HighLogic.LoadedSceneIsFlight)
@@ -674,6 +684,24 @@ namespace BonVoyage
                 }
             }
             return active;
+        }
+
+
+        /// <summary>
+        /// Get controller of a vessel
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public BVController GetControllerOfVessel(Vessel v)
+        {
+            for (int i = 0; i < BVControllers.Count; i++)
+            {
+                if (BVControllers[i].vessel.id == v.id)
+                {
+                    return BVControllers[i];
+                }
+            }
+            return null;
         }
 
     }

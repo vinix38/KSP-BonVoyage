@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KSP.Localization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,6 +61,26 @@ namespace BonVoyage
         {
             return 0;
         }
+
+
+        #region Status window texts
+
+        public override List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        {
+            base.GetDisplayedSystemCheckResults();
+
+            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
+            {
+                Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
+                Text = AverageSpeed.ToString() + " m/s",
+                Tooltip = "tooltip"
+            };
+            displayedSystemCheckResults.Add(result);
+
+            return displayedSystemCheckResults;
+        }
+
+        #endregion
 
     }
 

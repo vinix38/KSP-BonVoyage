@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace BonVoyage
@@ -13,6 +14,10 @@ namespace BonVoyage
     /// </summary>
     public class ControlWindowModel
     {
+        // Displayed stats list
+        private DialogGUIVerticalLayout statsListLayout = null;
+
+
         private double latitude = 0f;
         public string Latitude
         {
@@ -40,6 +45,7 @@ namespace BonVoyage
         }
 
         private bool controllerActive; // Is controller active and doing it's behind the scenes magic?
+        private BVController currentController;
 
 
         /// <summary>
@@ -51,6 +57,17 @@ namespace BonVoyage
             CommonWindowProperties.ControlWindowPosition = Configuration.ControlWindowPosition;
 
             controllerActive = false;
+            currentController = null;
+        }
+
+
+        /// <summary>
+        /// Set current controller
+        /// </summary>
+        /// <param name="c"></param>
+        public void SetController(BVController controller)
+        {
+            currentController = controller;
         }
 
 
@@ -122,6 +139,11 @@ namespace BonVoyage
         public void SystemCheckButtonClicked()
         {
             ScreenMessages.PostScreenMessage("System check");
+
+            if (currentController != null)
+            {
+                RefreshStatsListLayout();
+            }
         }
 
 
@@ -151,6 +173,136 @@ namespace BonVoyage
         public void SetButtonClicked()
         {
             ScreenMessages.PostScreenMessage("Latitude = " + latitude.ToString() + " ; Longitude = " + longitude.ToString());
+        }
+
+
+        /// <summary>
+        /// Pick on map button was clicked
+        /// </summary>
+        public void PickOnMapkButtonClicked()
+        {
+            ScreenMessages.PostScreenMessage("Pick on map");
+        }
+
+
+        /// <summary>
+        /// Current target button was clicked
+        /// </summary>
+        public void CurrentTargetButtonClicked()
+        {
+            ScreenMessages.PostScreenMessage("Current target");
+        }
+
+
+        /// <summary>
+        /// Current waypoint button was clicked
+        /// </summary>
+        public void CurrentWaypointButtonClicked()
+        {
+            ScreenMessages.PostScreenMessage("Current waypoint");
+        }
+
+
+        /// <summary>
+        /// Create table row for displayed result
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns>DialogGUIHorizontalLayout row</returns>
+        private DialogGUIHorizontalLayout CreateListLayoutRow(DisplayedSystemCheckResult result)
+        {
+            DialogGUIHorizontalLayout row = null;
+
+            if (result.Tooltip.Length > 0)
+            {
+                row = new DialogGUIHorizontalLayout(
+                    new DialogGUILabel(result.Label + ":", 100f),
+                    new DialogGUILabel(result.Text),
+                    new DialogGUISpace(1f),
+                    // Add a button with transparent background and label style just to display a tooltip when hovering over it
+                    // Transparent sprite is needed to hide button borders
+                    TooltipExtension.DeferTooltip(new DialogGUIButton(CommonWindowProperties.transparent, "(?)", () => { }, 17f, 18f, false) { tooltipText = result.Tooltip, guiStyle = CommonWindowProperties.Style_Button_Label })
+                );
+            }
+            else
+            {
+                row = new DialogGUIHorizontalLayout(
+                    new DialogGUILabel(result.Label + ":", 100f),
+                    new DialogGUILabel(result.Text)
+                );
+            }
+
+            return row;
+        }
+
+
+        /// <summary>
+        /// Get layout of the list of stats
+        /// </summary>
+        /// <returns></returns>
+        public DialogGUIVerticalLayout GetStatsListLayout()
+        {
+            if (currentController != null)
+            {
+                List<DisplayedSystemCheckResult> resultsList = currentController.GetDisplayedSystemCheckResults();
+
+                DialogGUIBase[] list = new DialogGUIBase[1 + resultsList.Count];
+                int index = 0;
+                for (int i = 0; i < resultsList.Count; i++)
+                {
+                    list[index] = CreateListLayoutRow(resultsList[i]);
+                    index++;
+                }
+                list[index] = new DialogGUISpace(3f);
+                statsListLayout = new DialogGUIVerticalLayout(list);
+            }
+            else
+            {
+                statsListLayout = new DialogGUIVerticalLayout(new DialogGUISpace(3f));
+            }
+            return statsListLayout;
+        }
+
+
+        /// <summary>
+        /// Clear layout of the list of stats
+        /// </summary>
+        public void ClearStatsListLayout()
+        {
+            statsListLayout = null;
+        }
+
+
+        /// <summary>
+        /// Refresh list of stats without
+        /// </summary>
+        public void RefreshStatsListLayout()
+        {
+            Stack<Transform> stack = new Stack<Transform>();  // some data on hierarchy of GUI components
+            stack.Push(statsListLayout.uiItem.gameObject.transform); // need the reference point of the parent GUI component for position and size
+
+            List<DialogGUIBase> rows = statsListLayout.children;
+
+            // Clear list
+            while (rows.Count > 0)
+            {
+                DialogGUIBase child = rows.ElementAt(0); // Get child
+                rows.RemoveAt(0); // Drop row
+                child.uiItem.gameObject.DestroyGameObjectImmediate(); // Free memory up
+            }
+
+            // Add rows
+            if (currentController != null)
+            {
+                List<DisplayedSystemCheckResult> resultsList = currentController.GetDisplayedSystemCheckResults();
+
+                for (int i = 0; i < resultsList.Count; i++)
+                {
+                    rows.Add(CreateListLayoutRow(resultsList[i]));
+                    rows.Last().Create(ref stack, CommonWindowProperties.ActiveSkin); // required to force the GUI creatio﻿n
+                }
+            }
+            rows.Add(new DialogGUISpace(3f));
+            rows.Last().Create(ref stack, CommonWindowProperties.ActiveSkin); // required to force the GUI creatio﻿n
         }
 
     }

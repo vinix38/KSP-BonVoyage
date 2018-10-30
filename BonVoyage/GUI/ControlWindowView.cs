@@ -29,11 +29,13 @@ namespace BonVoyage
             model = m;
             closeCallback = close;
 
-            DialogGUITextInput latField = new DialogGUITextInput("", false, 20, (string s) => { model.Latitude = s; return s; }, model.GetLatitude, TMPro.TMP_InputField.ContentType.DecimalNumber, 24f);
-            model.AddLockControlToTextField(latField);
-            DialogGUITextInput lonField = new DialogGUITextInput("", false, 20, (string s) => { model.Longitude = s; return s; }, model.GetLongitude, TMPro.TMP_InputField.ContentType.DecimalNumber, 24f);
-            model.AddLockControlToTextField(lonField);
+            AddChild(model.GetStatsListLayout());            
 
+            // Set a target section
+            DialogGUITextInput latField = new DialogGUITextInput("", false, 20, (string s) => { model.Latitude = s; return s; }, model.GetLatitude, TMPro.TMP_InputField.ContentType.DecimalNumber, CommonWindowProperties.buttonHeight);
+            model.AddLockControlToTextField(latField);
+            DialogGUITextInput lonField = new DialogGUITextInput("", false, 20, (string s) => { model.Longitude = s; return s; }, model.GetLongitude, TMPro.TMP_InputField.ContentType.DecimalNumber, CommonWindowProperties.buttonHeight);
+            model.AddLockControlToTextField(lonField);
             AddChild(new DialogGUILabel(Localizer.Format("#LOC_BV_Control_SetTarget") + ":"));
             AddChild(new DialogGUIHorizontalLayout(TextAnchor.MiddleLeft,
                 new DialogGUILabel(Localizer.Format("#LOC_BV_Control_Lat") + ":"),
@@ -41,10 +43,17 @@ namespace BonVoyage
                 new DialogGUISpace(2f),
                 new DialogGUILabel(Localizer.Format("#LOC_BV_Control_Lon") + ":"),
                 lonField,
-                new DialogGUIButton(Localizer.Format("#LOC_BV_Control_Set"), model.SetButtonClicked, model.EnableButtons, 40f, 20f, false)
+                new DialogGUIButton(Localizer.Format("#LOC_BV_Control_Set"), model.SetButtonClicked, model.EnableButtons, 40f, CommonWindowProperties.buttonHeight - 4, false)
+            ));
+            AddChild(new DialogGUIHorizontalLayout(
+                 new DialogGUIButton(Localizer.Format("#LOC_BV_Control_PickOnMap"), model.PickOnMapkButtonClicked, model.EnableButtons, 90f, CommonWindowProperties.buttonHeight - 4, false),
+                 new DialogGUIButton(Localizer.Format("#LOC_BV_Control_CurrenTarget"), model.CurrentTargetButtonClicked, model.EnableButtons, 104f, CommonWindowProperties.buttonHeight - 4, false)
+            ));
+            AddChild(new DialogGUIHorizontalLayout(
+                new DialogGUIButton(Localizer.Format("#LOC_BV_Control_CurrentWaypoint"), model.CurrentWaypointButtonClicked, model.EnableButtons, 124f, CommonWindowProperties.buttonHeight - 4, false)
             ));
 
-            AddChild(new DialogGUISpace(5f));
+            AddChild(new DialogGUISpace(3f));
 
             AddChild(new DialogGUIHorizontalLayout(
                 new DialogGUIFlexibleSpace(),
@@ -56,7 +65,7 @@ namespace BonVoyage
 
             AddChild(new DialogGUIHorizontalLayout(
                 new DialogGUIFlexibleSpace(),
-                new DialogGUIButton(model.GetGoButtonText, model.GoButtonClicked, null, 120f, 28f, false, CommonWindowProperties.Style_Button_Bold_Yellow),
+                new DialogGUIButton(model.GetGoButtonText, model.GoButtonClicked, null, 120f, CommonWindowProperties.buttonHeight + 4, false, CommonWindowProperties.Style_Button_Bold_Yellow),
                 new DialogGUIFlexibleSpace()
             ));
         }
@@ -142,6 +151,7 @@ namespace BonVoyage
 
                 dialog.Dismiss();
                 dialog = null;
+                model.ClearStatsListLayout();
             }
         }
 

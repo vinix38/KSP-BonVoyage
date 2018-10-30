@@ -96,7 +96,7 @@ namespace BonVoyage
         public bool ControlButtonCanBeEnabled()
         {
             if (HighLogic.LoadedSceneIsFlight)
-                return BonVoyage.Instance.CheckActiveControllerForVessel(FlightGlobals.ActiveVessel);
+                return BonVoyage.Instance.CheckActiveControllerOfVessel(FlightGlobals.ActiveVessel);
             else
                 return false;
         }
@@ -169,17 +169,7 @@ namespace BonVoyage
 
             if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
             {
-                double n = controller.RemainingDistanceToTarget;
-                if (n > 0)
-                {
-                    if (n < 1000)
-                        result = n.ToString("N0") + " m";
-                    else
-                    {
-                        n = n / 1000;
-                        result = n.ToString("0.##") + " km";
-                    }
-                }
+                Tools.ConvertDistanceToText(controller.RemainingDistanceToTarget);
             }
 
             return result;
