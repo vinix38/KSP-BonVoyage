@@ -35,7 +35,7 @@ namespace BonVoyage
             mainWindowPosition = mwp;
             closeCallback = close;
 
-            AddChild(new DialogGUIToggle(model.GetDewarpToggleState(), Localizer.Format("#LOC_BV_AutomaticDewarp"), model.DewarpChecked, 130f));
+            AddChild(TooltipExtension.DeferTooltip(new DialogGUIToggle(model.GetDewarpToggleState(), Localizer.Format("#LOC_BV_AutomaticDewarp"), model.DewarpChecked, 130f) { tooltipText = Localizer.Format("#LOC_BV_AutomaticDewarp_Tooltip") }));
 
             AddChild(new DialogGUIBox("", 140f, 80f, null,
                 new DialogGUIVerticalLayout(140f, 80f, CommonWindowProperties.settingsWindowSpacing, CommonWindowProperties.boxPadding, TextAnchor.UpperLeft,

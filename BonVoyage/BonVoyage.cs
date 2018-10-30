@@ -28,6 +28,10 @@ namespace BonVoyage
 
         public List<BVController> BVControllers; // Controllers list
 
+        public bool GamePaused; // Is game paused?
+        public bool ShowUI; // Is UI vissible? (F2 pressed)
+        public bool MapMode; // if true, then target will be picked in the map mode
+
         #endregion
 
 
@@ -35,9 +39,6 @@ namespace BonVoyage
 
         private ApplicationLauncherButton appLauncherButton; // Button in the game's toolbar
         private IButton toolbarButton; // Toolbar Continued button
-
-        private bool gamePaused; // Is game paused?
-        private bool showUI; // Is UI vissible? (F2 pressed)
 
         private bool mainViewVisible; // Is main view visible?
         private MainWindowView MainView { get; set; } // Mod's main view
@@ -79,8 +80,9 @@ namespace BonVoyage
 
             toolbarButton = null;
 
-            gamePaused = false;
-            showUI = true;
+            GamePaused = false;
+            ShowUI = true;
+            MapMode = false;
 
             BVControllers = new List<BVController>();
 
@@ -165,6 +167,9 @@ namespace BonVoyage
         /// </summary>
         void OnGUI()
         {
+            if (GamePaused && !ShowUI)
+                return;
+            
             if (CommonWindowProperties.UnitySkin == null)
             {
                 CommonWindowProperties.UnitySkin = StyleConverter.Convert(GUI.skin);
@@ -184,7 +189,7 @@ namespace BonVoyage
         /// </summary>
         public void OnGamePause()
         {
-            gamePaused = true;
+            GamePaused = true;
         }
 
 
@@ -193,7 +198,7 @@ namespace BonVoyage
         /// </summary>
         public void OnGameUnpause()
         {
-            gamePaused = false;
+            GamePaused = false;
         }
 
 
@@ -202,7 +207,7 @@ namespace BonVoyage
         /// </summary>
         private void OnShowUI()
         {
-            showUI = true;
+            ShowUI = true;
         }
 
 
@@ -211,7 +216,7 @@ namespace BonVoyage
         /// </summary>
         private void OnHideUI()
         {
-            showUI = false;
+            ShowUI = false;
         }
 
 

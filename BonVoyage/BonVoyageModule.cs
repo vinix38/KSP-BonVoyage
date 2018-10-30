@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace BonVoyage
 {
@@ -171,6 +172,48 @@ namespace BonVoyage
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Pick target in the map mode
+        /// </summary>
+        void OnGUI()
+        {
+            if (BonVoyage.Instance.GamePaused && !BonVoyage.Instance.ShowUI)
+                return;
+
+            // Pick target in the map mode
+            if (BonVoyage.Instance.MapMode)
+            {
+                if (!MapView.MapIsEnabled)
+                {
+                    BonVoyage.Instance.MapMode = false;
+                    return;
+                }
+
+                double[] latLon = Tools.PlaceTargetAtCursor(vessel.mainBody);
+                if (latLon[0] != double.MinValue)
+                {
+                    GUI.Label(
+                        new Rect(Input.mousePosition.x + 20, Screen.height - Input.mousePosition.y, 200, 55),
+                        Localizer.Format("#LOC_BV_Control_Lat") + ": " + latLon[0].ToString("F") + "\n" +
+                        Localizer.Format("#LOC_BV_Control_Lon") + ": " + latLon[1].ToString("F") + "\n" +
+                        Localizer.Format("#LOC_BV_Control_Biome") + ": " + ScienceUtil.GetExperimentBiome(vessel.mainBody, latLon[0], latLon[1])
+                    );
+                    // On left mouse click send coordinates and exit map mode
+                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                    {
+                        if (BonVoyage.Instance.ControlModel != null)
+                        {
+                            BonVoyage.Instance.ControlModel.Latitude = latLon[0].ToString();
+                            BonVoyage.Instance.ControlModel.Longitude = latLon[1].ToString();
+                        }
+                        BonVoyage.Instance.MapMode = false;
+                        MapView.ExitMapView();
+                    }
+                }
+            }
+        }
 
     }
 
