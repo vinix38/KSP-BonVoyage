@@ -5,6 +5,13 @@ using System.Linq;
 
 namespace BonVoyage
 {
+    [Flags]
+    public enum TileTypes
+    {
+        Land = 0x1,
+        Ocean = 0x2
+    }
+
     /// <summary>
     /// Hexagonal grid for pathfinding will be used
     /// https://tbswithunity3d.wordpress.com/2012/02/23/hexagonal-grid-path-finding-using-a-algorithm/
@@ -13,6 +20,7 @@ namespace BonVoyage
     public class PathFinder
     {
         internal const double StepSize = 1000;
+
         public struct Point
         {
             public int X, Y;
@@ -45,33 +53,58 @@ namespace BonVoyage
         private double targetLatitude;
         private double targetLongitude;
         private CelestialBody mainBody;
+        TileTypes tileTypes;
         private List<Hex> tiles;
         internal Path<Hex> path;
 
-        public PathFinder(double startLat, double startLon, double targetLat, double targetLon, CelestialBody body)
+
+        Func<Hex, Hex, double> distance = (node1, node2) => StepSize;
+        Func<Hex, double> estimate;
+
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="startLat"></param>
+        /// <param name="startLon"></param>
+        /// <param name="targetLat"></param>
+        /// <param name="targetLon"></param>
+        /// <param name="body"></param>
+        /// <param name="types"></param>
+        public PathFinder(double startLat, double startLon, double targetLat, double targetLon, CelestialBody body, TileTypes types)
         {
             startLatitude = startLat;
             startLongitude = startLon;
             targetLatitude = targetLat;
             targetLongitude = targetLon;
             mainBody = body;
+            tileTypes = types;
             estimate = Estimate;
 
             tiles = new List<Hex>();
 
-            directions = new Dictionary<int, Point>();
-            directions.Add(0, new Point(0, -1)); // 0 degree
-            directions.Add(60, new Point(1, -1)); // 60
-            directions.Add(120, new Point(1, 0)); // 120
-            directions.Add(180, new Point(0, 1)); // 180
-            directions.Add(240, new Point(-1, 1)); // 240
-            directions.Add(300, new Point(-1, 0)); // 300
+            directions = new Dictionary<int, Point>
+            {
+                { 0, new Point(0, -1) }, // 0 degree
+                { 60, new Point(1, -1) }, // 60
+                { 120, new Point(1, 0) }, // 120
+                { 180, new Point(0, 1) }, // 180
+                { 240, new Point(-1, 1) }, // 240
+                { 300, new Point(-1, 0) } // 300
+            };
         }
 
+
+        /// <summary>
+        /// Find path to the target
+        /// </summary>
         public void FindPath()
         {
             double distanceToTarget = GeoUtils.GetDistance(startLatitude, startLongitude, targetLatitude, targetLongitude, mainBody.Radius);
-            if (distanceToTarget < StepSize) return;
+
+            if (distanceToTarget < StepSize)
+                return;
+
             double bearing = GeoUtils.InitialBearing(startLatitude, startLongitude, targetLatitude, targetLongitude);
             double altitude = GeoUtils.TerrainHeightAt(startLatitude, startLongitude, mainBody);
             int x = 0;
@@ -91,25 +124,21 @@ namespace BonVoyage
             Hex destination = tiles.Find(t => (t.X == x + directions[180].X) && (t.Y == y + directions[180].Y));
             
             path = Path<Hex>.FindPath<Hex>(start, destination, distance, estimate);
-
-            ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_PathBuild"));
         }
+
 
         private double Estimate(Hex hex)
         {
             return GeoUtils.GetDistance(hex.Latitude, hex.Longitude, targetLatitude, targetLongitude, mainBody.Radius);
         }
 
-        Func<Hex, Hex, double> distance = (node1, node2) => StepSize;
-        Func<Hex, double> estimate;
 
         internal IEnumerable<Hex> GetNeighbours(int x, int y, bool passable = true)
         {
             var tile = tiles.Find(t => (t.X == x) && (t.Y == y));
             if (tile == null)
-            {
                 return null;
-            }
+
             List<Hex> neighbours = new List<Hex>();
             foreach (var direction in directions)
             {
@@ -129,15 +158,35 @@ namespace BonVoyage
             }
             if (passable)
             {
-                return neighbours.Where(
-                    n => (n.Altitude >= 0 || !mainBody.ocean) &&
-                    ((n.Altitude - tile.Altitude) < StepSize / 2) &&
-                    ((n.Altitude - tile.Altitude) > 0 - StepSize / 2)
-                );
+                switch (tileTypes)
+                {
+                    case TileTypes.Land | TileTypes.Ocean:
+                        return neighbours.Where(
+                            n => 
+                            ((n.Altitude - tile.Altitude) < StepSize / 2) &&
+                            ((n.Altitude - tile.Altitude) > 0 - StepSize / 2)
+                        );
+
+                    case TileTypes.Land:
+                        return neighbours.Where(
+                            n => (n.Altitude >= 0 || !mainBody.ocean) &&
+                            ((n.Altitude - tile.Altitude) < StepSize / 2) &&
+                            ((n.Altitude - tile.Altitude) > 0 - StepSize / 2)
+                        );
+
+                    case TileTypes.Ocean:
+                        return neighbours.Where(
+                            n => (n.Altitude <= 0)
+                        );
+
+                    default:
+                        return neighbours;
+                }
             }
             else
                 return neighbours;
         }
+
 
         public double GetDistance()
         {

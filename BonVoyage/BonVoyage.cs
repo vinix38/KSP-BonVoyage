@@ -114,6 +114,9 @@ namespace BonVoyage
             // test
 
             LoadControllers();
+
+            // After BonVoyage was runned for the first time, set FirstRun to false, because we don't need to reset path and target lat/lon
+            Configuration.FirstRun = false;
         }
 
 

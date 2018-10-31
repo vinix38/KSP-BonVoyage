@@ -15,32 +15,49 @@ namespace BonVoyage
         public Node LastStep { get; private set; }
         public Path<Node> PreviousSteps { get; private set; }
         public double TotalCost { get; private set; }
+
         private Path(Node lastStep, Path<Node> previousSteps, double totalCost)
         {
             LastStep = lastStep;
             PreviousSteps = previousSteps;
             TotalCost = totalCost;
         }
-        public Path(Node start) : this(start, null, 0) { }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="start"></param>
+        public Path(Node start) : this(start, null, 0)
+        {
+        }
+
+
         public Path<Node> AddStep(Node step, double stepCost)
         {
             return new Path<Node>(step, this, TotalCost + stepCost);
         }
+
+
         public IEnumerator<Node> GetEnumerator()
         {
             for (Path<Node> p = this; p != null; p = p.PreviousSteps)
                 yield return p.LastStep;
         }
+
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }
 
+
+
         static public Path<Node> FindPath<Node>(
             Node start,
             Node destination,
             Func<Node, Node, double> distance,
-            Func<Node, double> estimate)
+            Func<Node, double> estimate
+        )
             where Node : IHasNeighbours<Node>
         {
             DateTime startedAt = DateTime.Now;
@@ -72,6 +89,8 @@ namespace BonVoyage
     class PriorityQueue<P, V>
     {
         private SortedDictionary<P, Queue<V>> list = new SortedDictionary<P, Queue<V>>();
+
+
         public void Enqueue(P priority, V value)
         {
             Queue<V> q;
@@ -82,6 +101,8 @@ namespace BonVoyage
             }
             q.Enqueue(value);
         }
+
+
         public V Dequeue()
         {
             // will throw if there isn’t any first element!
@@ -91,6 +112,8 @@ namespace BonVoyage
                 list.Remove(pair.Key);
             return v;
         }
+
+
         public bool IsEmpty
         {
             get { return !list.Any(); }

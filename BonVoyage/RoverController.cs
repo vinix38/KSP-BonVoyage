@@ -82,6 +82,22 @@ namespace BonVoyage
 
         #endregion
 
+
+        #region Pathfinder
+
+        /// <summary>
+        /// Find a route to the target
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <returns></returns>
+        public override bool FindRoute(double lat, double lon)
+        {
+            return FindRoute(lat, lon, TileTypes.Land);
+        }
+
+        #endregion
+
     }
 
 }

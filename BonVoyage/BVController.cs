@@ -102,16 +102,19 @@ namespace BonVoyage
             BVModule = module;
             displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
 
-            // Load values from config
-            active = bool.Parse(BVModule.GetValue("active") != null ? BVModule.GetValue("active") : "false");
-            shutdown = bool.Parse(BVModule.GetValue("shutdown") != null ? BVModule.GetValue("shutdown") : "false");
-            targetLatitude = double.Parse(BVModule.GetValue("targetLatitude") != null ? BVModule.GetValue("targetLatitude") : "0");
-            targetLongitude = double.Parse(BVModule.GetValue("targetLongitude") != null ? BVModule.GetValue("targetLongitude") : "0");
-            distanceToTarget = double.Parse(BVModule.GetValue("distanceToTarget") != null ? BVModule.GetValue("distanceToTarget") : "0");
-            distanceTravelled = double.Parse(BVModule.GetValue("distanceTravelled") != null ? BVModule.GetValue("distanceTravelled") : "0");
-            lastTimeUpdated = double.Parse(BVModule.GetValue("lastTimeUpdated") != null ? BVModule.GetValue("lastTimeUpdated") : "0");
-            if (BVModule.GetValue("pathEncoded") != null)
-                path = PathUtils.DecodePath(BVModule.GetValue("pathEncoded"));
+            // Load values from config if it isn't the first run of the mod (we are reseting vessel on the first run)
+            if (!Configuration.FirstRun)
+            {
+                active = bool.Parse(BVModule.GetValue("active") != null ? BVModule.GetValue("active") : "false");
+                shutdown = bool.Parse(BVModule.GetValue("shutdown") != null ? BVModule.GetValue("shutdown") : "false");
+                targetLatitude = double.Parse(BVModule.GetValue("targetLatitude") != null ? BVModule.GetValue("targetLatitude") : "0");
+                targetLongitude = double.Parse(BVModule.GetValue("targetLongitude") != null ? BVModule.GetValue("targetLongitude") : "0");
+                distanceToTarget = double.Parse(BVModule.GetValue("distanceToTarget") != null ? BVModule.GetValue("distanceToTarget") : "0");
+                distanceTravelled = double.Parse(BVModule.GetValue("distanceTravelled") != null ? BVModule.GetValue("distanceTravelled") : "0");
+                lastTimeUpdated = double.Parse(BVModule.GetValue("lastTimeUpdated") != null ? BVModule.GetValue("lastTimeUpdated") : "0");
+                if (BVModule.GetValue("pathEncoded") != null)
+                    path = PathUtils.DecodePath(BVModule.GetValue("pathEncoded"));
+            }
 
             State = VesselState.Idle;
             if (shutdown)
@@ -181,7 +184,7 @@ namespace BonVoyage
             DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
             {
                 Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
-                Text = targetLatitude.ToString(),
+                Text = targetLatitude.ToString("0.####"),
                 Tooltip = ""
             };
             displayedSystemCheckResults.Add(result);
@@ -189,7 +192,7 @@ namespace BonVoyage
             result = new DisplayedSystemCheckResult
             {
                 Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
-                Text = targetLongitude.ToString(),
+                Text = targetLongitude.ToString("0.####"),
                 Tooltip = ""
             };
             displayedSystemCheckResults.Add(result);
@@ -203,6 +206,52 @@ namespace BonVoyage
             displayedSystemCheckResults.Add(result);
 
             return displayedSystemCheckResults;
+        }
+
+        #endregion
+
+
+        #region Pathfinder
+
+        /// <summary>
+        /// Find a route to the target
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <returns></returns>
+        public virtual bool FindRoute(double lat, double lon)
+        {
+            return FindRoute(lat, lon, TileTypes.Land | TileTypes.Ocean);
+        }
+
+
+        /// <summary>
+        /// Find a route to the target using only specified tile types (route on land, water or both)
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <param name="tileType"></param>
+        /// <returns></returns>
+        protected bool FindRoute(double targetLat, double targetLon, TileTypes tileType)
+        {
+            bool result = false;
+
+            PathFinder pathFinder = new PathFinder(vessel.latitude, vessel.longitude, targetLat, targetLon, vessel.mainBody, tileType);
+            pathFinder.FindPath();
+
+            double dist = pathFinder.GetDistance();
+            if (dist > 0) // Path found
+            {
+                targetLatitude = targetLat;
+                targetLongitude = targetLon;
+                distanceToTarget = dist;
+                path = PathUtils.HexToWaypoint(pathFinder.path);
+                result = true;
+            }
+            else // Path not found
+                result = false;
+
+            return result;
         }
 
         #endregion

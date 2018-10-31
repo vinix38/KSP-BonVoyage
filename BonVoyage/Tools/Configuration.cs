@@ -1,8 +1,4 @@
 ﻿using KSP.IO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace BonVoyage
@@ -16,6 +12,20 @@ namespace BonVoyage
 
 
         #region Public properties
+
+        /// <summary>
+        /// Automatic dewarp
+        /// </summary>
+        public static bool FirstRun
+        {
+            get { return configuration.GetValue<bool>("firstRun", true); }
+            set
+            {
+                configuration.SetValue("firstRun", value);
+                configuration.save();
+            }
+        }
+
 
         /// <summary>
         /// UI skin

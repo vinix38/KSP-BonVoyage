@@ -2,10 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace BonVoyage
 {
@@ -134,7 +132,7 @@ namespace BonVoyage
                     ScreenMessages.PostScreenMessage("Disable");
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid"));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
         }
 
 
@@ -150,7 +148,7 @@ namespace BonVoyage
                 RefreshStatsListLayout();
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid"));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
         }
 
 
@@ -179,19 +177,24 @@ namespace BonVoyage
         /// </summary>
         public void SetButtonClicked()
         {
-            ScreenMessages.PostScreenMessage("Latitude = " + latitude.ToString() + " ; Longitude = " + longitude.ToString());
-
             if (currentController != null)
             {
                 if (currentController.vessel.situation == Vessel.Situations.LANDED)
                 {
-                    RefreshStatsListLayout();
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_FindingRoute", 5f));
+                    if (currentController.FindRoute(latitude, longitude))
+                    {
+                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteFound", 5f));
+                        RefreshStatsListLayout();
+                    }
+                    else
+                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteNotFound", 5f));
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f);
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid"));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
         }
 
 
@@ -208,10 +211,10 @@ namespace BonVoyage
                     BonVoyage.Instance.MapMode = true;
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f));
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid"));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
         }
 
 
@@ -229,10 +232,10 @@ namespace BonVoyage
                     longitude = (cooordinates[1] + 360) % 360;
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_TargetNotValid"));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_TargetNotValid", 5f));
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid"));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
         }
 
 
@@ -250,10 +253,10 @@ namespace BonVoyage
                     longitude = (cooordinates[1] + 360) % 360;
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WaypointNotValid"));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WaypointNotValid", 5f));
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid"));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
         }
 
 
