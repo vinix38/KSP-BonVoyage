@@ -141,10 +141,9 @@ namespace BonVoyage
         /// </summary>
         public void SystemCheckButtonClicked()
         {
-            ScreenMessages.PostScreenMessage("System check");
-
             if (currentController != null)
             {
+                currentController.SystemCheck();
                 RefreshStatsListLayout();
             }
             else
@@ -201,7 +200,7 @@ namespace BonVoyage
         /// <summary>
         /// Pick on map button was clicked
         /// </summary>
-        public void PickOnMapkButtonClicked()
+        public void PickOnMapButtonClicked()
         {
             if (currentController != null)
             {

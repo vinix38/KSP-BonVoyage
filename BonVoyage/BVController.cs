@@ -256,6 +256,14 @@ namespace BonVoyage
 
         #endregion
 
+
+        /// <summary>
+        /// Check the systems
+        /// </summary>
+        public virtual void SystemCheck()
+        {
+        }
+
     }
 
 }

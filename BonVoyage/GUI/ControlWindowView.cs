@@ -42,7 +42,7 @@ namespace BonVoyage
                 new DialogGUIButton(Localizer.Format("#LOC_BV_Control_Set"), model.SetButtonClicked, model.EnableButtons, 40f, CommonWindowProperties.buttonHeight - 4, false)
             ));
             AddChild(new DialogGUIHorizontalLayout(
-                 new DialogGUIButton(Localizer.Format("#LOC_BV_Control_PickOnMap"), model.PickOnMapkButtonClicked, model.EnableButtons, 90f, CommonWindowProperties.buttonHeight - 4, false),
+                 new DialogGUIButton(Localizer.Format("#LOC_BV_Control_PickOnMap"), model.PickOnMapButtonClicked, model.EnableButtons, 90f, CommonWindowProperties.buttonHeight - 4, false),
                  new DialogGUIButton(Localizer.Format("#LOC_BV_Control_CurrenTarget"), model.CurrentTargetButtonClicked, model.EnableButtons, 104f, CommonWindowProperties.buttonHeight - 4, false)
             ));
             AddChild(new DialogGUIHorizontalLayout(

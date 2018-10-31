@@ -41,8 +41,8 @@ namespace BonVoyage
         public const float controlMinHeight = 190f;
         public const float controlWindowWidth = controlMinWidth + 20f;
         public const float controlWindowHeight = controlMinHeight + 20f;
-        public static readonly Vector2 controlWindowAnchorMin = new Vector2(0.5f, 0.5f);
-        public static readonly Vector2 controlWindowAnchorMax = new Vector2(0.5f, 0.5f);
+        public static readonly Vector2 controlWindowAnchorMin = new Vector2(0.5f, 1f);
+        public static readonly Vector2 controlWindowAnchorMax = new Vector2(0.5f, 1f);
         public static Vector2 ControlWindowPosition = new Vector2(0.5f, 0.5f);
 
         public static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
