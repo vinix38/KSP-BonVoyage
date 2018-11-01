@@ -221,12 +221,12 @@ namespace BonVoyage
                     crewSpeedBonus = 2 * maxScoutLevel; // up to 10% for a Scout (Scouts disregard safety)
             }
 
-            // Average speed will vary depending on number of wheels online and crew present from 50 to 90 percent of average wheels' max speed
+            // Average speed will vary depending on number of wheels online and crew present from 50 to 95 percent of average wheels' max speed
             if (wheelTestResult.online != 0)
             {
                 maxSpeedBase = wheelTestResult.maxSpeedSum / wheelTestResult.online;
                 wheelsPercentualModifier = Math.Min(70, (40 + 5 * wheelTestResult.online));
-                averageSpeed = maxSpeedBase * (wheelsPercentualModifier + crewSpeedBonus) / 100;
+                averageSpeed = maxSpeedBase * wheelsPercentualModifier / 100 * (1 + crewSpeedBonus / 100);
             }
             else
                 averageSpeed = 0;
