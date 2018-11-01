@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using KSP.UI.Screens;
-using KSP.IO;
 using UI;
 using KSP.Localization;
 using ToolbarWrapper;
-using UnityEngine.SceneManagement;
 
 namespace BonVoyage
 {

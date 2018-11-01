@@ -1,7 +1,6 @@
 ﻿using KSP.Localization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace BonVoyage
@@ -55,14 +54,15 @@ namespace BonVoyage
         public double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
         public virtual double AverageSpeed { get { return 0; } }
         public event EventHandler OnStateChanged;
-        protected List<DisplayedSystemCheckResult> displayedSystemCheckResults;
 
         #endregion
 
 
-        #region Private properties
+        #region Private and protected properties
 
         protected ConfigNode BVModule; // Config node of BonVoyageModule
+        protected List<DisplayedSystemCheckResult> displayedSystemCheckResults;
+        protected int mainStarIndex; // Vessel's main star's index in the FlightGlobals.Bodies
 
         // Config values
         private bool active = false;
@@ -119,6 +119,8 @@ namespace BonVoyage
             State = VesselState.Idle;
             if (shutdown)
                 State = VesselState.ControllerDisabled;
+
+            mainStarIndex = 0; // In the most cases The Sun
         }
 
 
@@ -262,6 +264,7 @@ namespace BonVoyage
         /// </summary>
         public virtual void SystemCheck()
         {
+            mainStarIndex = Tools.GetMainStar(vessel).flightGlobalsIndex;
         }
 
     }

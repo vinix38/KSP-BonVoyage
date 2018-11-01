@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace BonVoyage
@@ -134,6 +131,23 @@ namespace BonVoyage
                 }
             }
             return new double[2] { double.MinValue, double.MinValue };
+        }
+
+
+        /// <summary>
+        /// Return main star for a vessel
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static CelestialBody GetMainStar(Vessel v)
+        {
+            CelestialBody body = v.mainBody;
+            while (body.referenceBody != body) // Last body has reference to itself???
+            {
+                // We are preparing for Kopernicus
+                body = body.referenceBody;
+            }
+            return body;
         }
 
     }

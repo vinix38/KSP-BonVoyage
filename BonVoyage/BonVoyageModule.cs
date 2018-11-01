@@ -1,7 +1,6 @@
 ﻿using KSP.Localization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -153,7 +152,7 @@ namespace BonVoyage
                     //    Deactivate();
                     //BonVoyage.Instance.HideModuleControl();
                 }
-                BonVoyage.Instance.SetShutdownState(this.vessel.id, shutdown);
+                BonVoyage.Instance.SetShutdownState(vessel.id, shutdown);
             }
             else
             {

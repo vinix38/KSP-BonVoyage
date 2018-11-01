@@ -5,8 +5,12 @@ Rovers background processing for KSP.
 ## 0.14.0 - New voyage
 ### Changes
 - KSP 1.5.1 compatibility
-- Major overhaul
+- Major overhaul - We are getting ready to extend our operations to the water.
 - Localization support
+- KSPWheel module system check change
+  - Required EC is scaled by a motor's output setting
+  - Maximum speed is taken from maxDrivenSpeed field, which is scaled by gear setting, and capped at max safe speed
+- Direct input of target coordinates
 
 ## 0.13.3
 ### Changes

@@ -1,7 +1,6 @@
 ﻿using KSP.Localization;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace BonVoyage
@@ -103,7 +102,7 @@ namespace BonVoyage
                     ?
                     Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
                         + Localizer.Format("#LOC_BV_Control_WheelsModifier") + ": " + wheelsPercentualModifier.ToString("F") + "%\n"
-                        + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
+                        + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
                         + (SpeedReduction > 0 ? Localizer.Format("#LOC_BV_Control_PowerPenalty") + ": " + (SpeedReduction > 75 ? "100" : SpeedReduction.ToString("F")) + "%\n" : "")
                         + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
                     :
@@ -158,6 +157,8 @@ namespace BonVoyage
         /// </summary>
         public override void SystemCheck()
         {
+            base.SystemCheck();
+
             // Test stock wheels
             WheelTestResult testResultStockWheels = CheckStockWheels();
             // Test KSPWheels
@@ -173,6 +174,90 @@ namespace BonVoyage
 
             // Generally, moving at high speed requires less power than wheels' max consumption. Maximum required power of controller will 35% of wheels power requirement 
             requiredPower = wheelTestResult.powerRequired / 100 * 35;
+
+            // Get power production
+            electricPower_Solar = GetAvailablePower_Solar();
+            electricPower_Other = GetAvailablePower_Other();
+
+            // Solar powered
+            solarPowered = (electricPower_Solar > 0.0 ? true : false);
+
+            // Manned
+            manned = (vessel.GetCrewCount() > 0);
+
+            // Pilots and Scouts (USI) increase base average speed
+            crewSpeedBonus = 0;
+            if (manned)
+            {
+                int maxPilotLevel = -1;
+                int maxScoutLevel = -1;
+                int maxDriverLevel = -1;
+
+                List<ProtoCrewMember> crewList = vessel.GetVesselCrew();
+                for (int i = 0; i < crewList.Count; i++)
+                {
+                    switch (crewList[i].trait)
+                    {
+                        case "Pilot":
+                            if (maxPilotLevel < crewList[i].experienceLevel)
+                                maxPilotLevel = crewList[i].experienceLevel;
+                            break;
+                        case "Scout":
+                            if (maxScoutLevel < crewList[i].experienceLevel)
+                                maxScoutLevel = crewList[i].experienceLevel;
+                            break;
+                        default:
+                            if (crewList[i].HasEffect("AutopilotSkill"))
+                                if (maxDriverLevel < crewList[i].experienceLevel)
+                                    maxDriverLevel = crewList[i].experienceLevel;
+                            break;
+                    }
+                }
+                if (maxPilotLevel > 0)
+                    crewSpeedBonus = 6 * maxPilotLevel; // up to 30% for a Pilot
+                else if (maxDriverLevel > 0)
+                    crewSpeedBonus = 4 * maxDriverLevel; // up to 20% for any driver (has AutopilotSkill skill)
+                else if (maxScoutLevel > 0)
+                    crewSpeedBonus = 2 * maxScoutLevel; // up to 10% for a Scout (Scouts disregard safety)
+            }
+
+            // Average speed will vary depending on number of wheels online and crew present from 50 to 90 percent of average wheels' max speed
+            if (wheelTestResult.online != 0)
+            {
+                maxSpeedBase = wheelTestResult.maxSpeedSum / wheelTestResult.online;
+                wheelsPercentualModifier = Math.Min(70, (40 + 5 * wheelTestResult.online));
+                averageSpeed = maxSpeedBase * (wheelsPercentualModifier + crewSpeedBonus) / 100;
+            }
+            else
+                averageSpeed = 0;
+
+            // Unmanned rovers drive with 80% speed penalty
+            if (!manned)
+                averageSpeed = averageSpeed * 0.2;
+
+            // Base average speed at night is the same as average speed, if there is other power source. Zero otherwise.
+            if (electricPower_Solar > 0.0)
+                averageSpeedAtNight = averageSpeed;
+            else
+                averageSpeedAtNight = 0;
+
+            // If required power is greater then total power generated, then average speed can be lowered up to 75%
+            if (requiredPower > (electricPower_Solar + electricPower_Other))
+            {
+                double speedReduction = (requiredPower - (electricPower_Solar + electricPower_Other)) / requiredPower;
+                if (speedReduction <= 0.75)
+                    averageSpeed = averageSpeed * (1 - speedReduction);
+            }
+
+            // If required power is greater then generated other power generated, then average speed at night can be lowered up to 75%
+            if (requiredPower > electricPower_Other)
+            {
+                double speedReduction = (requiredPower - electricPower_Other) / requiredPower;
+                if (speedReduction <= 0.75)
+                    averageSpeedAtNight = averageSpeedAtNight * (1 - speedReduction);
+                else
+                    averageSpeedAtNight = 0;
+            }
         }
 
 
@@ -381,6 +466,108 @@ namespace BonVoyage
 
 
         #region Power
+
+        /// <summary>
+        /// Calculate available power from solar panels
+        /// </summary>
+        /// <returns></returns>
+        private double GetAvailablePower_Solar()
+        {
+            //// Revision - Kopernicus
+            double solarPower = 0;
+            double distanceToSun = vessel.distanceToSun;
+            double solarFlux = PhysicsGlobals.SolarLuminosity / (4 * Math.PI * distanceToSun * distanceToSun); // f = L / SA = L / 4π r2 (Wm-2)
+            float multiplier = 1;
+
+            for (int i = 0; i < vessel.parts.Count; ++i)
+            {
+                ModuleDeployableSolarPanel solarPanel = vessel.parts[i].FindModuleImplementing<ModuleDeployableSolarPanel>();
+                if (solarPanel == null)
+                    continue;
+
+                if ((solarPanel.deployState != ModuleDeployablePart.DeployState.BROKEN) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTED) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTING))
+                {
+                    if (solarPanel.useCurve) // Power curve
+                        multiplier = solarPanel.powerCurve.Evaluate((float)distanceToSun);
+                    else // solar flux at current distance / solar flux at 1AU (Kerbin)
+                        multiplier = (float)(solarFlux / PhysicsGlobals.SolarLuminosityAtHome);
+                    solarPower += solarPanel.chargeRate * multiplier;
+                }
+            }
+
+            return solarPower;
+        }
+
+
+        /// <summary>
+        /// Calculate available power from generators and reactors
+        /// </summary>
+        /// <returns></returns>
+        private double GetAvailablePower_Other()
+        {
+            double otherPower = 0;
+
+            // Go through all parts and get power from generators and reactors
+            for (int i = 0; i < vessel.parts.Count; ++i)
+            {
+                var part = vessel.parts[i];
+
+                // Standard RTG
+                ModuleGenerator powerModule = part.FindModuleImplementing<ModuleGenerator>();
+                if (powerModule != null)
+                {
+                    if (powerModule.generatorIsActive || powerModule.isAlwaysActive)
+                    {
+                        // Go through resources and get EC power
+                        for (int j = 0; j < powerModule.resHandler.outputResources.Count; ++j)
+                        {
+                            var resource = powerModule.resHandler.outputResources[j];
+                            if (resource.name == "ElectricCharge")
+                                otherPower += resource.rate * powerModule.efficiency;
+                        }
+                    }
+                }
+
+                //// Revision - NF, Interstellar
+                // Other generators
+                PartModuleList modules = part.Modules;
+                for (int j = 0; j < modules.Count; ++j)
+                {
+                    var module = modules[j];
+
+                    // Near future fission reactors
+                    if (module.moduleName == "FissionGenerator")
+                        otherPower += double.Parse(module.Fields.GetValue("CurrentGeneration").ToString());
+
+                    // KSP Interstellar generators
+                    if (module.moduleName == "FNGenerator")
+                    {
+                        if (bool.Parse(module.Fields.GetValue("IsEnabled").ToString()))
+                            otherPower += double.Parse(module.Fields.GetValue("maxElectricdtps").ToString());
+                    }
+                }
+
+                //// Revision - USI, WBI
+                // WBI reactors, USI reactors and MKS Power Pack
+                ModuleResourceConverter converterModule = part.FindModuleImplementing<ModuleResourceConverter>();
+                if (converterModule != null)
+                {
+                    if (converterModule.ModuleIsActive()
+                        && ((converterModule.ConverterName == "Nuclear Reactor") || (converterModule.ConverterName == "Reactor") || (converterModule.ConverterName == "Generator")))
+                    {
+                        for (int j = 0; j < converterModule.outputList.Count; ++j)
+                        {
+                            var resource = converterModule.outputList[j];
+                            if (resource.ResourceName == "ElectricCharge")
+                                otherPower += resource.Ratio * converterModule.GetEfficiencyMultiplier();
+                        }
+                    }
+                }
+            }
+
+            return otherPower;
+        }
+
         #endregion
 
     }
