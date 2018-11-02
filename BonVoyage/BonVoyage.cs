@@ -598,6 +598,7 @@ namespace BonVoyage
 
         /// <summary>
         /// Show/Hide windows during Update
+        /// Update controllers once a second
         /// </summary>
         public void Update()
         {
@@ -617,6 +618,19 @@ namespace BonVoyage
                     HideControlWindow();
                 }
             }
+
+
+            // Update controllers once a second
+            if (GamePaused || ((HighLogic.LoadedScene != GameScenes.FLIGHT) && (HighLogic.LoadedScene != GameScenes.SPACECENTER) && (HighLogic.LoadedScene != GameScenes.TRACKSTATION)))
+                return;
+
+            if (lastUpdate.AddSeconds(1) > DateTime.Now)
+                return;
+
+            lastUpdate = DateTime.Now;
+            double currentTime = Planetarium.GetUniversalTime();
+            for (int i = 0; i < BVControllers.Count; i++)
+                BVControllers[i].Update(currentTime);
         }
 
 

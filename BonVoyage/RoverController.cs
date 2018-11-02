@@ -642,6 +642,33 @@ namespace BonVoyage
             return base.Deactivate();
         }
 
+
+        /// <summary>
+        /// Update vessel
+        /// </summary>
+        /// <param name="currentTime"></param>
+        public override void Update(double currentTime)
+        {
+            if (vessel == null)
+                return;
+            if (vessel.isActiveVessel)
+            {
+                if (active)
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_AutopilotActive"), 10f).color = Color.red;
+                return;
+            }
+            ScreenMessages.PostScreenMessage(vessel.name);
+            if (!active || vessel.loaded)
+                return;
+
+            VesselState newState = VesselState.Moving;
+
+            if (State != newState)
+                State = newState;
+
+            Save(currentTime);
+        }
+
     }
 
 }

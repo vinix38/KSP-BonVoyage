@@ -67,7 +67,10 @@ namespace BonVoyage
         {
             currentController = controller;
             if (controller != null)
+            {
+                controller.SystemCheck();
                 controllerActive = controller.Active;
+            }
         }
 
 

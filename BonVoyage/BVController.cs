@@ -68,7 +68,7 @@ namespace BonVoyage
         protected int mainStarIndex; // Vessel's main star's index in the FlightGlobals.Bodies
 
         // Config values
-        private bool active = false;
+        protected bool active = false;
         private bool shutdown = false;
         private double targetLatitude = 0;
         private double targetLongitude = 0;
@@ -329,6 +329,44 @@ namespace BonVoyage
             }
 
             return !active;
+        }
+
+
+        /// <summary>
+        /// Update vessel
+        /// </summary>
+        /// <param name="currentTime"></param>
+        public virtual void Update(double currentTime)
+        {
+            if (vessel.isActiveVessel)
+            {
+                if (active)
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_AutopilotActive"), 10f).color = Color.red;
+                return;
+            }
+
+            if (!active || vessel.loaded)
+                return;
+
+            Save(currentTime);
+        }
+
+
+        /// <summary>
+        /// Save data to ProtoVessel
+        /// </summary>
+        protected void Save(double currentTime)
+        {
+            lastTimeUpdated = currentTime;
+
+            BVModule.SetValue("distanceTravelled", distanceTravelled.ToString());
+            BVModule.SetValue("lastTimeUpdated", currentTime.ToString());
+
+            vessel.protoVessel.latitude = vessel.latitude;
+            vessel.protoVessel.longitude = vessel.longitude;
+            vessel.protoVessel.altitude = vessel.altitude;
+            vessel.protoVessel.landedAt = vessel.mainBody.bodyName;
+            vessel.protoVessel.displaylandedAt = vessel.mainBody.bodyDisplayName.Replace("^N", "");
         }
 
     }

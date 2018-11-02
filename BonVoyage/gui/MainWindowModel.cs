@@ -168,7 +168,7 @@ namespace BonVoyage
 
             if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
             {
-                Tools.ConvertDistanceToText(controller.RemainingDistanceToTarget);
+                result = Tools.ConvertDistanceToText(controller.RemainingDistanceToTarget);
             }
 
             return result;
