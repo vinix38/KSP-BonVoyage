@@ -45,6 +45,9 @@ namespace BonVoyage
         /// <returns></returns>
         internal static string EncodePath(List<WayPoint> path)
         {
+            if (path == null)
+                return "";
+
             string result = "";
             for (int i = 0; i < path.Count; i++)
                 result += path[i].latitude.ToString("R") + ":" + path[i].longitude.ToString("R") + ";";

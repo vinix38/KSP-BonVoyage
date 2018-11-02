@@ -47,6 +47,22 @@ namespace BonVoyage
         private bool controlViewVisible; // Is control view visible?
         private ControlWindowView ControlView { get; set; } // Mod's control view
 
+        // Lock mask for a vessel with active autopilot
+        private ControlTypes lockMask = (
+            ControlTypes.YAW |
+            ControlTypes.PITCH |
+            ControlTypes.ROLL |
+            ControlTypes.THROTTLE |
+            ControlTypes.STAGING |
+            ControlTypes.RCS |
+            ControlTypes.SAS |
+            ControlTypes.WHEEL_STEER |
+            ControlTypes.WHEEL_THROTTLE |
+            ControlTypes.GROUPS_ALL
+        );
+
+        private DateTime lastUpdate; // Last time of controllers update cycle
+
         #endregion
 
 
@@ -81,6 +97,7 @@ namespace BonVoyage
             GamePaused = false;
             ShowUI = true;
             MapMode = false;
+            lastUpdate = DateTime.Now;
 
             BVControllers = new List<BVController>();
 
@@ -115,6 +132,8 @@ namespace BonVoyage
 
             // After BonVoyage was runned for the first time, set FirstRun to false, because we don't need to reset path and target lat/lon
             Configuration.FirstRun = false;
+
+            InputLockManager.RemoveControlLock("BonVoyageInputLock");
         }
 
 
@@ -233,6 +252,8 @@ namespace BonVoyage
                 mainViewVisible = false;
             if (controlViewVisible)
                 ToggleControlWindow();
+
+            InputLockManager.RemoveControlLock("BonVoyageInputLock");
         }
 
 
@@ -246,6 +267,17 @@ namespace BonVoyage
                 MainModel.RefreshVesselListLayout();
             if (controlViewVisible)
                 ToggleControlWindow();
+
+            BonVoyageModule currentModule = vessel.FindPartModuleImplementing<BonVoyageModule>();
+            if (currentModule != null)
+            {
+                if (currentModule.active)
+                {
+                    InputLockManager.SetControlLock(lockMask, "BonVoyageInputLock");
+                    return;
+                }
+            }
+            InputLockManager.RemoveControlLock("BonVoyageInputLock");
         }
 
 
@@ -570,9 +602,15 @@ namespace BonVoyage
         public void Update()
         {
             // Escape was pressed -> close opened windows (set launcher state to false, so next time a window will be opened)
-            if (Input.GetKeyDown(KeyCode.Escape) && (MainView != null))
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                appLauncherButton.SetFalse(true);
+                if (MainView != null)
+                {
+                    if (appLauncherButton != null)
+                        appLauncherButton.SetFalse(true);
+                    else
+                        ToggleMainWindow();
+                }
                 if (controlViewVisible)
                 {
                     controlViewVisible = false;
@@ -703,11 +741,28 @@ namespace BonVoyage
             for (int i = 0; i < BVControllers.Count; i++)
             {
                 if (BVControllers[i].vessel.id == v.id)
-                {
                     return BVControllers[i];
-                }
             }
             return null;
+        }
+
+
+        
+        /// <summary>
+        /// Actions, when autopilot was activated
+        /// </summary>
+        /// <param name="value"></param>
+        public void AutopilotActivated(bool value)
+        {
+            if (value)
+            {
+                InputLockManager.SetControlLock(lockMask, "BonVoyageInputLock");
+                if (controlViewVisible)
+                    ToggleControlWindow();
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_AutopilotActive"), 10f).color = Color.red;
+            }
+            else
+                InputLockManager.RemoveControlLock("BonVoyageInputLock");
         }
 
     }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace BonVoyage
 {
@@ -50,6 +51,8 @@ namespace BonVoyage
                     State = VesselState.Idle;
             }
         }
+
+        public bool Active {  get { return active; } }
 
         public double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
         public virtual double AverageSpeed { get { return 0; } }
@@ -265,6 +268,67 @@ namespace BonVoyage
         public virtual void SystemCheck()
         {
             mainStarIndex = Tools.GetMainStar(vessel).flightGlobalsIndex;
+        }
+
+
+        /// <summary>
+        /// Activate autopilot
+        /// </summary>
+        public virtual bool Activate()
+        {
+            if (distanceToTarget == 0)
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NoRoute", 5f)).color = Color.yellow;
+                return false;
+            }
+
+            BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
+            if (module != null)
+            {
+                distanceTravelled = 0;
+                active = true;
+
+                module.active = active;
+                module.targetLatitude = targetLatitude;
+                module.targetLongitude = targetLongitude;
+                module.distanceToTarget = distanceToTarget;
+                module.distanceTravelled = distanceTravelled;
+                module.pathEncoded = PathUtils.EncodePath(path);
+
+                BonVoyage.Instance.AutopilotActivated(true);
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_BonVoyage"), 5f);
+            }
+
+            return active;
+        }
+
+
+        /// <summary>
+        /// Deactivate autopilot
+        /// </summary>
+        public virtual bool Deactivate()
+        {
+            BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
+            if (module != null)
+            {
+                active = false;
+                targetLatitude = 0;
+                targetLongitude = 0;
+                distanceToTarget = 0;
+                distanceTravelled = 0;
+                path = null;
+
+                module.active = active;
+                module.targetLatitude = targetLatitude;
+                module.targetLongitude = targetLongitude;
+                module.distanceToTarget = distanceToTarget;
+                module.distanceTravelled = distanceTravelled;
+                module.pathEncoded = "";
+
+                BonVoyage.Instance.AutopilotActivated(false);
+            }
+
+            return !active;
         }
 
     }

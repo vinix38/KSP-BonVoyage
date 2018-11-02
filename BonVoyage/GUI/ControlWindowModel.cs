@@ -66,6 +66,8 @@ namespace BonVoyage
         public void SetController(BVController controller)
         {
             currentController = controller;
+            if (controller != null)
+                controllerActive = controller.Active;
         }
 
 
@@ -125,11 +127,17 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                controllerActive = !controllerActive;
-                if (controllerActive)
-                    ScreenMessages.PostScreenMessage("GO!");
+                if (!controllerActive)
+                {
+                    controllerActive = currentController.Activate();
+                    if (!controllerActive) // Refresh after uncomplete activation - show results of a system check
+                        RefreshStatsListLayout();
+                }
                 else
-                    ScreenMessages.PostScreenMessage("Disable");
+                {
+                    controllerActive = currentController.Deactivate();
+                    BonVoyage.Instance.ResetWindows();
+                }
             }
             else
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));

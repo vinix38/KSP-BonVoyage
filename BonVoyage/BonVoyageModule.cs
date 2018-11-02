@@ -148,9 +148,12 @@ namespace BonVoyage
                 Events["BVControlPanel"].guiActive = !shutdown;
                 if (shutdown)
                 {
-                    //if (active)
-                    //    Deactivate();
-                    //BonVoyage.Instance.HideModuleControl();
+                    if (active)
+                    {
+                        BVController controller = BonVoyage.Instance.GetControllerOfVessel(vessel);
+                        if (controller != null)
+                            controller.Deactivate();
+                    }
                 }
                 BonVoyage.Instance.SetShutdownState(vessel.id, shutdown);
             }

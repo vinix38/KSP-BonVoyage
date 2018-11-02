@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace BonVoyage
 {
@@ -236,7 +237,7 @@ namespace BonVoyage
                 averageSpeed = averageSpeed * 0.2;
 
             // Base average speed at night is the same as average speed, if there is other power source. Zero otherwise.
-            if (electricPower_Solar > 0.0)
+            if (electricPower_Other > 0.0)
                 averageSpeedAtNight = averageSpeed;
             else
                 averageSpeedAtNight = 0;
@@ -569,6 +570,77 @@ namespace BonVoyage
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Activate autopilot
+        /// </summary>
+        public override bool Activate()
+        {
+            if (vessel.situation != Vessel.Situations.LANDED)
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f).color = Color.yellow;
+                return false;
+            }
+
+            SystemCheck();
+
+            // No driving until at least 3 operable wheels are touching the ground - tricycles are allowed
+            if ((wheelTestResult.inTheAir > 0) && (wheelTestResult.operable < 3))
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WheelsNotTouching"), 5f).color = Color.yellow;
+                return false;
+            }
+            if (wheelTestResult.operable < 3)
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WheelsNotOperable"), 5f).color = Color.yellow;
+                return false;
+            }
+
+            // At least 2 wheels must be on
+            if (wheelTestResult.online < 2)
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WheelsNotOnline"), 5f).color = Color.yellow;
+                return false;
+            }
+
+            // Power production
+            if (requiredPower > (electricPower_Solar + electricPower_Other))
+            {
+                // If required power is greater then total power generated, then average speed can be lowered up to 75%
+                double speedReduction = (requiredPower - (electricPower_Solar + electricPower_Other)) / requiredPower;
+
+                if (speedReduction > 0.75)
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_LowPower"), 5f).color = Color.yellow;
+                    return false;
+                }
+            }
+
+            BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
+            if (module != null)
+            {
+                vesselHeightFromTerrain = vessel.heightFromTerrain + wheelTestResult.maxWheelRadius;
+
+                module.averageSpeed = averageSpeed;
+                module.averageSpeedAtNight = averageSpeedAtNight;
+                module.solarPowered = solarPowered;
+                module.manned = manned;
+                module.vesselHeightFromTerrain = vesselHeightFromTerrain;
+            }
+
+            return base.Activate();
+        }
+
+
+        /// <summary>
+        /// Deactivate autopilot
+        /// </summary>
+        public override bool Deactivate()
+        {
+            SystemCheck();
+            return base.Deactivate();
+        }
 
     }
 

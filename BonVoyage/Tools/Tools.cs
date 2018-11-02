@@ -70,6 +70,9 @@ namespace BonVoyage
         /// <returns>[latitude, longitude]</returns>
         public static double[] GetCurrentTargetLatLon(Vessel v)
         {
+            if (v.targetObject == null)
+                return new double[2] { double.MinValue, double.MinValue };
+
             Vessel target = v.targetObject.GetVessel();
             if ((target == null) || (target.situation != Vessel.Situations.LANDED) || (target.mainBody != v.mainBody))
                 return new double[2] { double.MinValue, double.MinValue };
