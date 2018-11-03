@@ -1,7 +1,4 @@
 ﻿using KSP.Localization;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace BonVoyage
@@ -80,12 +77,6 @@ namespace BonVoyage
         /// </summary>
         [KSPField(isPersistant = true)]
         public double lastTimeUpdated = 0;
-
-        /// <summary>
-        /// Vessel is only solar powered
-        /// </summary>
-        [KSPField(isPersistant = true)]
-        public bool solarPowered = false;
 
         /// <summary>
         /// Vessel is manned

@@ -6,7 +6,7 @@ using System.Linq;
 namespace BonVoyage
 {
     [Flags]
-    public enum TileTypes
+    internal enum TileTypes
     {
         Land = 0x1,
         Ocean = 0x2
@@ -16,16 +16,16 @@ namespace BonVoyage
     /// Hexagonal grid for pathfinding will be used
     /// https://tbswithunity3d.wordpress.com/2012/02/23/hexagonal-grid-path-finding-using-a-algorithm/
     /// </summary>
- 
-    public class PathFinder
+
+    internal class PathFinder
     {
         internal const double StepSize = 1000;
 
-        public struct Point
+        internal struct Point
         {
-            public int X, Y;
+            internal int X, Y;
 
-            public Point(int x, int y)
+            internal Point(int x, int y)
             {
                 X = x;
                 Y = y;
@@ -34,11 +34,11 @@ namespace BonVoyage
 
         private class Tile
         {
-            public int x;
-            public int y;
-            public Hex hex;
+            internal int x;
+            internal int y;
+            internal Hex hex;
 
-            public Tile(int x, int y, Hex hex)
+            internal Tile(int x, int y, Hex hex)
             {
                 this.x = x;
                 this.y = y;
@@ -71,7 +71,7 @@ namespace BonVoyage
         /// <param name="targetLon"></param>
         /// <param name="body"></param>
         /// <param name="types"></param>
-        public PathFinder(double startLat, double startLon, double targetLat, double targetLon, CelestialBody body, TileTypes types)
+        internal PathFinder(double startLat, double startLon, double targetLat, double targetLon, CelestialBody body, TileTypes types)
         {
             startLatitude = startLat;
             startLongitude = startLon;
@@ -98,7 +98,7 @@ namespace BonVoyage
         /// <summary>
         /// Find path to the target
         /// </summary>
-        public void FindPath()
+        internal void FindPath()
         {
             double distanceToTarget = GeoUtils.GetDistance(startLatitude, startLongitude, targetLatitude, targetLongitude, mainBody.Radius);
 
@@ -188,7 +188,7 @@ namespace BonVoyage
         }
 
 
-        public double GetDistance()
+        internal double GetDistance()
         {
             if (path != null)
             {

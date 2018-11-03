@@ -5,14 +5,14 @@ namespace UI
     /// <summary>
     /// Convert GUI skin and style to UI skin and style
     /// </summary>
-    public static class StyleConverter
+    internal static class StyleConverter
     {
         /// <summary>
         /// Convert GUI skin to UI skin
         /// </summary>
         /// <param name="skin"></param>
         /// <returns></returns>
-        public static UISkinDef Convert(GUISkin skin)
+        internal static UISkinDef Convert(GUISkin skin)
         {
             UISkinDef def = new UISkinDef();
             if (skin != null)

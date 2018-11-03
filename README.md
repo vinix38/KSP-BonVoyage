@@ -5,7 +5,7 @@ Rovers background processing for KSP.
 ## 0.14.0 - New voyage
 ### Changes
 - KSP 1.5.1 compatibility
-- Major overhaul - We are getting ready to extend our operations to the water.
+- Major overhaul - We are getting ready to extend our operations to the water in the future.
 - Localization support
 - KSPWheel module system check change
   - Required EC is scaled by a motor's output setting

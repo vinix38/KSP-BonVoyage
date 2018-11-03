@@ -9,7 +9,7 @@ namespace BonVoyage
     /// <summary>
     /// Main mod's window - model part
     /// </summary>
-    public class MainWindowModel
+    internal class MainWindowModel
     {
         private readonly object refreshLock = new object(); // Object to lock access during refreshing of the list. Multiple events can be raised at the same time to request refresh.
         private bool activeControllersChecked = true;
@@ -22,7 +22,7 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public MainWindowModel()
+        internal MainWindowModel()
         {
             // Load from configuration
             CommonWindowProperties.MainWindowPosition = Configuration.MainWindowPosition;
@@ -35,7 +35,7 @@ namespace BonVoyage
         /// Active controllers checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void ActiveControllersChecked(bool value)
+        internal void ActiveControllersChecked(bool value)
         {
             activeControllersChecked = value;
             Configuration.ActiveControllers = value;
@@ -47,7 +47,7 @@ namespace BonVoyage
         /// Get the state of Active controllers toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetActiveControllersToggleState()
+        internal bool GetActiveControllersToggleState()
         {
             return activeControllersChecked;
         }
@@ -57,7 +57,7 @@ namespace BonVoyage
         /// Disabled controllers checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void DisabledControllersChecked(bool value)
+        internal void DisabledControllersChecked(bool value)
         {
             disabledControllersChecked = value;
             Configuration.DisabledControllers = value;
@@ -69,7 +69,7 @@ namespace BonVoyage
         /// Get the state of Disabled controllers toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetDisabledControllersToggleState()
+        internal bool GetDisabledControllersToggleState()
         {
             return disabledControllersChecked;
         }
@@ -79,7 +79,7 @@ namespace BonVoyage
         /// Return text of the control button
         /// </summary>
         /// <returns></returns>
-        public string GetControlButtonText()
+        internal string GetControlButtonText()
         {
             if (BonVoyage.Instance.ControlViewVisible)
                 return Localizer.Format("#LOC_BV_HideControl");
@@ -92,7 +92,7 @@ namespace BonVoyage
         /// Detect, if can be control button enabled
         /// </summary>
         /// <returns></returns>
-        public bool ControlButtonCanBeEnabled()
+        internal bool ControlButtonCanBeEnabled()
         {
             if (HighLogic.LoadedSceneIsFlight)
                 return BonVoyage.Instance.CheckActiveControllerOfVessel(FlightGlobals.ActiveVessel);
@@ -243,7 +243,7 @@ namespace BonVoyage
         /// Get layout of the list of vessels
         /// </summary>
         /// <returns></returns>
-        public DialogGUIVerticalLayout GetVesselListLayout()
+        internal DialogGUIVerticalLayout GetVesselListLayout()
         {
             // Count disabled controllers
             int disabledControllersCount = 0;
@@ -295,7 +295,7 @@ namespace BonVoyage
         /// <summary>
         /// Clear layout of the list of vessels
         /// </summary>
-        public void ClearVesselListLayout()
+        internal void ClearVesselListLayout()
         {
             // Clear events
             int controllersCount = BonVoyage.Instance.BVControllers.Count;
@@ -309,7 +309,7 @@ namespace BonVoyage
         /// <summary>
         /// Refresh list of vessels without reloading the list of controllers
         /// </summary>
-        public void RefreshVesselListLayout()
+        internal void RefreshVesselListLayout()
         {
             lock (refreshLock) // Only one refresh at a time
             {

@@ -2,7 +2,7 @@
 
 namespace BonVoyage
 {
-    public class GeoUtils
+    internal class GeoUtils
     {
         private const double PI = Math.PI;
 
@@ -158,7 +158,7 @@ namespace BonVoyage
         /// <param name="bearing">Bearing</param>
         /// <param name="distance">Distance</param>
         /// <param name="radius">Radius</param>
-        /// <returns>LAtitude and longitude</returns>
+        /// <returns>Latitude and longitude</returns>
         internal static double[] GetLatitudeLongitude(double latStart, double lonStart, double bearing, double distance, double radius)
         {
             latStart = PI / 180 * latStart;
@@ -223,16 +223,13 @@ namespace BonVoyage
         {
             // Not sure when this happens - for Sun and Jool?
             if (body.pqsController == null)
-            {
                 return 0;
-            }
 
             // Figure out the terrain height
             double latRads = PI / 180.0 * latitude;
             double lonRads = PI / 180.0 * longitude;
             Vector3d radialVector = new Vector3d(Math.Cos(latRads) * Math.Cos(lonRads), Math.Sin(latRads), Math.Cos(latRads) * Math.Sin(lonRads));
             return body.pqsController.GetSurfaceHeight(radialVector) - body.pqsController.radius;
-            //			return Math.Max(body.pqsController.GetSurfaceHeight(radialVector) - body.pqsController.radius, 0.0);
         }
 
 

@@ -8,10 +8,10 @@ namespace BonVoyage
     /// Main mod's window - view part.
     /// For emmbeding in a MultiOptionDialog.
     /// </summary>
-    public class MainWindowView : DialogGUIVerticalLayout
+    internal class MainWindowView : DialogGUIVerticalLayout
     {
-        public delegate void SettingsCallback();
-        public delegate void ControlCallback();
+        internal delegate void SettingsCallback();
+        internal delegate void ControlCallback();
 
         private PopupDialog dialog { get; set; }
         private MainWindowModel model;
@@ -23,7 +23,7 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public MainWindowView(MainWindowModel m, SettingsCallback settings, ControlCallback control, UnityAction close) : base(
+        internal MainWindowView(MainWindowModel m, SettingsCallback settings, ControlCallback control, UnityAction close) : base(
             CommonWindowProperties.mainListMinWidth + 20, // min width
             CommonWindowProperties.mainListMinHeight, // min height
             CommonWindowProperties.mainWindowSpacing, // spacing
@@ -113,7 +113,7 @@ namespace BonVoyage
         /// Get position of the window
         /// </summary>
         /// <returns></returns>
-        public Vector3 GetWindowPosition()
+        internal Vector3 GetWindowPosition()
         {
             return dialog.GetComponent<RectTransform>().position;
         }
@@ -124,7 +124,7 @@ namespace BonVoyage
         /// Show dialog window
         /// </summary>
         /// <returns></returns>
-        public PopupDialog Show()
+        internal PopupDialog Show()
         {
             if (dialog == null)
             {
@@ -170,7 +170,7 @@ namespace BonVoyage
         /// <summary>
         /// Dismiss dialog window
         /// </summary>
-        public void Dismiss()
+        internal void Dismiss()
         {
             if (dialog != null)
             {

@@ -10,14 +10,14 @@ namespace BonVoyage
     /// <summary>
     /// Control window - model part
     /// </summary>
-    public class ControlWindowModel
+    internal class ControlWindowModel
     {
         // Displayed stats list
         private DialogGUIVerticalLayout statsListLayout = null;
 
 
         private double latitude = 0f;
-        public string Latitude
+        internal string Latitude
         {
             get { return latitude.ToString(); }
             set
@@ -30,7 +30,7 @@ namespace BonVoyage
         }
 
         private double longitude = 0f;
-        public string Longitude
+        internal string Longitude
         {
             get { return longitude.ToString(); }
             set
@@ -49,7 +49,7 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public ControlWindowModel()
+        internal ControlWindowModel()
         {
             // Load from configuration
             CommonWindowProperties.ControlWindowPosition = Configuration.ControlWindowPosition;
@@ -63,7 +63,7 @@ namespace BonVoyage
         /// Set current controller
         /// </summary>
         /// <param name="c"></param>
-        public void SetController(BVController controller)
+        internal void SetController(BVController controller)
         {
             currentController = controller;
             if (controller != null)
@@ -78,7 +78,7 @@ namespace BonVoyage
         /// If controller is active, some buttons will be disabled
         /// </summary>
         /// <returns></returns>
-        public bool EnableButtons()
+        internal bool EnableButtons()
         {
             return !controllerActive;
         }
@@ -96,7 +96,7 @@ namespace BonVoyage
         {
             InputLockManager.RemoveControlLock("BonVoyageInputFieldLock");
         }
-        public void AddLockControlToTextField(DialogGUITextInput field)
+        internal void AddLockControlToTextField(DialogGUITextInput field)
         {
             field.OnUpdate = () => {
                 if (field.uiItem != null)
@@ -114,7 +114,7 @@ namespace BonVoyage
         /// Return text of the control button
         /// </summary>
         /// <returns></returns>
-        public string GetGoButtonText()
+        internal string GetGoButtonText()
         {
             if (!controllerActive)
                 return Localizer.Format("#LOC_BV_Control_Go");
@@ -126,7 +126,7 @@ namespace BonVoyage
         /// <summary>
         /// Go button was clicked
         /// </summary>
-        public void GoButtonClicked()
+        internal void GoButtonClicked()
         {
             if (currentController != null)
             {
@@ -150,7 +150,7 @@ namespace BonVoyage
         /// <summary>
         /// System check button was clicked
         /// </summary>
-        public void SystemCheckButtonClicked()
+        internal void SystemCheckButtonClicked()
         {
             if (currentController != null)
             {
@@ -166,7 +166,7 @@ namespace BonVoyage
         ///  Return saved latitude
         /// </summary>
         /// <returns></returns>
-        public string GetLatitude()
+        internal string GetLatitude()
         {
             return Latitude;
         }
@@ -176,7 +176,7 @@ namespace BonVoyage
         /// Return saved longitude
         /// </summary>
         /// <returns></returns>
-        public string GetLongitude()
+        internal string GetLongitude()
         {
             return Longitude;
         }
@@ -185,7 +185,7 @@ namespace BonVoyage
         /// <summary>
         /// Set button was clicked
         /// </summary>
-        public void SetButtonClicked()
+        internal void SetButtonClicked()
         {
             if (currentController != null)
             {
@@ -211,7 +211,7 @@ namespace BonVoyage
         /// <summary>
         /// Pick on map button was clicked
         /// </summary>
-        public void PickOnMapButtonClicked()
+        internal void PickOnMapButtonClicked()
         {
             if (currentController != null)
             {
@@ -231,7 +231,7 @@ namespace BonVoyage
         /// <summary>
         /// Current target button was clicked
         /// </summary>
-        public void CurrentTargetButtonClicked()
+        internal void CurrentTargetButtonClicked()
         {
             if (currentController != null)
             {
@@ -252,7 +252,7 @@ namespace BonVoyage
         /// <summary>
         /// Current waypoint button was clicked
         /// </summary>
-        public void CurrentWaypointButtonClicked()
+        internal void CurrentWaypointButtonClicked()
         {
             if (currentController != null)
             {
@@ -306,7 +306,7 @@ namespace BonVoyage
         /// Get layout of the list of stats
         /// </summary>
         /// <returns></returns>
-        public DialogGUIVerticalLayout GetStatsListLayout()
+        internal DialogGUIVerticalLayout GetStatsListLayout()
         {
             if (currentController != null)
             {
@@ -333,7 +333,7 @@ namespace BonVoyage
         /// <summary>
         /// Clear layout of the list of stats
         /// </summary>
-        public void ClearStatsListLayout()
+        internal void ClearStatsListLayout()
         {
             statsListLayout = null;
         }
@@ -342,7 +342,7 @@ namespace BonVoyage
         /// <summary>
         /// Refresh list of stats without
         /// </summary>
-        public void RefreshStatsListLayout()
+        internal void RefreshStatsListLayout()
         {
             Stack<Transform> stack = new Stack<Transform>();  // some data on hierarchy of GUI components
             stack.Push(statsListLayout.uiItem.gameObject.transform); // need the reference point of the parent GUI component for position and size

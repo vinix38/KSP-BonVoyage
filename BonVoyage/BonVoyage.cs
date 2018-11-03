@@ -19,16 +19,16 @@ namespace BonVoyage
         public static BonVoyage Instance; // Mod's instance
         public const string Name = "BonVoyage"; // Name of the mod
 
-        public MainWindowModel MainModel; // Main view's model
-        public SettingsWindowModel SettingsModel; // Settings view's model
-        public ControlWindowModel ControlModel; // Control view's model
-        public bool ControlViewVisible { get { return controlViewVisible; } }
+        internal MainWindowModel MainModel; // Main view's model
+        internal SettingsWindowModel SettingsModel; // Settings view's model
+        internal ControlWindowModel ControlModel; // Control view's model
+        internal bool ControlViewVisible { get { return controlViewVisible; } }
 
-        public List<BVController> BVControllers; // Controllers list
+        internal List<BVController> BVControllers; // Controllers list
 
-        public bool GamePaused; // Is game paused?
-        public bool ShowUI; // Is UI vissible? (F2 pressed)
-        public bool MapMode; // if true, then target will be picked in the map mode
+        internal bool GamePaused; // Is game paused?
+        internal bool ShowUI; // Is UI vissible? (F2 pressed)
+        internal bool MapMode; // if true, then target will be picked in the map mode
 
         #endregion
 
@@ -292,6 +292,9 @@ namespace BonVoyage
             {
                 LoadControllers();
             }
+
+            GamePaused = false;
+            ShowUI = true;
         }
 
         #endregion
@@ -350,7 +353,7 @@ namespace BonVoyage
         /// <summary>
         /// Destroy app launcher button
         /// </summary>
-        public void RemoveAppLauncherButton()
+        internal void RemoveAppLauncherButton()
         {
             if (appLauncherButton != null)
             {
@@ -363,7 +366,7 @@ namespace BonVoyage
         /// <summary>
         /// Destroy Toolbar Continued button
         /// </summary>
-        public void RemoveToolbarContinuedButton()
+        internal void RemoveToolbarContinuedButton()
         {
             if (toolbarButton != null)
             {
@@ -537,7 +540,7 @@ namespace BonVoyage
         /// <summary>
         /// Toggle state of the control window dialog
         /// </summary>
-        public void ToggleControlWindow()
+        internal void ToggleControlWindow()
         {
             controlViewVisible = !controlViewVisible;
 
@@ -618,15 +621,14 @@ namespace BonVoyage
                     HideControlWindow();
                 }
             }
-
-
+            
             // Update controllers once a second
             if (GamePaused || ((HighLogic.LoadedScene != GameScenes.FLIGHT) && (HighLogic.LoadedScene != GameScenes.SPACECENTER) && (HighLogic.LoadedScene != GameScenes.TRACKSTATION)))
                 return;
-
+            
             if (lastUpdate.AddSeconds(1) > DateTime.Now)
                 return;
-
+            
             lastUpdate = DateTime.Now;
             double currentTime = Planetarium.GetUniversalTime();
             for (int i = 0; i < BVControllers.Count; i++)
@@ -637,7 +639,7 @@ namespace BonVoyage
         /// <summary>
         /// Reset windows when skin was changed
         /// </summary>
-        public void ResetWindows()
+        internal void ResetWindows()
         {
             bool settings = setttingsViewVisible; // Settings are closed by HideMainWindow automatically, so we need to store the value
             if (MainView != null)
@@ -658,7 +660,7 @@ namespace BonVoyage
         /// <summary>
         /// Set value of shutdown in a controller and refresh the main view after a change in the BonVoyageModule
         /// </summary>
-        public void SetShutdownState(Guid vesselId, bool value)
+        internal void SetShutdownState(Guid vesselId, bool value)
         {
             for (int i = 0; i < BVControllers.Count; i++)
             {
@@ -726,7 +728,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public bool CheckActiveControllerOfVessel(Vessel v)
+        internal bool CheckActiveControllerOfVessel(Vessel v)
         {
             bool active = false;
             if (HighLogic.LoadedSceneIsFlight)
@@ -750,7 +752,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public BVController GetControllerOfVessel(Vessel v)
+        internal BVController GetControllerOfVessel(Vessel v)
         {
             for (int i = 0; i < BVControllers.Count; i++)
             {
@@ -761,12 +763,12 @@ namespace BonVoyage
         }
 
 
-        
+
         /// <summary>
         /// Actions, when autopilot was activated
         /// </summary>
         /// <param name="value"></param>
-        public void AutopilotActivated(bool value)
+        internal void AutopilotActivated(bool value)
         {
             if (value)
             {

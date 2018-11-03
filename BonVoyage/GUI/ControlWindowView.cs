@@ -14,7 +14,7 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public ControlWindowView(ControlWindowModel m, UnityAction close) : base(
+        internal ControlWindowView(ControlWindowModel m, UnityAction close) : base(
             CommonWindowProperties.controlMinWidth, // min width
             CommonWindowProperties.controlMinHeight, // min height
             CommonWindowProperties.controlWindowSpacing, // spacing
@@ -101,7 +101,7 @@ namespace BonVoyage
         /// Show dialog window
         /// </summary>
         /// <returns></returns>
-        public PopupDialog Show()
+        internal PopupDialog Show()
         {
             if (dialog == null)
             {
@@ -138,7 +138,7 @@ namespace BonVoyage
         /// <summary>
         /// Dismiss dialog window
         /// </summary>
-        public void Dismiss()
+        internal void Dismiss()
         {
             if (dialog != null)
             {

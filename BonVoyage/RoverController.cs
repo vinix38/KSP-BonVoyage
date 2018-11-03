@@ -1,7 +1,7 @@
 ﻿using KSP.Localization;
+using KSP.UI.Screens;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace BonVoyage
@@ -9,11 +9,11 @@ namespace BonVoyage
     /// <summary>
     /// Rover controller. Child of BVController
     /// </summary>
-    public class RoverController : BVController
+    internal class RoverController : BVController
     {
-        #region Public properties
+        #region internal properties
 
-        public override double AverageSpeed { get { return ((angle <= 90) ? (averageSpeed * speedMultiplier) : (averageSpeedAtNight * speedMultiplier)); } }
+        internal override double AverageSpeed { get { return ((angle <= 90) ? (averageSpeed * speedMultiplier) : (averageSpeedAtNight * speedMultiplier)); } }
 
         #endregion
 
@@ -23,7 +23,6 @@ namespace BonVoyage
         // Config values
         private double averageSpeed = 0;
         private double averageSpeedAtNight = 0;
-        private bool solarPowered = false;
         private bool manned = false;
         private double vesselHeightFromTerrain = 0;
         // Config values
@@ -58,12 +57,11 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <param name="module"></param>
-        public RoverController(Vessel v, ConfigNode module) : base (v, module)
+        internal RoverController(Vessel v, ConfigNode module) : base (v, module)
         {
             // Load values from config
             averageSpeed = double.Parse(BVModule.GetValue("averageSpeed") != null ? BVModule.GetValue("averageSpeed") : "0");
             averageSpeedAtNight = double.Parse(BVModule.GetValue("averageSpeedAtNight") != null ? BVModule.GetValue("averageSpeedAtNight") : "0");
-            solarPowered = bool.Parse(BVModule.GetValue("solarPowered") != null ? BVModule.GetValue("solarPowered") : "false");
             manned = bool.Parse(BVModule.GetValue("manned") != null ? BVModule.GetValue("manned") : "false");
             vesselHeightFromTerrain = double.Parse(BVModule.GetValue("vesselHeightFromTerrain") != null ? BVModule.GetValue("vesselHeightFromTerrain") : "0");
 
@@ -82,7 +80,7 @@ namespace BonVoyage
         /// Get controller type
         /// </summary>
         /// <returns></returns>
-        public override int GetControllerType()
+        internal override int GetControllerType()
         {
             return 0;
         }
@@ -90,7 +88,7 @@ namespace BonVoyage
 
         #region Status window texts
 
-        public override List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal override List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
         {
             base.GetDisplayedSystemCheckResults();
 
@@ -145,7 +143,7 @@ namespace BonVoyage
         /// <param name="lat"></param>
         /// <param name="lon"></param>
         /// <returns></returns>
-        public override bool FindRoute(double lat, double lon)
+        internal override bool FindRoute(double lat, double lon)
         {
             return FindRoute(lat, lon, TileTypes.Land);
         }
@@ -156,7 +154,7 @@ namespace BonVoyage
         /// <summary>
         /// Check the systems
         /// </summary>
-        public override void SystemCheck()
+        internal override void SystemCheck()
         {
             base.SystemCheck();
 
@@ -179,9 +177,6 @@ namespace BonVoyage
             // Get power production
             electricPower_Solar = GetAvailablePower_Solar();
             electricPower_Other = GetAvailablePower_Other();
-
-            // Solar powered
-            solarPowered = (electricPower_Solar > 0.0 ? true : false);
 
             // Manned
             manned = (vessel.GetCrewCount() > 0);
@@ -269,15 +264,15 @@ namespace BonVoyage
         /// </summary>
         private struct WheelTestResult
         {
-            public double powerRequired; // Total power required
-            public double maxSpeedSum; // Sum of max speeds of all online wheels
-            public int inTheAir; // Count of wheels in the air
-            public int operable; // Count of operable wheels
-            public int damaged; // Count of damaged wheels
-            public int online; // Count of online wheels
-            public float maxWheelRadius; // Maximum of radii of all aplicable wheels
+            internal double powerRequired; // Total power required
+            internal double maxSpeedSum; // Sum of max speeds of all online wheels
+            internal int inTheAir; // Count of wheels in the air
+            internal int operable; // Count of operable wheels
+            internal int damaged; // Count of damaged wheels
+            internal int online; // Count of online wheels
+            internal float maxWheelRadius; // Maximum of radii of all aplicable wheels
 
-            public WheelTestResult(double powerRequired, double maxSpeedSum, int inTheAir, int operable, int damaged, int online, float maxWheelRadius)
+            internal WheelTestResult(double powerRequired, double maxSpeedSum, int inTheAir, int operable, int damaged, int online, float maxWheelRadius)
             {
                 this.powerRequired = powerRequired;
                 this.maxSpeedSum = maxSpeedSum;
@@ -575,7 +570,7 @@ namespace BonVoyage
         /// <summary>
         /// Activate autopilot
         /// </summary>
-        public override bool Activate()
+        internal override bool Activate()
         {
             if (vessel.situation != Vessel.Situations.LANDED)
             {
@@ -624,7 +619,6 @@ namespace BonVoyage
 
                 module.averageSpeed = averageSpeed;
                 module.averageSpeedAtNight = averageSpeedAtNight;
-                module.solarPowered = solarPowered;
                 module.manned = manned;
                 module.vesselHeightFromTerrain = vesselHeightFromTerrain;
             }
@@ -636,7 +630,7 @@ namespace BonVoyage
         /// <summary>
         /// Deactivate autopilot
         /// </summary>
-        public override bool Deactivate()
+        internal override bool Deactivate()
         {
             SystemCheck();
             return base.Deactivate();
@@ -647,7 +641,7 @@ namespace BonVoyage
         /// Update vessel
         /// </summary>
         /// <param name="currentTime"></param>
-        public override void Update(double currentTime)
+        internal override void Update(double currentTime)
         {
             if (vessel == null)
                 return;
@@ -657,16 +651,148 @@ namespace BonVoyage
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_AutopilotActive"), 10f).color = Color.red;
                 return;
             }
-            ScreenMessages.PostScreenMessage(vessel.name);
+            
             if (!active || vessel.loaded)
                 return;
 
-            VesselState newState = VesselState.Moving;
+            //// Revision - Kopernicus
+            Vector3d roverPos = vessel.mainBody.position - vessel.GetWorldPos3D();
+            Vector3d toMainStar = vessel.mainBody.position - FlightGlobals.Bodies[mainStarIndex].position;
+            angle = Vector3d.Angle(roverPos, toMainStar); // Angle between rover and main star
 
-            if (State != newState)
-                State = newState;
+            // Speed penalties at twighlight and at night
+            if ((angle > 90) && manned) // night
+                speedMultiplier = 0.25;
+            else if ((angle > 85) && manned) // twilight
+                speedMultiplier = 0.5;
+            else if ((angle > 80) && manned) // twilight
+                speedMultiplier = 0.75;
+            else // day
+                speedMultiplier = 1.0;
+
+            // No moving at night, if there isn't enough power
+            if ((angle > 90) && (averageSpeedAtNight == 0.0))
+            {
+                State = VesselState.AwaitingSunlight;
+                lastTimeUpdated = currentTime;
+                BVModule.SetValue("lastTimeUpdated", currentTime.ToString());
+                return;
+            }
+
+            double deltaT = currentTime - lastTimeUpdated;
+            double deltaS = AverageSpeed * deltaT;
+            distanceTravelled += deltaS;
+
+            if (distanceTravelled >= distanceToTarget) // We reached the target
+            {
+                if (!MoveSafely(targetLatitude, targetLongitude))
+                    distanceTravelled -= deltaS;
+                else
+                {
+                    distanceTravelled = distanceToTarget;
+
+                    active = false;
+                    BVModule.SetValue("active", "False");
+                    BVModule.SetValue("distanceTravelled", distanceToTarget.ToString());
+                    BVModule.SetValue("pathEncoded", "");
+
+                    // Dewarp
+                    if (Configuration.AutomaticDewarp)
+                    {
+                        if (TimeWarp.CurrentRate > 3) // Instant drop to 50x warp
+                            TimeWarp.SetRate(3, true);
+                        if (TimeWarp.CurrentRate > 0) // Gradual drop out of warp
+                            TimeWarp.SetRate(0, false);
+                        ScreenMessages.PostScreenMessage(vessel.vesselName + " " + Localizer.Format("#LOC_BV_VesselArrived") + " " + vessel.mainBody.bodyDisplayName.Replace("^N", ""), 5f);
+                    }
+
+                    NotifyArrival();
+                }
+                State = VesselState.Idle;
+            }
+            else
+            {
+                int step = Convert.ToInt32(Math.Floor(distanceTravelled / PathFinder.StepSize)); // In which step of the path we are
+                double remainder = distanceTravelled % PathFinder.StepSize; // Current remaining distance from the current step
+                double bearing = 0;
+
+                if (step < path.Count - 1)
+                    bearing = GeoUtils.InitialBearing( // Bearing to the next step from previous step
+                        path[step].latitude,
+                        path[step].longitude,
+                        path[step + 1].latitude,
+                        path[step + 1].longitude
+                    );
+                else
+                    bearing = GeoUtils.InitialBearing( // Bearing to the target from previous step
+                        path[step].latitude,
+                        path[step].longitude,
+                        targetLatitude,
+                        targetLongitude
+                    );
+
+                // Compute new coordinates, we are moving from the current step, length f distance is "remainder"
+                double[] newCoordinates = GeoUtils.GetLatitudeLongitude(
+                    path[step].latitude,
+                    path[step].longitude,
+                    bearing,
+                    remainder,
+                    vessel.mainBody.Radius
+                );
+
+                // Move
+                if (!MoveSafely(newCoordinates[0], newCoordinates[1]))
+                {
+                    distanceTravelled -= deltaS;
+                    State = VesselState.Idle;
+                }
+                else
+                    State = VesselState.Moving;
+            }
 
             Save(currentTime);
+        }
+
+
+        /// <summary>
+        /// Save move of a rover. We need to prevent hitting an active vessel.
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns>true if rover was moved, false otherwise</returns>
+        private bool MoveSafely(double latitude, double longitude)
+        {
+            double altitude = GeoUtils.TerrainHeightAt(latitude, longitude, vessel.mainBody);
+            if (FlightGlobals.ActiveVessel != null)
+            {
+                Vector3d newPos = vessel.mainBody.GetWorldSurfacePosition(latitude, longitude, altitude);
+                Vector3d actPos = FlightGlobals.ActiveVessel.GetWorldPos3D();
+                double distance = Vector3d.Distance(newPos, actPos);
+                if (distance <= 2400)
+                    return false;
+            }
+
+            vessel.latitude = latitude;
+            vessel.longitude = longitude;
+            vessel.altitude = altitude + vesselHeightFromTerrain;
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// Notify, that rover has arrived
+        /// </summary>
+        private void NotifyArrival()
+        {
+            MessageSystem.Message message = new MessageSystem.Message(
+                "Rover arrived", // title
+                "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_VesselArrived") + " " + vessel.mainBody.bodyDisplayName.Replace("^N", "") + ".\n<color=#AED6EE>"
+                + Localizer.Format("#LOC_BV_Control_Lat") + ": " + targetLatitude.ToString("F2") + "</color>\n<color=#AED6EE>" + Localizer.Format("#LOC_BV_Control_Lon") + ": " + targetLongitude.ToString("F2") + "</color>", // message
+                MessageSystemButton.MessageButtonColor.GREEN,
+                MessageSystemButton.ButtonIcons.COMPLETE
+            );
+            MessageSystem.Instance.AddMessage(message);
         }
 
     }

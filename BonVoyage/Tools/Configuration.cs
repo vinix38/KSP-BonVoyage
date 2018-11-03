@@ -6,17 +6,17 @@ namespace BonVoyage
     /// <summary>
     /// Configuration of the mod
     /// </summary>
-    public static class Configuration
+    internal static class Configuration
     {
         private static PluginConfiguration configuration; // Configuration data
 
 
-        #region Public properties
+        #region internal properties
 
         /// <summary>
         /// Automatic dewarp
         /// </summary>
-        public static bool FirstRun
+        internal static bool FirstRun
         {
             get { return configuration.GetValue<bool>("firstRun", true); }
             set
@@ -30,7 +30,7 @@ namespace BonVoyage
         /// <summary>
         /// UI skin
         /// </summary>
-        public static byte Skin
+        internal static byte Skin
         {
             get { return configuration.GetValue<byte>("skin", 0); }
             set
@@ -44,7 +44,7 @@ namespace BonVoyage
         /// <summary>
         /// Automatic dewarp
         /// </summary>
-        public static bool AutomaticDewarp
+        internal static bool AutomaticDewarp
         {
             get { return configuration.GetValue<bool>("dewarp", false); }
             set
@@ -58,7 +58,7 @@ namespace BonVoyage
         /// <summary>
         /// Use KSP toolbar
         /// </summary>
-        public static bool KSPToolbar
+        internal static bool KSPToolbar
         {
             get { return configuration.GetValue<bool>("kspToolbar", true); }
             set
@@ -72,7 +72,7 @@ namespace BonVoyage
         /// <summary>
         /// Use Toolbar Continued
         /// </summary>
-        public static bool ToolbarContinued
+        internal static bool ToolbarContinued
         {
             get { return configuration.GetValue<bool>("toolbarContinued", false); }
             set
@@ -86,7 +86,7 @@ namespace BonVoyage
         /// <summary>
         /// Main window position
         /// </summary>
-        public static Vector2 MainWindowPosition
+        internal static Vector2 MainWindowPosition
         {
             get { return configuration.GetValue<Vector2>("mainWindow", new Vector2(0.5f, 0.5f)); }
             set
@@ -100,7 +100,7 @@ namespace BonVoyage
         /// <summary>
         /// Control window position
         /// </summary>
-        public static Vector2 ControlWindowPosition
+        internal static Vector2 ControlWindowPosition
         {
             get { return configuration.GetValue<Vector2>("controlWindow", new Vector2(0.5f, 0.5f)); }
             set
@@ -114,7 +114,7 @@ namespace BonVoyage
         /// <summary>
         /// Active vessels
         /// </summary>
-        public static bool ActiveControllers
+        internal static bool ActiveControllers
         {
             get { return configuration.GetValue<bool>("activeControllers", true); }
             set
@@ -128,7 +128,7 @@ namespace BonVoyage
         /// <summary>
         /// Disabled vessels
         /// </summary>
-        public static bool DisabledControllers
+        internal static bool DisabledControllers
         {
             get { return configuration.GetValue<bool>("disabledControllers", false); }
             set
@@ -144,7 +144,7 @@ namespace BonVoyage
         /// <summary>
         /// Load configuration from file
         /// </summary>
-        public static void Load()
+        internal static void Load()
         {
             configuration = PluginConfiguration.CreateForType<BonVoyage>();
             configuration.load();
@@ -154,7 +154,7 @@ namespace BonVoyage
         /// <summary>
         /// Save configuration to file
         /// </summary>
-        public static void Save()
+        internal static void Save()
         {
             configuration.save();
         }

@@ -8,7 +8,7 @@ namespace BonVoyage
     /// Settings window - view part.
     /// For emmbeding in a MultiOptionDialog.
     /// </summary>
-    public class SettingsWindowView : DialogGUIVerticalLayout
+    internal class SettingsWindowView : DialogGUIVerticalLayout
     {
         private PopupDialog dialog { get; set; }
         private SettingsWindowModel model;
@@ -19,7 +19,7 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public SettingsWindowView(SettingsWindowModel m, Vector3 mwp, UnityAction close) : base(
+        internal SettingsWindowView(SettingsWindowModel m, Vector3 mwp, UnityAction close) : base(
             CommonWindowProperties.settingsMinWidth, // min width
             CommonWindowProperties.settingsMinHeight, // min height
             CommonWindowProperties.settingsWindowSpacing, // spacing
@@ -75,7 +75,7 @@ namespace BonVoyage
         /// Show dialog window
         /// </summary>
         /// <returns></returns>
-        public PopupDialog Show()
+        internal PopupDialog Show()
         {
             if (dialog == null)
             {
@@ -112,7 +112,7 @@ namespace BonVoyage
         /// <summary>
         /// Dismiss dialog window
         /// </summary>
-        public void Dismiss()
+        internal void Dismiss()
         {
             if (dialog != null)
             {

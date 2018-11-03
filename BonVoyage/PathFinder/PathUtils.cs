@@ -6,16 +6,16 @@ namespace BonVoyage
     /// <summary>
     /// Pathfinder helper utils
     /// </summary>
-    public class PathUtils
+    internal class PathUtils
     {
         /// <summary>
         /// Path waypoint
         /// </summary>
         internal struct WayPoint
         {
-            public double latitude;
-            public double longitude;
-            public WayPoint(double lat, double lon)
+            internal double latitude;
+            internal double longitude;
+            internal WayPoint(double lat, double lon)
             {
                 latitude = lat;
                 longitude = lon;

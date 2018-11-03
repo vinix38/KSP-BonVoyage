@@ -1,7 +1,6 @@
 ﻿using KSP.Localization;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace BonVoyage
@@ -9,7 +8,7 @@ namespace BonVoyage
     /// <summary>
     /// Enum of vessel states
     /// </summary>
-    public enum VesselState
+    internal enum VesselState
     {
         Idle = 0,
         ControllerDisabled = 1,
@@ -22,24 +21,24 @@ namespace BonVoyage
     /// <summary>
     /// Result for display in the Control Window
     /// </summary>
-    public struct DisplayedSystemCheckResult
+    internal struct DisplayedSystemCheckResult
     {
-        public string Label;
-        public string Text;
-        public string Tooltip;
+        internal string Label;
+        internal string Text;
+        internal string Tooltip;
     }
 
 
     /// <summary>
     /// Basic controller
     /// </summary>
-    public class BVController
+    internal class BVController
     {
-        #region Public properties
+        #region internal properties
 
-        public Vessel vessel; // Vessel containing BonVoyageModule
+        internal Vessel vessel; // Vessel containing BonVoyageModule
 
-        public bool Shutdown
+        internal bool Shutdown
         {
             get { return shutdown; }
             set
@@ -52,11 +51,11 @@ namespace BonVoyage
             }
         }
 
-        public bool Active {  get { return active; } }
+        internal bool Active {  get { return active; } }
 
-        public double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
-        public virtual double AverageSpeed { get { return 0; } }
-        public event EventHandler OnStateChanged;
+        internal double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
+        internal virtual double AverageSpeed { get { return 0; } }
+        internal event EventHandler OnStateChanged;
 
         #endregion
 
@@ -70,24 +69,27 @@ namespace BonVoyage
         // Config values
         protected bool active = false;
         private bool shutdown = false;
-        private double targetLatitude = 0;
-        private double targetLongitude = 0;
-        private double distanceToTarget = 0;
-        private double distanceTravelled = 0;
-        private double lastTimeUpdated = 0;
+        protected double targetLatitude = 0;
+        protected double targetLongitude = 0;
+        protected double distanceToTarget = 0;
+        protected double distanceTravelled = 0;
+        protected double lastTimeUpdated = 0;
         // Config values
         
-        private List<PathUtils.WayPoint> path = null; // Path to destination
+        internal List<PathUtils.WayPoint> path = null; // Path to destination
 
         private VesselState _state;
-        public VesselState State
+        internal VesselState State
         {
             get { return _state; }
             set
             {
-                _state = value;
-                if (OnStateChanged != null)
-                    OnStateChanged(this, EventArgs.Empty);
+                if (_state != value)
+                {
+                    _state = value;
+                    if (OnStateChanged != null)
+                        OnStateChanged(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -99,7 +101,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <param name="module"></param>
-        public BVController(Vessel v, ConfigNode module)
+        internal BVController(Vessel v, ConfigNode module)
         {
             vessel = v;
             BVModule = module;
@@ -131,7 +133,7 @@ namespace BonVoyage
         /// Get controller type
         /// </summary>
         /// <returns></returns>
-        public virtual int GetControllerType()
+        internal virtual int GetControllerType()
         {
             return -1;
         }
@@ -143,7 +145,7 @@ namespace BonVoyage
         /// Get vessel state
         /// </summary>
         /// <returns></returns>
-        public VesselState GetVesselState()
+        internal VesselState GetVesselState()
         {
             if (vessel.isActiveVessel)
                 return VesselState.Current;
@@ -155,7 +157,7 @@ namespace BonVoyage
         /// Get textual reprezentation of the vessel status
         /// </summary>
         /// <returns></returns>
-        public string GetVesselStateText()
+        internal string GetVesselStateText()
         {
             if (vessel.isActiveVessel)
                 return Localizer.Format("#LOC_BV_Status_Current");
@@ -179,7 +181,7 @@ namespace BonVoyage
 
         #region Status window texts
 
-        public virtual List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal virtual List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
         {
             if (displayedSystemCheckResults == null) // Just to be sure
                 displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
@@ -224,7 +226,7 @@ namespace BonVoyage
         /// <param name="lat"></param>
         /// <param name="lon"></param>
         /// <returns></returns>
-        public virtual bool FindRoute(double lat, double lon)
+        internal virtual bool FindRoute(double lat, double lon)
         {
             return FindRoute(lat, lon, TileTypes.Land | TileTypes.Ocean);
         }
@@ -265,7 +267,7 @@ namespace BonVoyage
         /// <summary>
         /// Check the systems
         /// </summary>
-        public virtual void SystemCheck()
+        internal virtual void SystemCheck()
         {
             mainStarIndex = Tools.GetMainStar(vessel).flightGlobalsIndex;
         }
@@ -274,7 +276,7 @@ namespace BonVoyage
         /// <summary>
         /// Activate autopilot
         /// </summary>
-        public virtual bool Activate()
+        internal virtual bool Activate()
         {
             if (distanceToTarget == 0)
             {
@@ -306,7 +308,7 @@ namespace BonVoyage
         /// <summary>
         /// Deactivate autopilot
         /// </summary>
-        public virtual bool Deactivate()
+        internal virtual bool Deactivate()
         {
             BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
             if (module != null)
@@ -336,8 +338,10 @@ namespace BonVoyage
         /// Update vessel
         /// </summary>
         /// <param name="currentTime"></param>
-        public virtual void Update(double currentTime)
+        internal virtual void Update(double currentTime)
         {
+            if (vessel == null)
+                return;
             if (vessel.isActiveVessel)
             {
                 if (active)
@@ -347,6 +351,8 @@ namespace BonVoyage
 
             if (!active || vessel.loaded)
                 return;
+
+            State = VesselState.Idle;
 
             Save(currentTime);
         }

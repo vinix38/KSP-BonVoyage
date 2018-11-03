@@ -10,68 +10,68 @@ namespace BonVoyage
     /// </summary>
     static class CommonWindowProperties
     {
-        #region Public properties
+        #region internal properties
 
-        public static UISkinDef UnitySkin { get; set; }
-        public static UISkinDef ActiveSkin { get; set; } // Actual skin used
+        internal static UISkinDef UnitySkin { get; set; }
+        internal static UISkinDef ActiveSkin { get; set; } // Actual skin used
 
-        public static RectOffset mainElementPadding = new RectOffset(5, 5, 10, 10);
-        public const float mainWindowSpacing = 3f;
-        public static RectOffset mainListPadding = new RectOffset(4, 4, 3, 3);
-        public const float mainListMinWidth = 570f;
-        public const float mainListMinHeight = 100f;
-        public const float mainWindowWidth = mainListMinWidth + 20f;
-        public const float mainWindowHeight = mainListMinHeight + 330f;
-        public static readonly Vector2 mainWindowAnchorMin = new Vector2(0.5f, 0.5f);
-        public static readonly Vector2 mainWindowAnchorMax = new Vector2(0.5f, 0.5f);
-        public static Vector2 MainWindowPosition = new Vector2(0.5f, 0.5f);
+        internal static RectOffset mainElementPadding = new RectOffset(5, 5, 10, 10);
+        internal const float mainWindowSpacing = 3f;
+        internal static RectOffset mainListPadding = new RectOffset(4, 4, 3, 3);
+        internal const float mainListMinWidth = 570f;
+        internal const float mainListMinHeight = 100f;
+        internal const float mainWindowWidth = mainListMinWidth + 20f;
+        internal const float mainWindowHeight = mainListMinHeight + 330f;
+        internal static readonly Vector2 mainWindowAnchorMin = new Vector2(0.5f, 0.5f);
+        internal static readonly Vector2 mainWindowAnchorMax = new Vector2(0.5f, 0.5f);
+        internal static Vector2 MainWindowPosition = new Vector2(0.5f, 0.5f);
 
-        public static RectOffset settingsElementPadding = new RectOffset(5, 5, 10, 10);
-        public const float settingsWindowSpacing = 3f;
-        public const float settingsMinWidth = 140f;
-        public const float settingsMinHeight = 200f;
-        public const float settingsWindowWidth = settingsMinWidth + 20f;
-        public const float settingsWindowHeight = settingsMinHeight + 20f;
-        public static readonly Vector2 settingsWindowAnchorMin = new Vector2(0.5f, 0.5f);
-        public static readonly Vector2 settingsWindowAnchorMax = new Vector2(0.5f, 0.5f);
+        internal static RectOffset settingsElementPadding = new RectOffset(5, 5, 10, 10);
+        internal const float settingsWindowSpacing = 3f;
+        internal const float settingsMinWidth = 140f;
+        internal const float settingsMinHeight = 200f;
+        internal const float settingsWindowWidth = settingsMinWidth + 20f;
+        internal const float settingsWindowHeight = settingsMinHeight + 20f;
+        internal static readonly Vector2 settingsWindowAnchorMin = new Vector2(0.5f, 0.5f);
+        internal static readonly Vector2 settingsWindowAnchorMax = new Vector2(0.5f, 0.5f);
 
-        public static RectOffset controlElementPadding = new RectOffset(5, 5, 10, 10);
-        public const float controlWindowSpacing = 3f;
-        public const float controlMinWidth = 201f;
-        public const float controlMinHeight = 190f;
-        public const float controlWindowWidth = controlMinWidth + 20f;
-        public const float controlWindowHeight = controlMinHeight + 20f;
-        public static readonly Vector2 controlWindowAnchorMin = new Vector2(0.5f, 1f);
-        public static readonly Vector2 controlWindowAnchorMax = new Vector2(0.5f, 1f);
-        public static Vector2 ControlWindowPosition = new Vector2(0.5f, 0.5f);
+        internal static RectOffset controlElementPadding = new RectOffset(5, 5, 10, 10);
+        internal const float controlWindowSpacing = 3f;
+        internal const float controlMinWidth = 201f;
+        internal const float controlMinHeight = 190f;
+        internal const float controlWindowWidth = controlMinWidth + 20f;
+        internal const float controlWindowHeight = controlMinHeight + 20f;
+        internal static readonly Vector2 controlWindowAnchorMin = new Vector2(0.5f, 1f);
+        internal static readonly Vector2 controlWindowAnchorMax = new Vector2(0.5f, 1f);
+        internal static Vector2 ControlWindowPosition = new Vector2(0.5f, 0.5f);
 
-        public static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
-        public static float buttonHeight = 24f;
+        internal static RectOffset boxPadding = new RectOffset(4, 4, 4, 4);
+        internal static float buttonHeight = 24f;
 
-        public const int buttonIconWidth = 20;
+        internal const int buttonIconWidth = 20;
 
         #endregion
 
 
         #region Styles
 
-        public static readonly UIStyleState StyleState_White = new UIStyleState() { textColor = Color.white };
-        public static readonly UIStyleState StyleState_Green = new UIStyleState() { textColor = Color.green };
-        public static readonly UIStyleState StyleState_Yellow = new UIStyleState() { textColor = Color.yellow };
-        public static readonly UIStyleState StyleState_Red = new UIStyleState() { textColor = Color.red };
-        public static readonly UIStyleState StyleState_Grey = new UIStyleState() { textColor = Color.grey };
+        internal static readonly UIStyleState StyleState_White = new UIStyleState() { textColor = Color.white };
+        internal static readonly UIStyleState StyleState_Green = new UIStyleState() { textColor = Color.green };
+        internal static readonly UIStyleState StyleState_Yellow = new UIStyleState() { textColor = Color.yellow };
+        internal static readonly UIStyleState StyleState_Red = new UIStyleState() { textColor = Color.red };
+        internal static readonly UIStyleState StyleState_Grey = new UIStyleState() { textColor = Color.grey };
 
-        public static UIStyle Style_Label_Bold_Left;
-        public static UIStyle Style_Label_Bold_Center;
-        public static UIStyle Style_Label_Normal_Center;
-        public static UIStyle Style_Label_Normal_Center_White;
-        public static UIStyle Style_Label_Normal_Center_Green;
-        public static UIStyle Style_Label_Normal_Center_Yellow;
-        public static UIStyle Style_Label_Normal_Center_Red;
-        public static UIStyle Style_Label_Normal_Center_Grey;
+        internal static UIStyle Style_Label_Bold_Left;
+        internal static UIStyle Style_Label_Bold_Center;
+        internal static UIStyle Style_Label_Normal_Center;
+        internal static UIStyle Style_Label_Normal_Center_White;
+        internal static UIStyle Style_Label_Normal_Center_Green;
+        internal static UIStyle Style_Label_Normal_Center_Yellow;
+        internal static UIStyle Style_Label_Normal_Center_Red;
+        internal static UIStyle Style_Label_Normal_Center_Grey;
 
-        public static UIStyle Style_Button_Bold_Yellow;
-        public static UIStyle Style_Button_Label;
+        internal static UIStyle Style_Button_Bold_Yellow;
+        internal static UIStyle Style_Button_Label;
 
 
         /// <summary>
@@ -126,13 +126,13 @@ namespace BonVoyage
 		/// Completely transparent sprite so we can use buttons for the headers
 		/// without the default button graphic.
 		/// </value>
-		public static readonly Sprite transparent = SolidColorSprite(new Color(0f, 0f, 0f, 0f));
+		internal static readonly Sprite transparent = SolidColorSprite(new Color(0f, 0f, 0f, 0f));
 
 
         /// <summary>
         /// Refresh styles after skin change
         /// </summary>
-        public static void RefreshStyles()
+        internal static void RefreshStyles()
         {
             // Style_Label_Bold_Left
             Style_Label_Bold_Left = new UIStyle(ActiveSkin.label)
@@ -237,7 +237,7 @@ namespace BonVoyage
 		/// <param name="style">Style object containing the sprites for the button</param>
 		/// <param name="tooltip">String to show when user hovers on button</param>
 		/// <param name="onClick">Function to call when the user clicks the button</param>
-		public static void AddFloatingButton(Transform parentTransform, float innerHorizOffset, float innerVertOffset, UIStyle style, string text, string tooltip, UnityAction onClick)
+		internal static void AddFloatingButton(Transform parentTransform, float innerHorizOffset, float innerVertOffset, UIStyle style, string text, string tooltip, UnityAction onClick)
         {
             // This creates a new button object using the prefab from KSP's UISkinManager.
             // The same prefab is used for the PopupDialog system buttons.

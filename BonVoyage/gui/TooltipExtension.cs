@@ -17,7 +17,7 @@ namespace BonVoyage
         /// <param name="gameObj">GameObject to which we want to add a tooltip</param>
         /// <param name="title">Highlighted text for the tooltip</param>
         /// <param name="text">Less emphasized text for the tooltip</param>
-        public static void SetTooltip(this GameObject gameObj, string title, string text)
+        internal static void SetTooltip(this GameObject gameObj, string title, string text)
         {
             if (gameObj != null)
             {
@@ -40,7 +40,7 @@ namespace BonVoyage
         /// <param name="gameObj"></param>
         /// <param name="tooltip"></param>
         /// <returns></returns>
-        public static bool SetTooltip(this GameObject gameObj, string tooltip)
+        internal static bool SetTooltip(this GameObject gameObj, string tooltip)
         {
             if (gameObj != null)
             {
@@ -62,7 +62,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="gb"></param>
         /// <returns></returns>
-        public static DialogGUIBase DeferTooltip(DialogGUIBase gb)
+        internal static DialogGUIBase DeferTooltip(DialogGUIBase gb)
         {
             if (gb.tooltipText != "")
             {

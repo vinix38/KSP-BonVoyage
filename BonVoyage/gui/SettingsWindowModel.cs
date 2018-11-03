@@ -5,7 +5,7 @@ namespace BonVoyage
     /// <summary>
     /// Settings window - model part
     /// </summary>
-    public class SettingsWindowModel
+    internal class SettingsWindowModel
     {
         private bool dewarpChecked = false;
         private bool kspSkin = true;
@@ -16,7 +16,7 @@ namespace BonVoyage
         /// <summary>
         /// Constructor
         /// </summary>
-        public SettingsWindowModel()
+        internal SettingsWindowModel()
         {
             // Load from configuration
             if (Configuration.Skin == 1)
@@ -33,7 +33,7 @@ namespace BonVoyage
         /// Automatic dewarp checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void DewarpChecked(bool value)
+        internal void DewarpChecked(bool value)
         {
             dewarpChecked = value;
             Configuration.AutomaticDewarp = value;
@@ -44,7 +44,7 @@ namespace BonVoyage
         /// Get the state of Autmatic dewarp toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetDewarpToggleState()
+        internal bool GetDewarpToggleState()
         {
             return dewarpChecked;
         }
@@ -74,7 +74,7 @@ namespace BonVoyage
         /// KSP skin checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void KSPSkinChecked(bool value)
+        internal void KSPSkinChecked(bool value)
         {
             kspSkin = value;
             ChangeSkin();
@@ -85,7 +85,7 @@ namespace BonVoyage
         /// Unity skin checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void UnitySkinChecked(bool value)
+        internal void UnitySkinChecked(bool value)
         {
             kspSkin = !value;
             ChangeSkin();
@@ -96,7 +96,7 @@ namespace BonVoyage
         /// Get the state of KSP skin toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetKSPSkinToggleState()
+        internal bool GetKSPSkinToggleState()
         {
             return kspSkin;
         }
@@ -106,7 +106,7 @@ namespace BonVoyage
         /// Get the state of Unity skin toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetUnitySkinToggleState()
+        internal bool GetUnitySkinToggleState()
         {
             return !kspSkin;
         }
@@ -116,7 +116,7 @@ namespace BonVoyage
         /// KSP toolbar checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void KSPToolbarChecked(bool value)
+        internal void KSPToolbarChecked(bool value)
         {
             kspToolbarChecked = value;
             Configuration.KSPToolbar = value;
@@ -132,7 +132,7 @@ namespace BonVoyage
         /// Toolbar Continued checkbox
         /// </summary>
         /// <param name="value"></param>
-        public void TCChecked(bool value)
+        internal void TCChecked(bool value)
         {
             toolbarContinuedChecked = value;
             Configuration.ToolbarContinued = value;
@@ -148,7 +148,7 @@ namespace BonVoyage
         /// Get the state of KSP toolbar toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetKSPToolbarToggleState()
+        internal bool GetKSPToolbarToggleState()
         {
             return kspToolbarChecked;
         }
@@ -158,7 +158,7 @@ namespace BonVoyage
         /// Get the state of Toolbar Continued toggle
         /// </summary>
         /// <returns></returns>
-        public bool GetTCToggleState()
+        internal bool GetTCToggleState()
         {
             return toolbarContinuedChecked;
         }

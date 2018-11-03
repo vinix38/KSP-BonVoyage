@@ -10,7 +10,7 @@ namespace BonVoyage
 		/// </returns>
 		/// <param name="filename">Name of file located in our plugin folder</param>
 		/// <param name="GameDataRelative">True if the KSP/GameData portion of the path is assumed, false if we need to provide the full path</param>
-		public static string TextureFilePath(string filename, bool GameDataRelative = true)
+		internal static string TextureFilePath(string filename, bool GameDataRelative = true)
         {
             if (GameDataRelative)
             {
@@ -30,7 +30,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="distance"></param>
         /// <returns></returns>
-        public static string ConvertDistanceToText(double distance)
+        internal static string ConvertDistanceToText(double distance)
         {
             string result = "-";
             double n = distance;
@@ -53,7 +53,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <returns>[latitude, longitude]</returns>
-        public static double[] GetCurrentWaypointLatLon(Vessel v)
+        internal static double[] GetCurrentWaypointLatLon(Vessel v)
         {
             NavWaypoint waypoint = NavWaypoint.fetch;
             if ((waypoint == null) || !waypoint.IsActive || (waypoint.Body != v.mainBody))
@@ -68,7 +68,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <returns>[latitude, longitude]</returns>
-        public static double[] GetCurrentTargetLatLon(Vessel v)
+        internal static double[] GetCurrentTargetLatLon(Vessel v)
         {
             if (v.targetObject == null)
                 return new double[2] { double.MinValue, double.MinValue };
@@ -87,7 +87,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="targetBody"></param>
         /// <returns>[latitude, longitude]</returns>
-        public static double[] PlaceTargetAtCursor(CelestialBody targetBody)
+        internal static double[] PlaceTargetAtCursor(CelestialBody targetBody)
         {
             if (targetBody.pqsController == null)
                 return new double[2] { double.MinValue, double.MinValue };
@@ -142,7 +142,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public static CelestialBody GetMainStar(Vessel v)
+        internal static CelestialBody GetMainStar(Vessel v)
         {
             CelestialBody body = v.mainBody;
             while (body.referenceBody != body) // Last body has reference to itself???

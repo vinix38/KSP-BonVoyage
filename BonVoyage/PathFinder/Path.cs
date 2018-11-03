@@ -12,9 +12,9 @@ namespace BonVoyage
     /// 
     class Path<Node> : IEnumerable<Node>
     {
-        public Node LastStep { get; private set; }
-        public Path<Node> PreviousSteps { get; private set; }
-        public double TotalCost { get; private set; }
+        internal Node LastStep { get; private set; }
+        internal Path<Node> PreviousSteps { get; private set; }
+        internal double TotalCost { get; private set; }
 
         private Path(Node lastStep, Path<Node> previousSteps, double totalCost)
         {
@@ -27,12 +27,12 @@ namespace BonVoyage
         /// Constructor
         /// </summary>
         /// <param name="start"></param>
-        public Path(Node start) : this(start, null, 0)
+        internal Path(Node start) : this(start, null, 0)
         {
         }
 
 
-        public Path<Node> AddStep(Node step, double stepCost)
+        internal Path<Node> AddStep(Node step, double stepCost)
         {
             return new Path<Node>(step, this, TotalCost + stepCost);
         }
@@ -52,7 +52,7 @@ namespace BonVoyage
 
 
 
-        static public Path<Node> FindPath<Node>(
+        static internal Path<Node> FindPath<Node>(
             Node start,
             Node destination,
             Func<Node, Node, double> distance,
@@ -91,7 +91,7 @@ namespace BonVoyage
         private SortedDictionary<P, Queue<V>> list = new SortedDictionary<P, Queue<V>>();
 
 
-        public void Enqueue(P priority, V value)
+        internal void Enqueue(P priority, V value)
         {
             Queue<V> q;
             if (!list.TryGetValue(priority, out q))
@@ -103,7 +103,7 @@ namespace BonVoyage
         }
 
 
-        public V Dequeue()
+        internal V Dequeue()
         {
             // will throw if there isn’t any first element!
             var pair = list.First();
@@ -114,7 +114,7 @@ namespace BonVoyage
         }
 
 
-        public bool IsEmpty
+        internal bool IsEmpty
         {
             get { return !list.Any(); }
         }
