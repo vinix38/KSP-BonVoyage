@@ -41,3 +41,5 @@ Thumbs.db
 BonVoyage/BonVoyage.csproj
 BonVoyage/Issues.txt
 BonVoyage/BonVoyage.csproj
+.vs/BonVoyage/v15/Server/sqlite3/db.lock
+.vs/BonVoyage/v15/Server/sqlite3/storage.ide
