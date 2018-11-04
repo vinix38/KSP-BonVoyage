@@ -1,5 +1,5 @@
 # KSP-BonVoyage
-Rovers background processing for KSP.
+Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
 ## 0.14.0 - New voyage
@@ -11,7 +11,7 @@ Rovers background processing for KSP.
   - Required EC is scaled by a motor's output setting
   - Maximum speed is taken from maxDrivenSpeed field, which is scaled by gear setting, and capped at max safe speed
 - Direct input of target coordinates
-- Stabilization of a rover during scene switching into flight, if it's moving or just arrived at a destination. The function is switched off, if World Stabilizer is present.
+- Stabilization of a rover during scene switching into flight, if it's moving or just arrived at a destination. The function is switched off, if World Stabilizer or BD Armory is present.
 
 ## 0.13.3
 ### Changes

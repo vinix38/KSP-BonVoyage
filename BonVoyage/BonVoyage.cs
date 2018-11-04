@@ -131,7 +131,7 @@ namespace BonVoyage
 
             InputLockManager.RemoveControlLock("BonVoyageInputLock");
 
-            otherStabilizerPresent = Tools.AssemblyIsLoaded("WorldStabilizer");
+            otherStabilizerPresent = (Tools.AssemblyIsLoaded("WorldStabilizer") || Tools.AssemblyIsLoaded("BDArmory"));
         }
 
 

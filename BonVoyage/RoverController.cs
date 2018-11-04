@@ -542,8 +542,7 @@ namespace BonVoyage
                             otherPower += double.Parse(module.Fields.GetValue("maxElectricdtps").ToString());
                     }
                 }
-
-                //// Revision - USI, WBI
+                
                 // WBI reactors, USI reactors and MKS Power Pack
                 ModuleResourceConverter converterModule = part.FindModuleImplementing<ModuleResourceConverter>();
                 if (converterModule != null)
@@ -655,6 +654,15 @@ namespace BonVoyage
             
             if (!active || vessel.loaded)
                 return;
+
+            // If we don't know last time of update, then set it and wait for the next update cycle
+            if (lastTimeUpdated == 0)
+            {
+                State = VesselState.Idle;
+                lastTimeUpdated = currentTime;
+                BVModule.SetValue("lastTimeUpdated", currentTime.ToString());
+                return;
+            }
 
             //// Revision - Kopernicus
             Vector3d roverPos = vessel.mainBody.position - vessel.GetWorldPos3D();
