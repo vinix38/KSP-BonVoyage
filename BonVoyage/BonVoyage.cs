@@ -63,6 +63,8 @@ namespace BonVoyage
 
         private DateTime lastUpdate; // Last time of controllers update cycle
 
+        private bool otherStabilizerPresent; // Set to true if other stabilizing mod is present
+
         #endregion
 
 
@@ -116,17 +118,11 @@ namespace BonVoyage
             GameEvents.onGameSceneSwitchRequested.Add(OnGameSceneSwitchRequested);
             GameEvents.onVesselChange.Add(OnVesselChange);
             GameEvents.onLevelWasLoaded.Add(OnLevelWasLoaded);
+            GameEvents.onVesselGoOffRails.Add(OnVesselGoOffRails);
             GameEvents.onHideUI.Add(OnHideUI);
             GameEvents.onShowUI.Add(OnShowUI);
             GameEvents.onGamePause.Add(OnGamePause);
             GameEvents.onGameUnpause.Add(OnGameUnpause);
-
-
-            // test
-            //GameEvents.onGameSceneLoadRequested.Add(onGameSceneLoadRequested); // GameScenes
-            //GameEvents.onVesselGoOffRails.Add(onVesselGoOffRails); // Vessel
-            //GameEvents.onVesselLoaded.Add(onVesselLoaded); // Vessel
-            // test
 
             LoadControllers();
 
@@ -134,6 +130,8 @@ namespace BonVoyage
             Configuration.FirstRun = false;
 
             InputLockManager.RemoveControlLock("BonVoyageInputLock");
+
+            otherStabilizerPresent = Tools.AssemblyIsLoaded("WorldStabilizer");
         }
 
 
@@ -147,37 +145,16 @@ namespace BonVoyage
             GameEvents.onGameSceneSwitchRequested.Remove(OnGameSceneSwitchRequested);
             GameEvents.onVesselChange.Remove(OnVesselChange);
             GameEvents.onLevelWasLoaded.Remove(OnLevelWasLoaded);
+            GameEvents.onVesselGoOffRails.Remove(OnVesselGoOffRails);
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
             GameEvents.onGamePause.Remove(OnGamePause);
             GameEvents.onGameUnpause.Remove(OnGameUnpause);
 
-            // test
-            //GameEvents.onGameSceneLoadRequested.Remove(onGameSceneLoadRequested); // GameScenes
-            //GameEvents.onVesselGoOffRails.Remove(onVesselGoOffRails); // Vessel
-            //GameEvents.onVesselLoaded.Remove(onVesselLoaded); // Vessel
-            // test
-
             RemoveLauncher();
 
             Configuration.Save();
         }
-
-
-        // test
-        public void onGameSceneLoadRequested(GameScenes scenes)
-        {
-            Debug.LogWarning("BV: onGameSceneLoadRequested");
-        }
-        public void onVesselGoOffRails(Vessel vessel)
-        {
-            Debug.LogWarning("BV: onVesselGoOffRails");
-        }
-        public void onVesselLoaded(Vessel vessel)
-        {
-            Debug.LogWarning("BV: onVesselLoaded");
-        }
-        // test
 
 
         #region Game events
@@ -295,6 +272,44 @@ namespace BonVoyage
 
             GamePaused = false;
             ShowUI = true;
+        }
+
+
+        /// <summary>
+        /// Move and rotate a rover
+        /// </summary>
+        /// <param name="vessel"></param>
+        public void OnVesselGoOffRails(Vessel vessel)
+        {
+            if (vessel.situation == Vessel.Situations.LANDED)
+            {
+                if (vessel.isEVA) // Kerbals
+                    return;
+                if (vessel.packed) // No physics
+                    return;
+
+                BVController controller = null;
+                for (int i = 0; i < BVControllers.Count; i++)
+                {
+                    if (BVControllers[i].vessel.id == vessel.id)
+                    {
+                        controller = BVControllers[i];
+                        break;
+                    }
+                }
+
+                // Move only a rover
+                if ((controller != null) && (controller is RoverController))
+                {
+                    // Only rovers with active controller or rovers that just arrived at the destination
+                    if (controller.Active || controller.Arrived)
+                    {
+                        // Stabilize only if another stabilizer is not present
+                        if (!otherStabilizerPresent)
+                            StabilizeVessel.AddVesselToStabilize(vessel);
+                    }
+                }
+            }
         }
 
         #endregion
@@ -633,6 +648,15 @@ namespace BonVoyage
             double currentTime = Planetarium.GetUniversalTime();
             for (int i = 0; i < BVControllers.Count; i++)
                 BVControllers[i].Update(currentTime);
+        }
+
+
+        /// <summary>
+        /// Stabilize vessel on fixed update
+        /// </summary>
+        public void FixedUpdate()
+        {
+            StabilizeVessel.Stabilize();
         }
 
 

@@ -615,7 +615,8 @@ namespace BonVoyage
             BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
             if (module != null)
             {
-                vesselHeightFromTerrain = vessel.heightFromTerrain + wheelTestResult.maxWheelRadius;
+                //vesselHeightFromTerrain = vessel.heightFromTerrain + wheelTestResult.maxWheelRadius;
+                vesselHeightFromTerrain = vessel.radarAltitude;
 
                 module.averageSpeed = averageSpeed;
                 module.averageSpeedAtNight = averageSpeedAtNight;
@@ -692,7 +693,9 @@ namespace BonVoyage
                     distanceTravelled = distanceToTarget;
 
                     active = false;
+                    arrived = true;
                     BVModule.SetValue("active", "False");
+                    BVModule.SetValue("arrived", "True");
                     BVModule.SetValue("distanceTravelled", distanceToTarget.ToString());
                     BVModule.SetValue("pathEncoded", "");
 

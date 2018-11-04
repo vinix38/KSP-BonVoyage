@@ -23,6 +23,12 @@ namespace BonVoyage
         public bool shutdown = false;
 
         /// <summary>
+        /// Vessel arrived at destination
+        /// </summary>
+        [KSPField(isPersistant = true)]
+        public bool arrived = false;
+
+        /// <summary>
         /// Vessel type - 0 - rover, 1 - ship
         /// </summary>
         // localize, when ship part is ready

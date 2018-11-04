@@ -52,6 +52,17 @@ namespace BonVoyage
         }
 
         internal bool Active {  get { return active; } }
+        internal bool Arrived
+        {
+            get { return arrived; }
+            set
+            {
+                arrived = value;
+                BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
+                if (module != null)
+                    module.arrived = value;
+            }
+        }
 
         internal double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
         internal virtual double AverageSpeed { get { return 0; } }
@@ -69,6 +80,7 @@ namespace BonVoyage
         // Config values
         protected bool active = false;
         private bool shutdown = false;
+        protected bool arrived = false;
         protected double targetLatitude = 0;
         protected double targetLongitude = 0;
         protected double distanceToTarget = 0;
@@ -112,6 +124,7 @@ namespace BonVoyage
             {
                 active = bool.Parse(BVModule.GetValue("active") != null ? BVModule.GetValue("active") : "false");
                 shutdown = bool.Parse(BVModule.GetValue("shutdown") != null ? BVModule.GetValue("shutdown") : "false");
+                arrived = bool.Parse(BVModule.GetValue("arrived") != null ? BVModule.GetValue("arrived") : "false");
                 targetLatitude = double.Parse(BVModule.GetValue("targetLatitude") != null ? BVModule.GetValue("targetLatitude") : "0");
                 targetLongitude = double.Parse(BVModule.GetValue("targetLongitude") != null ? BVModule.GetValue("targetLongitude") : "0");
                 distanceToTarget = double.Parse(BVModule.GetValue("distanceToTarget") != null ? BVModule.GetValue("distanceToTarget") : "0");
