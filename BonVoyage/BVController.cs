@@ -129,7 +129,6 @@ namespace BonVoyage
                 targetLongitude = double.Parse(BVModule.GetValue("targetLongitude") != null ? BVModule.GetValue("targetLongitude") : "0");
                 distanceToTarget = double.Parse(BVModule.GetValue("distanceToTarget") != null ? BVModule.GetValue("distanceToTarget") : "0");
                 distanceTravelled = double.Parse(BVModule.GetValue("distanceTravelled") != null ? BVModule.GetValue("distanceTravelled") : "0");
-                lastTimeUpdated = double.Parse(BVModule.GetValue("lastTimeUpdated") != null ? BVModule.GetValue("lastTimeUpdated") : "0");
                 if (BVModule.GetValue("pathEncoded") != null)
                     path = PathUtils.DecodePath(BVModule.GetValue("pathEncoded"));
             }
@@ -138,6 +137,7 @@ namespace BonVoyage
             if (shutdown)
                 State = VesselState.ControllerDisabled;
 
+            lastTimeUpdated = 0;
             mainStarIndex = 0; // In the most cases The Sun
         }
 
@@ -301,6 +301,7 @@ namespace BonVoyage
             if (module != null)
             {
                 distanceTravelled = 0;
+                lastTimeUpdated = 0;
                 active = true;
 
                 module.active = active;

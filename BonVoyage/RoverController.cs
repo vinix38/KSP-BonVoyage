@@ -350,7 +350,7 @@ namespace BonVoyage
                         powerRequired += wheelMotor.avgResRate;
                         online++;
                         double maxWheelSpeed = 0;
-                        UnityEngine.Debug.LogWarning("maxWheelSpeed = " + wheelMotor.wheelSpeedMax);
+
                         // RoveMax M1 and RoveMax M1-F (Making History expansion) don't have max wheels speed defined, so we just set it to something sensible
                         if ((wheelMotor.part.name == "roverWheel1") || (wheelMotor.part.name == "roverWheelM1-F "))
                             maxWheelSpeed = 42;
@@ -647,6 +647,7 @@ namespace BonVoyage
                 return;
             if (vessel.isActiveVessel)
             {
+                lastTimeUpdated = 0;
                 if (active)
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_AutopilotActive"), 10f).color = Color.red;
                 return;
