@@ -2,7 +2,6 @@
 using UnityEngine.Events;
 using UnityEngine.UI;
 using TMPro;
-using System;
 
 namespace BonVoyage
 {

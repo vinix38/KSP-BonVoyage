@@ -31,6 +31,8 @@ namespace BonVoyage
         private static VesselBounds bounds;
         private static double initialAltitude = 0;
 
+        private static Vessel vesselToRotate = null;
+
 
         /// <summary>
         /// This vessel will be stabilized
@@ -46,6 +48,16 @@ namespace BonVoyage
             moveVesselUp = true;
             bounds = new VesselBounds(v);
             initialAltitude = v.altitude;
+        }
+
+
+        /// <summary>
+        /// This vessel will be rotated
+        /// </summary>
+        /// <param name="v"></param>
+        internal static void AddVesselToRotate(Vessel v)
+        {
+            vesselToRotate = v;
         }
 
 
@@ -70,6 +82,18 @@ namespace BonVoyage
                     vesselToStabilize = null;
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Rotate vessel if there is some
+        /// </summary>
+        internal static void Rotate()
+        {
+            if (vesselToRotate == null)
+                return;
+
+            vesselToRotate = null;
         }
 
 

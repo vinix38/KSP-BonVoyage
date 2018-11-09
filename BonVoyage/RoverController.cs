@@ -523,8 +523,7 @@ namespace BonVoyage
                         }
                     }
                 }
-
-                //// Revision - Interstellar
+                
                 // Other generators
                 PartModuleList modules = part.Modules;
                 for (int j = 0; j < modules.Count; ++j)
@@ -536,10 +535,25 @@ namespace BonVoyage
                         otherPower += double.Parse(module.Fields.GetValue("CurrentGeneration").ToString());
 
                     // KSP Interstellar generators
-                    if (module.moduleName == "FNGenerator")
+                    if ((module.moduleName == "ThermalElectricEffectGenerator") || (module.moduleName == "IntegratedThermalElectricPowerGenerator") || (module.moduleName == "ThermalElectricPowerGenerator") 
+                        || (module.moduleName == "IntegratedChargedParticlesPowerGenerator") || (module.moduleName == "ChargedParticlesPowerGenerator") || (module.moduleName == "FNGenerator"))
                     {
                         if (bool.Parse(module.Fields.GetValue("IsEnabled").ToString()))
-                            otherPower += double.Parse(module.Fields.GetValue("maxElectricdtps").ToString());
+                        {
+                            //otherPower += double.Parse(module.Fields.GetValue("maxElectricdtps").ToString()); // Doesn't work as expected
+
+                            string maxPowerStr = module.Fields.GetValue("MaxPowerStr").ToString();
+                            double maxPower = 0;
+
+                            if (maxPowerStr.Contains("GW"))
+                                maxPower = double.Parse(maxPowerStr.Replace(" GW", "")) * 1000000;
+                            else if (maxPowerStr.Contains("MW"))
+                                maxPower = double.Parse(maxPowerStr.Replace(" MW", "")) * 1000;
+                            else
+                                maxPower = double.Parse(maxPowerStr.Replace(" KW", ""));
+
+                            otherPower += maxPower;
+                        }
                     }
                 }
                 

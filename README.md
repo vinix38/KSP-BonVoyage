@@ -2,6 +2,15 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.1
+### Fixes
+- Fixed detection of KSP Interstellar Extended generators
+
+### Changes
+- Kopernicus support - solar panels are working even when you are around other stars
+- Added support for Bison Cab from Wild Blue Industries
+
+
 ## 0.14.0.1
 ### Fixes
 - Fixed rover skipping kilometers forward to the target under some circumstances
