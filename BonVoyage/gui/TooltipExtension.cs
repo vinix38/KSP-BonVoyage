@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using KSP.UI.TooltipTypes;
+using System;
 
 namespace BonVoyage
 {
