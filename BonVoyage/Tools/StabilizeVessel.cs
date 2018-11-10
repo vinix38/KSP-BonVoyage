@@ -81,14 +81,7 @@ namespace BonVoyage
         {
             v.ResetCollisionIgnores();
 
-            Debug.LogWarning(v.transform.up.y);
-            Debug.LogWarning(v.transform.forward.y);
-            Debug.LogWarning(v.transform.right.y);
-
             var from = Vector3d.back; // [0,0,-1]
-            //if ((Math.Abs(v.transform.up.y) == (float)1.0) || (Math.Abs(v.transform.forward.y) == (float)1.0) || (Math.Abs(v.transform.right.y) == (float)1.0))
-            //    from = Vector3d.back; // [0,0,-1]
-
             var to = GeoUtils.GetTerrainNormal(v.latitude, v.longitude, v.altitude, v.mainBody);
 
             Quaternion rotation = Quaternion.FromToRotation(from, to);
