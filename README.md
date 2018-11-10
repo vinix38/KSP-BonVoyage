@@ -2,7 +2,7 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
-## 0.14.1
+## 0.14.1.1
 ### Fixes
 - Fixed detection of KSP Interstellar Extended generators
 
