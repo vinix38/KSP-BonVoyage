@@ -9,6 +9,7 @@ Automagic Industries brings you a new autopilot, which reduces driving accidents
 ### Changes
 - Kopernicus support - solar panels are working even when you are around other stars
 - Added support for Bison Cab from Wild Blue Industries
+- Bon Voyage tries to rotate a rover perpendicular to a terrain
 
 
 ## 0.14.0.1

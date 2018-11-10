@@ -304,7 +304,6 @@ namespace BonVoyage
                     // Only rovers with active controller or rovers that just arrived at the destination
                     if (controller.Active || controller.Arrived)
                     {
-                        StabilizeVessel.AddVesselToRotate(vessel);
                         // Stabilize only if another stabilizer is not present
                         if (!otherStabilizerPresent)
                             StabilizeVessel.AddVesselToStabilize(vessel);
@@ -657,7 +656,6 @@ namespace BonVoyage
         /// </summary>
         public void FixedUpdate()
         {
-            StabilizeVessel.Rotate();
             if (!otherStabilizerPresent)
                 StabilizeVessel.Stabilize();
         }

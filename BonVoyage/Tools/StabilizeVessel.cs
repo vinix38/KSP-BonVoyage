@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace BonVoyage
@@ -31,8 +32,6 @@ namespace BonVoyage
         private static VesselBounds bounds;
         private static double initialAltitude = 0;
 
-        private static Vessel vesselToRotate = null;
-
 
         /// <summary>
         /// This vessel will be stabilized
@@ -48,16 +47,6 @@ namespace BonVoyage
             moveVesselUp = true;
             bounds = new VesselBounds(v);
             initialAltitude = v.altitude;
-        }
-
-
-        /// <summary>
-        /// This vessel will be rotated
-        /// </summary>
-        /// <param name="v"></param>
-        internal static void AddVesselToRotate(Vessel v)
-        {
-            vesselToRotate = v;
         }
 
 
@@ -88,12 +77,19 @@ namespace BonVoyage
         /// <summary>
         /// Rotate vessel if there is some
         /// </summary>
-        internal static void Rotate()
+        private static void Rotate(Vessel v)
         {
-            if (vesselToRotate == null)
-                return;
+            v.ResetCollisionIgnores();
 
-            vesselToRotate = null;
+            var from = Vector3d.up; // Fallback - [0,1,0]
+            if ((Math.Abs(v.transform.up.y) == (float)1.0) || (Math.Abs(v.transform.forward.y) == (float)1.0) || (Math.Abs(v.transform.right.y) == (float)1.0))
+                from = Vector3d.back; // [0,0,-1]
+
+            var to = GeoUtils.GetTerrainNormal(v.latitude, v.longitude, v.altitude, v.mainBody);
+
+            Quaternion rotation = Quaternion.FromToRotation(from, to);
+
+            v.SetRotation(rotation);
         }
 
 
@@ -102,9 +98,10 @@ namespace BonVoyage
         /// </summary>
         private static void Stabilize(Vessel v)
         {
-            // First, we move burrowed vessel up and then down if it's too high
+            // First, we rotate, then move burrowed vessel up and then down if it's too high
             if (moveVesselUp)
             {
+                Rotate(v);
                 MoveUp(v);
                 moveVesselUp = false;
             }
