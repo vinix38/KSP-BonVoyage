@@ -27,6 +27,7 @@ namespace BonVoyage
         private const int rayCastExtendedMask = rayCastMask | 1;
 
         private static Vessel vesselToStabilize = null;
+        private static Vector3d rotationVector = Vector3d.back;
         private static int vesselTimer = stabilizationTicks;
         private static bool moveVesselUp = false;
         private static VesselBounds bounds;
@@ -37,12 +38,13 @@ namespace BonVoyage
         /// This vessel will be stabilized
         /// </summary>
         /// <param name="v"></param>
-        internal static void AddVesselToStabilize(Vessel v)
+        internal static void AddVesselToStabilize(Vessel v, Vector3d rotation)
         {
             vesselToStabilize = v;
             if (vesselToStabilize == null)
                 return;
 
+            rotationVector = rotation;
             vesselTimer = stabilizationTicks;
             moveVesselUp = true;
             bounds = new VesselBounds(v);
@@ -81,7 +83,8 @@ namespace BonVoyage
         {
             v.ResetCollisionIgnores();
 
-            var from = Vector3d.back; // [0,0,-1]
+            //var from = Vector3d.back; // [0,0,-1]
+            var from = rotationVector;
             var to = GeoUtils.GetTerrainNormal(v.latitude, v.longitude, v.altitude, v.mainBody);
 
             Quaternion rotation = Quaternion.FromToRotation(from, to);

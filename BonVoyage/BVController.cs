@@ -52,6 +52,7 @@ namespace BonVoyage
         }
 
         internal bool Active {  get { return active; } }
+
         internal bool Arrived
         {
             get { return arrived; }
@@ -62,6 +63,12 @@ namespace BonVoyage
                 if (module != null)
                     module.arrived = value;
             }
+        }
+
+        internal Vector3d RotationVector
+        {
+            get { return rotationVector; }
+            set { rotationVector = value; }
         }
 
         internal double RemainingDistanceToTarget { get { return distanceToTarget - distanceTravelled; } }
@@ -86,8 +93,9 @@ namespace BonVoyage
         protected double distanceToTarget = 0;
         protected double distanceTravelled = 0;
         protected double lastTimeUpdated = 0;
+        private Vector3d rotationVector = Vector3d.back; // Rotation of a craft
         // Config values
-        
+
         internal List<PathUtils.WayPoint> path = null; // Path to destination
 
         private VesselState _state;
@@ -131,6 +139,36 @@ namespace BonVoyage
                 distanceTravelled = double.Parse(BVModule.GetValue("distanceTravelled") != null ? BVModule.GetValue("distanceTravelled") : "0");
                 if (BVModule.GetValue("pathEncoded") != null)
                     path = PathUtils.DecodePath(BVModule.GetValue("pathEncoded"));
+
+                if (BVModule.GetValue("rotationVector") != null)
+                {
+                    switch (BVModule.GetValue("rotationVector"))
+                    {
+                        case "0":
+                            rotationVector = Vector3d.up;
+                            break;
+                        case "1":
+                            rotationVector = Vector3d.down;
+                            break;
+                        case "2":
+                            rotationVector = Vector3d.forward;
+                            break;
+                        case "3":
+                            rotationVector = Vector3d.back;
+                            break;
+                        case "4":
+                            rotationVector = Vector3d.right;
+                            break;
+                        case "5":
+                            rotationVector = Vector3d.left;
+                            break;
+                        default:
+                            rotationVector = Vector3d.back;
+                            break;
+                    }
+                }
+                else
+                    rotationVector = Vector3d.back;
             }
 
             State = VesselState.Idle;
