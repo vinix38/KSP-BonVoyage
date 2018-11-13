@@ -306,7 +306,7 @@ namespace BonVoyage
                     {
                         // Stabilize only if another stabilizer is not present
                         if (!otherStabilizerPresent)
-                            StabilizeVessel.AddVesselToStabilize(vessel, controller.RotationVector);
+                            StabilizeVessel.AddVesselToStabilize(vessel, controller.RotationVector, Configuration.DisableRotation);
                     }
                 }
             }
@@ -561,12 +561,14 @@ namespace BonVoyage
 
             if (controlViewVisible)
             {
-                // Check if we are in flight and active vessel has BV controller and is not shutted down
+                // Check if we are in flight, active vessel has full controll and BV controller and is not shutted down
                 bool active = false;
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     Vessel vessel = FlightGlobals.ActiveVessel;
-                    active = CheckActiveControllerOfVessel(FlightGlobals.ActiveVessel);
+                    BVController controller = GetControllerOfVessel(FlightGlobals.ActiveVessel);
+                    if (controller != null)
+                        active = (!controller.Shutdown && controller.CheckConnection());
                 }
 
                 if (active && (ControlView == null))

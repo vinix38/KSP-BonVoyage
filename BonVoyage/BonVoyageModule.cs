@@ -132,6 +132,7 @@ namespace BonVoyage
             {
                 //Fields["vesselType"].guiActive = !shutdown;
                 Fields["rotationVector"].uiControlFlight.onFieldChanged = RotationVectorChanged;
+                Fields["rotationVector"].guiActive = !shutdown;
                 Events["BVControlPanel"].guiActive = !shutdown;
             }
         }
@@ -142,7 +143,7 @@ namespace BonVoyage
         /// <summary>
         /// Shutdown/Activate BV controller
         /// </summary>
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Shutdown Bon Voyage Controller", category = "Bon Voyage")]
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Shutdown Bon Voyage Controller", category = "Bon Voyage", requireFullControl = true)]
         public void ToggleBVController()
         {
             shutdown = !shutdown;
@@ -150,6 +151,7 @@ namespace BonVoyage
             if (!HighLogic.LoadedSceneIsEditor)
             {
                 //Fields["vesselType"].guiActive = !shutdown;
+                Fields["rotationVector"].guiActive = !shutdown;
                 Events["BVControlPanel"].guiActive = !shutdown;
                 if (shutdown)
                 {
@@ -172,7 +174,7 @@ namespace BonVoyage
         /// <summary>
         /// Show BV control panel
         /// </summary>
-        [KSPEvent(guiActive = true, guiName = "#LOC_BV_ContextMenu_Panel", category = "Bon Voyage")]
+        [KSPEvent(guiActive = true, guiName = "#LOC_BV_ContextMenu_Panel", category = "Bon Voyage", requireFullControl = true)]
         public void BVControlPanel()
         {
             BonVoyage.Instance.ToggleControlWindow();

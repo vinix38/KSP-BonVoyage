@@ -28,6 +28,7 @@ namespace BonVoyage
 
         private static Vessel vesselToStabilize = null;
         private static Vector3d rotationVector = Vector3d.back;
+        private static bool disableRotation = false;
         private static int vesselTimer = stabilizationTicks;
         private static bool moveVesselUp = false;
         private static VesselBounds bounds;
@@ -38,13 +39,15 @@ namespace BonVoyage
         /// This vessel will be stabilized
         /// </summary>
         /// <param name="v"></param>
-        internal static void AddVesselToStabilize(Vessel v, Vector3d rotation)
+        internal static void AddVesselToStabilize(Vessel v, Vector3d rotation, bool rotationDisabled = false)
         {
             vesselToStabilize = v;
             if (vesselToStabilize == null)
                 return;
 
             rotationVector = rotation;
+            disableRotation = rotationDisabled;
+
             vesselTimer = stabilizationTicks;
             moveVesselUp = true;
             bounds = new VesselBounds(v);
@@ -101,7 +104,8 @@ namespace BonVoyage
             // First, we rotate, then move burrowed vessel up and then down if it's too high
             if (moveVesselUp)
             {
-                Rotate(v);
+                if (!disableRotation)
+                    Rotate(v);
                 MoveUp(v);
                 moveVesselUp = false;
             }

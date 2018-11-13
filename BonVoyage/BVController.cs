@@ -427,6 +427,24 @@ namespace BonVoyage
             vessel.protoVessel.displaylandedAt = vessel.mainBody.bodyDisplayName.Replace("^N", "");
         }
 
+
+        /// <summary>
+        /// Check if unmanned vessel has connection
+        /// </summary>
+        /// <returns></returns>
+        internal bool CheckConnection()
+        {
+            if (vessel.GetCrewCount() == 0) // Unmanned -> check connection
+            {
+                if (vessel.Connection.ControlState != CommNet.VesselControlState.ProbeFull)
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NoConnection", 5f)).color = Color.red;
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 
 }

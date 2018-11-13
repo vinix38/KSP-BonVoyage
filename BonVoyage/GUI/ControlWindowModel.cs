@@ -68,7 +68,8 @@ namespace BonVoyage
             currentController = controller;
             if (controller != null)
             {
-                controller.SystemCheck();
+                if (currentController.CheckConnection())
+                    controller.SystemCheck();
                 controllerActive = controller.Active;
             }
         }
@@ -130,6 +131,9 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
+                if (!currentController.CheckConnection())
+                    return;
+
                 if (!controllerActive)
                 {
                     controllerActive = currentController.Activate();
@@ -143,7 +147,7 @@ namespace BonVoyage
                 }
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
         }
 
 
@@ -154,11 +158,12 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                currentController.SystemCheck();
+                if (currentController.CheckConnection())
+                    currentController.SystemCheck();
                 RefreshStatsListLayout();
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
         }
 
 
@@ -191,6 +196,9 @@ namespace BonVoyage
             {
                 if (currentController.vessel.situation == Vessel.Situations.LANDED)
                 {
+                    if (!currentController.CheckConnection())
+                        return;
+
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_FindingRoute", 5f));
                     if (currentController.FindRoute(latitude, longitude))
                     {
@@ -201,10 +209,10 @@ namespace BonVoyage
                         ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteNotFound", 5f));
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f);
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f).color = Color.yellow;
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
         }
 
 
@@ -221,10 +229,10 @@ namespace BonVoyage
                     BonVoyage.Instance.MapMode = true;
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
         }
 
 
@@ -242,10 +250,10 @@ namespace BonVoyage
                     longitude = (cooordinates[1] + 360) % 360;
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_TargetNotValid", 5f));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_TargetNotValid", 5f)).color = Color.yellow;
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
         }
 
 
@@ -263,10 +271,10 @@ namespace BonVoyage
                     longitude = (cooordinates[1] + 360) % 360;
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WaypointNotValid", 5f));
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WaypointNotValid", 5f)).color = Color.yellow;
             }
             else
-                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f));
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
         }
 
 
