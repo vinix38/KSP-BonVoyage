@@ -63,6 +63,25 @@ namespace BonVoyage
             return hasConnection;
         }
 
+
+        /// <summary>
+        /// Check if vessel has local control
+        /// </summary>
+        /// <returns></returns>
+        internal static bool HasLocalControl(Guid id)
+        {
+            bool hasControl = false;
+
+            if (GetAPI() != null)
+            {
+                MethodInfo hasLocalControl = api.GetMethod("HasLocalControl", BindingFlags.Public | BindingFlags.Static);
+                if (hasLocalControl != null)
+                    hasControl = (bool)hasLocalControl.Invoke(null, new object[] { id });
+            }
+
+            return hasControl;
+        }
+
     }
 
 }

@@ -446,7 +446,7 @@ namespace BonVoyage
                 // RemoteTech
                 if (Tools.AssemblyIsLoaded("RemoteTech"))
                 {
-                    if (RemoteTechWrapper.IsRemoteTechEnabled() && !RemoteTechWrapper.HasAnyConnection(vessel.id))
+                    if (RemoteTechWrapper.IsRemoteTechEnabled() && (!RemoteTechWrapper.HasAnyConnection(vessel.id) || !RemoteTechWrapper.HasLocalControl(vessel.id)))
                     {
                         ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NoConnection", 5f)).color = Color.red;
                         return false;
