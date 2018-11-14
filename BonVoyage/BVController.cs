@@ -436,10 +436,21 @@ namespace BonVoyage
         {
             if (vessel.GetCrewCount() == 0) // Unmanned -> check connection
             {
+                // CommNet
                 if (vessel.Connection.ControlState != CommNet.VesselControlState.ProbeFull)
                 {
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NoConnection", 5f)).color = Color.red;
                     return false;
+                }
+
+                // RemoteTech
+                if (Tools.AssemblyIsLoaded("RemoteTech"))
+                {
+                    if (RemoteTechWrapper.IsRemoteTechEnabled() && !RemoteTechWrapper.HasAnyConnection(vessel.id))
+                    {
+                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NoConnection", 5f)).color = Color.red;
+                        return false;
+                    }
                 }
             }
             return true;
