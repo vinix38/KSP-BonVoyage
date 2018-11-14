@@ -11,14 +11,14 @@ namespace BonVoyage
     internal static class StabilizeVessel
     {
         // How many ticks do we hold the vessel
-        private static int stabilizationTicks = 100;
+        private static int stabilizationTicks = 50;
 
         // If downmovement is below this value, leave the vessel as is
         private static float minDownMovement = 0.05f;
         // Minimum upmovement in case we're beneath the ground
         private static float upMovementStep = 0.2f;
         // Max upmovement in case upward movement is required; should cancel moving the craft to space in case we messed the things up
-        private static float maxUpMovement = 2.0f;
+        private static float maxUpMovement = 4.0f;
         // Last resort drop altitude
         // If the mod can't reliably determine the height above obstacles, like when vessel lies on different colliders, it still will be lowered, but to this altitude
         private static float lastResortAltitude = 2.0f;

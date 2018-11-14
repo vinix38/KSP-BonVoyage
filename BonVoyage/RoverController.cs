@@ -670,7 +670,7 @@ namespace BonVoyage
             if (!active || vessel.loaded)
                 return;
 
-            // If we don't know last time of update, then set it and wait for the next update cycle
+            // If we don't know the last time of update, then set it and wait for the next update cycle
             if (lastTimeUpdated == 0)
             {
                 State = VesselState.Idle;
@@ -678,8 +678,7 @@ namespace BonVoyage
                 BVModule.SetValue("lastTimeUpdated", currentTime.ToString());
                 return;
             }
-
-            //// Revision - Kopernicus
+            
             Vector3d roverPos = vessel.mainBody.position - vessel.GetWorldPos3D();
             Vector3d toMainStar = vessel.mainBody.position - FlightGlobals.Bodies[mainStarIndex].position;
             angle = Vector3d.Angle(roverPos, toMainStar); // Angle between rover and the main star
@@ -738,42 +737,46 @@ namespace BonVoyage
             }
             else
             {
-                int step = Convert.ToInt32(Math.Floor(distanceTravelled / PathFinder.StepSize)); // In which step of the path we are
-                double remainder = distanceTravelled % PathFinder.StepSize; // Current remaining distance from the current step
-                double bearing = 0;
-
-                if (step < path.Count - 1)
-                    bearing = GeoUtils.InitialBearing( // Bearing to the next step from previous step
-                        path[step].latitude,
-                        path[step].longitude,
-                        path[step + 1].latitude,
-                        path[step + 1].longitude
-                    );
-                else
-                    bearing = GeoUtils.InitialBearing( // Bearing to the target from previous step
-                        path[step].latitude,
-                        path[step].longitude,
-                        targetLatitude,
-                        targetLongitude
-                    );
-
-                // Compute new coordinates, we are moving from the current step, length f distance is "remainder"
-                double[] newCoordinates = GeoUtils.GetLatitudeLongitude(
-                    path[step].latitude,
-                    path[step].longitude,
-                    bearing,
-                    remainder,
-                    vessel.mainBody.Radius
-                );
-
-                // Move
-                if (!MoveSafely(newCoordinates[0], newCoordinates[1]))
+                try // There is sometimes null ref exception during scene change
                 {
-                    distanceTravelled -= deltaS;
-                    State = VesselState.Idle;
+                    int step = Convert.ToInt32(Math.Floor(distanceTravelled / PathFinder.StepSize)); // In which step of the path we are
+                    double remainder = distanceTravelled % PathFinder.StepSize; // Current remaining distance from the current step
+                    double bearing = 0;
+
+                    if (step < path.Count - 1)
+                        bearing = GeoUtils.InitialBearing( // Bearing to the next step from previous step
+                            path[step].latitude,
+                            path[step].longitude,
+                            path[step + 1].latitude,
+                            path[step + 1].longitude
+                        );
+                    else
+                        bearing = GeoUtils.InitialBearing( // Bearing to the target from previous step
+                            path[step].latitude,
+                            path[step].longitude,
+                            targetLatitude,
+                            targetLongitude
+                        );
+
+                    // Compute new coordinates, we are moving from the current step, distance is "remainder"
+                    double[] newCoordinates = GeoUtils.GetLatitudeLongitude(
+                        path[step].latitude,
+                        path[step].longitude,
+                        bearing,
+                        remainder,
+                        vessel.mainBody.Radius
+                    );
+
+                    // Move
+                    if (!MoveSafely(newCoordinates[0], newCoordinates[1]))
+                    {
+                        distanceTravelled -= deltaS;
+                        State = VesselState.Idle;
+                    }
+                    else
+                        State = VesselState.Moving;
                 }
-                else
-                    State = VesselState.Moving;
+                catch { }
             }
 
             Save(currentTime);
