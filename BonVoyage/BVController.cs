@@ -26,6 +26,9 @@ namespace BonVoyage
         internal string Label;
         internal string Text;
         internal string Tooltip;
+        internal bool Toggle; // true - DialogGUIToggle ; false - DialogGUILabel
+        internal Func<bool> GetToggleValue;
+        internal Callback<bool> ToggleSelectedCallback;
     }
 
 
@@ -241,6 +244,7 @@ namespace BonVoyage
 
             DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
             {
+                Toggle = false,
                 Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
                 Text = targetLatitude.ToString("0.####"),
                 Tooltip = ""
@@ -249,6 +253,7 @@ namespace BonVoyage
 
             result = new DisplayedSystemCheckResult
             {
+                Toggle = false,
                 Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
                 Text = targetLongitude.ToString("0.####"),
                 Tooltip = ""
@@ -257,6 +262,7 @@ namespace BonVoyage
 
             result = new DisplayedSystemCheckResult
             {
+                Toggle = false,
                 Label = Localizer.Format("#LOC_BV_Control_Distance"),
                 Text = Tools.ConvertDistanceToText(RemainingDistanceToTarget),
                 Tooltip = ""
@@ -446,7 +452,7 @@ namespace BonVoyage
                 // RemoteTech
                 if (Tools.AssemblyIsLoaded("RemoteTech"))
                 {
-                    if (RemoteTechWrapper.IsRemoteTechEnabled() && (!RemoteTechWrapper.HasAnyConnection(vessel.id) || !RemoteTechWrapper.HasLocalControl(vessel.id)))
+                    if (RemoteTechWrapper.IsRemoteTechEnabled() && !RemoteTechWrapper.HasAnyConnection(vessel.id) && !RemoteTechWrapper.HasLocalControl(vessel.id))
                     {
                         ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NoConnection", 5f)).color = Color.red;
                         return false;

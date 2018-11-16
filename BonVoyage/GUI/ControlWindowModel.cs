@@ -287,23 +287,36 @@ namespace BonVoyage
         {
             DialogGUIHorizontalLayout row = null;
 
-            if (result.Tooltip.Length > 0)
+            if (result.Toggle)
             {
                 row = new DialogGUIHorizontalLayout(
-                    new DialogGUILabel(result.Label + ":", 100f),
-                    new DialogGUILabel(result.Text),
-                    new DialogGUISpace(1f),
-                    // Add a button with transparent background and label style just to display a tooltip when hovering over it
-                    // Transparent sprite is needed to hide button borders
-                    TooltipExtension.DeferTooltip(new DialogGUIButton(CommonWindowProperties.transparent, "(?)", () => { }, 17f, 18f, false) { tooltipText = result.Tooltip, guiStyle = CommonWindowProperties.Style_Button_Label })
+                    (result.Tooltip.Length > 0)
+                    ?
+                    TooltipExtension.DeferTooltip(new DialogGUIToggle(result.GetToggleValue, result.Text, result.ToggleSelectedCallback) { tooltipText = result.Tooltip })
+                    :
+                    new DialogGUIToggle(result.GetToggleValue, result.Text, result.ToggleSelectedCallback)
                 );
             }
             else
             {
-                row = new DialogGUIHorizontalLayout(
-                    new DialogGUILabel(result.Label + ":", 100f),
-                    new DialogGUILabel(result.Text)
-                );
+                if (result.Tooltip.Length > 0)
+                {
+                    row = new DialogGUIHorizontalLayout(
+                        new DialogGUILabel(result.Label + ":", 100f),
+                        new DialogGUILabel(result.Text),
+                        new DialogGUISpace(1f),
+                        // Add a button with transparent background and label style just to display a tooltip when hovering over it
+                        // Transparent sprite is needed to hide button borders
+                        TooltipExtension.DeferTooltip(new DialogGUIButton(CommonWindowProperties.transparent, "(?)", () => { }, 17f, 18f, false) { tooltipText = result.Tooltip, guiStyle = CommonWindowProperties.Style_Button_Label })
+                    );
+                }
+                else
+                {
+                    row = new DialogGUIHorizontalLayout(
+                        new DialogGUILabel(result.Label + ":", 100f),
+                        new DialogGUILabel(result.Text)
+                    );
+                }
             }
 
             return row;

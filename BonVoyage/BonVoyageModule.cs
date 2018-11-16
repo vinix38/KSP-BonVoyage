@@ -104,6 +104,12 @@ namespace BonVoyage
         [KSPField(isPersistant = true)]
         public double vesselHeightFromTerrain = 0;
 
+        /// <summary>
+        /// Use batteries during a night
+        /// </summary>
+        [KSPField(isPersistant = true)]
+        public string batteries = "0/0/0/0"; // use batteries / max EC used / EC per sec / current EC
+
         #endregion
 
 
