@@ -13,7 +13,7 @@ namespace BonVoyage
     {
         #region internal properties
 
-        internal override double AverageSpeed { get { return ((angle <= 90) ? (averageSpeed * speedMultiplier) : (averageSpeedAtNight * speedMultiplier)); } }
+        internal override double AverageSpeed { get { return ((angle <= 90) || (batteries.UseBatteries && (batteries.CurrentEC > 0)) ? (averageSpeed * speedMultiplier) : (averageSpeedAtNight * speedMultiplier)); } }
 
         #endregion
 
@@ -71,15 +71,16 @@ namespace BonVoyage
                 if (BVModule.GetValue("batteries") != null)
                 {
                     string[] tempBat = BVModule.GetValue("batteries").Split(new char[] { '/' });
-                    if (tempBat.Length == 4)
+                    if (tempBat.Length == 5)
                     {
                         if (tempBat[0] == "1")
                             batteries.UseBatteries = true;
                         else
                             batteries.UseBatteries = false;
                         batteries.MaxUsedEC = double.Parse(tempBat[1]);
-                        batteries.ECPerSecond = double.Parse(tempBat[2]);
-                        batteries.CurrentEC = double.Parse(tempBat[3]);
+                        batteries.ECPerSecondConsumed = double.Parse(tempBat[2]);
+                        batteries.ECPerSecondGenerated = double.Parse(tempBat[3]);
+                        batteries.CurrentEC = double.Parse(tempBat[4]);
                     }
                 }
             }
@@ -213,17 +214,13 @@ namespace BonVoyage
 
             // Get available EC from batteries
             if (batteries.UseBatteries)
-            {
                 batteries.MaxAvailableEC = GetAvailableEC_Batteries();
-                batteries.CurrentEC = 0;
-            }
             else
-            {
                 batteries.MaxAvailableEC = 0;
-                batteries.MaxUsedEC = 0;
-                batteries.ECPerSecond = 0;
-                batteries.CurrentEC = 0;
-            }
+            batteries.MaxUsedEC = 0;
+            batteries.ECPerSecondConsumed = 0;
+            batteries.ECPerSecondGenerated = 0;
+            batteries.CurrentEC = 0;
 
             // Manned
             manned = (vessel.GetCrewCount() > 0);
@@ -306,20 +303,24 @@ namespace BonVoyage
             if (batteries.UseBatteries)
             {
                 batteries.MaxUsedEC = 0;
-                batteries.ECPerSecond = 0;
+                batteries.ECPerSecondConsumed = 0;
+                batteries.ECPerSecondGenerated = 0;
 
                 // We have enough of solar power to recharge batteries
                 if (requiredPower < (electricPower_Solar + electricPower_Other))
                 {
-                    batteries.ECPerSecond = Math.Max(requiredPower - electricPower_Other, 0); // If there is more other power than required power, we don't need batteries
+                    batteries.ECPerSecondConsumed = Math.Max(requiredPower - electricPower_Other, 0); // If there is more other power than required power, we don't need batteries
                     batteries.MaxUsedEC = batteries.MaxAvailableEC / 2; // We are using only half of max available EC
-                    if (batteries.ECPerSecond > 0)
+                    if (batteries.ECPerSecondConsumed > 0)
                     {
                         double halfday = vessel.mainBody.rotationPeriod / 2; // in seconds
-                        batteries.MaxUsedEC = Math.Min(batteries.MaxUsedEC, batteries.ECPerSecond * halfday); // get lesser value of MaxUsedEC and EC consumed per night
-                        batteries.MaxUsedEC = Math.Min(batteries.MaxUsedEC, (electricPower_Solar + electricPower_Other - requiredPower) * halfday); // get lesser value of MaxUsedEC and max EC available for recharge during a day
+                        batteries.ECPerSecondGenerated = electricPower_Solar + electricPower_Other - requiredPower;
+                        batteries.MaxUsedEC = Math.Min(batteries.MaxUsedEC, batteries.ECPerSecondConsumed * halfday); // get lesser value of MaxUsedEC and EC consumed per night
+                        batteries.MaxUsedEC = Math.Min(batteries.MaxUsedEC, batteries.ECPerSecondGenerated * halfday); // get lesser value of MaxUsedEC and max EC available for recharge during a day
                     }
                 }
+
+                batteries.CurrentEC = batteries.MaxUsedEC; // We are starting at full available capacity
             }
         }
 
@@ -538,7 +539,8 @@ namespace BonVoyage
             internal bool UseBatteries;
             internal double MaxAvailableEC;
             internal double MaxUsedEC;
-            internal double ECPerSecond;
+            internal double ECPerSecondConsumed;
+            internal double ECPerSecondGenerated;
             internal double CurrentEC;
 
             /// <summary>
@@ -547,7 +549,7 @@ namespace BonVoyage
             /// <returns></returns>
             internal string GetBatteriesInfo()
             {
-                return (UseBatteries ? "1" : "0") + "/" + MaxUsedEC.ToString() + "/" + ECPerSecond.ToString() + "/" + CurrentEC.ToString();
+                return (UseBatteries ? "1" : "0") + "/" + MaxUsedEC.ToString() + "/" + ECPerSecondConsumed.ToString() + "/" + ECPerSecondGenerated.ToString() + "/" + CurrentEC.ToString();
             }
         }
 
@@ -801,8 +803,20 @@ namespace BonVoyage
             else // day
                 speedMultiplier = 1.0;
 
+            double deltaT = currentTime - lastTimeUpdated; // Time delta from the last update
+
+            // Compute increase or decrease in EC from the last update
+            if (batteries.UseBatteries)
+            {
+                if (angle <= 90) // day
+                    batteries.CurrentEC = Math.Min(batteries.CurrentEC + batteries.ECPerSecondGenerated * deltaT, batteries.MaxUsedEC);
+                else // night
+                    batteries.CurrentEC = Math.Max(batteries.CurrentEC - batteries.ECPerSecondConsumed * deltaT, 0);
+                BVModule.SetValue("batteries", batteries.GetBatteriesInfo());
+            }
+
             // No moving at night, if there isn't enough power
-            if ((angle > 90) && (averageSpeedAtNight == 0.0))
+            if ((angle > 90) && (averageSpeedAtNight == 0.0) && !(batteries.UseBatteries && (batteries.CurrentEC > 0)))
             {
                 State = VesselState.AwaitingSunlight;
                 lastTimeUpdated = currentTime;
@@ -810,8 +824,7 @@ namespace BonVoyage
                 return;
             }
 
-            double deltaT = currentTime - lastTimeUpdated;
-            double deltaS = AverageSpeed * deltaT;
+            double deltaS = AverageSpeed * deltaT; // Distance delta from the last update
             distanceTravelled += deltaS;
 
             if (distanceTravelled >= distanceToTarget) // We reached the target

@@ -2,6 +2,18 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.2
+### Changes
+- Unmanned rover must have an active connection to set a target or issue the GO command if you are using the CommNet or RemoteTech
+- Batteries can be used during a night, if there is enough solar power to recharge them. Up to 50% of the total capacity of all enabled batteries will be used.
+- Added toggle to the Settings to disable rotation of a rover perpendicularly to the terrain after arriving to a target and during a ride
+- Added Rotation vector advanced tweakable
+  - Rotation of a rover depends on the orientation of the root part. You can now set the vector used for rotating the rover.
+  - This setting is accessible after enabling Advanced tweakables in the KSP settings
+  - Default value is "Back" - for rovers, whose root part is a probe or a cab oriented in such a way, that you see horizont line on the navball
+  - Other usual values are "Up" and "Down", if the default setting is putting your rover on it's (usually) shorter side. You need experiment a little bit in this case to find the right setting.
+
+
 ## 0.14.1.1
 ### Fixes
 - Fixed detection of KSP Interstellar Extended generators
