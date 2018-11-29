@@ -90,7 +90,7 @@ namespace BonVoyage
             var from = rotationVector;
             var to = GeoUtils.GetTerrainNormal(v.latitude, v.longitude, v.altitude, v.mainBody);
 
-            Quaternion rotation = Quaternion.FromToRotation(from, to);
+            QuaternionD rotation = QuaternionD.FromToRotation(from, to);
 
             v.SetRotation(rotation);
         }

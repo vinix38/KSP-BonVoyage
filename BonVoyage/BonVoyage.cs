@@ -126,7 +126,7 @@ namespace BonVoyage
 
             LoadControllers();
 
-            // After BonVoyage was runned for the first time, set FirstRun to false, because we don't need to reset path and target lat/lon
+            // After BonVoyage was run for the first time, set FirstRun to false, because we don't need to reset path and target lat/lon
             Configuration.FirstRun = false;
 
             InputLockManager.RemoveControlLock("BonVoyageInputLock");
@@ -707,7 +707,7 @@ namespace BonVoyage
         /// <summary>
         /// Load BV controllers from the config
         /// </summary>
-        private void LoadControllers()
+        internal void LoadControllers()
         {
             Vessel vessel = null;
             ProtoPartSnapshot part = null;
