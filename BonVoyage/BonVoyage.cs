@@ -16,7 +16,7 @@ namespace BonVoyage
     {
         #region Public properties
 
-        public static BonVoyage Instance; // Mod's instance
+        public static BonVoyage Instance { get; private set; } // Mod's instance
         public const string Name = "BonVoyage"; // Name of the mod
 
         internal MainWindowModel MainModel; // Main view's model
@@ -125,6 +125,7 @@ namespace BonVoyage
             GameEvents.onGameUnpause.Add(OnGameUnpause);
 
             LoadControllers();
+            AddScenario();
 
             // After BonVoyage was run for the first time, set FirstRun to false, because we don't need to reset path and target lat/lon
             Configuration.FirstRun = false;
@@ -268,6 +269,7 @@ namespace BonVoyage
             if ((scene == GameScenes.FLIGHT) || (scene == GameScenes.SPACECENTER) || (scene == GameScenes.TRACKSTATION))
             {
                 LoadControllers();
+                BonVoyageScenario.Instance.LoadScenario();
             }
 
             GamePaused = false;
@@ -806,6 +808,41 @@ namespace BonVoyage
             }
             else
                 InputLockManager.RemoveControlLock("BonVoyageInputLock");
+        }
+
+
+        /// <summary>
+        /// Add BonVoyage scenario to scenes (flight, space center, tracking station)
+        /// </summary>
+        private void AddScenario()
+        {
+            var game = HighLogic.CurrentGame;
+            var psm = game.scenarios.Find(s => s.moduleName == typeof(BonVoyageScenario).Name);
+            if (psm == null) // Our scenario doesn't exist => add it to all relevant scenes
+            {
+                game.AddProtoScenarioModule(typeof(BonVoyageScenario), GameScenes.FLIGHT, GameScenes.SPACECENTER, GameScenes.TRACKSTATION);
+            }
+            else // Check which scene don't have scenario and add it
+            {
+                bool flight = false, space = false, track = false;
+                int count = psm.targetScenes.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    var s = psm.targetScenes[i];
+                    if (s == GameScenes.FLIGHT)
+                        flight = true;
+                    if (s == GameScenes.SPACECENTER)
+                        space = true;
+                    if (s == GameScenes.TRACKSTATION)
+                        track = true;
+                }
+                if (!flight)
+                    psm.targetScenes.Add(GameScenes.FLIGHT);
+                if (!space)
+                    psm.targetScenes.Add(GameScenes.SPACECENTER);
+                if (!track)
+                    psm.targetScenes.Add(GameScenes.TRACKSTATION);
+            }
         }
 
     }

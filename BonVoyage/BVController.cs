@@ -78,6 +78,8 @@ namespace BonVoyage
         internal virtual double AverageSpeed { get { return 0; } }
         internal event EventHandler OnStateChanged;
 
+        internal Batteries batteries = new Batteries(); // Information about batteries
+
         #endregion
 
 

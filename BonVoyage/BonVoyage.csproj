@@ -49,8 +49,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Batteries.cs" />
     <Compile Include="BonVoyage.cs" />
     <Compile Include="BonVoyageModule.cs" />
+    <Compile Include="BonVoyageScenario.cs" />
     <Compile Include="BVController.cs" />
     <Compile Include="GUI\CommonWindowProperties.cs" />
     <Compile Include="GUI\ControlWindowModel.cs" />

@@ -35,7 +35,6 @@ namespace BonVoyage
         private double maxSpeedBase; // maximum speed without modifiers
         private int wheelsPercentualModifier; // Speed modifier based on wheels
         private int crewSpeedBonus; // Speed modifier based on the available crew
-        private Batteries batteries = new Batteries(); // Information about batteries
         WheelTestResult wheelTestResult = new WheelTestResult(); // Result of a test of wheels
 
         // Reduction of speed based on difference between required and available power in percents
@@ -67,22 +66,6 @@ namespace BonVoyage
                 averageSpeedAtNight = double.Parse(BVModule.GetValue("averageSpeedAtNight") != null ? BVModule.GetValue("averageSpeedAtNight") : "0");
                 manned = bool.Parse(BVModule.GetValue("manned") != null ? BVModule.GetValue("manned") : "false");
                 vesselHeightFromTerrain = double.Parse(BVModule.GetValue("vesselHeightFromTerrain") != null ? BVModule.GetValue("vesselHeightFromTerrain") : "0");
-
-                if (BVModule.GetValue("batteries") != null)
-                {
-                    string[] tempBat = BVModule.GetValue("batteries").Split(new char[] { '/' });
-                    if (tempBat.Length == 5)
-                    {
-                        if (tempBat[0] == "1")
-                            batteries.UseBatteries = true;
-                        else
-                            batteries.UseBatteries = false;
-                        batteries.MaxUsedEC = double.Parse(tempBat[1]);
-                        batteries.ECPerSecondConsumed = double.Parse(tempBat[2]);
-                        batteries.ECPerSecondGenerated = double.Parse(tempBat[3]);
-                        batteries.CurrentEC = double.Parse(tempBat[4]);
-                    }
-                }
             }
 
             speedMultiplier = 1.0;
@@ -532,29 +515,6 @@ namespace BonVoyage
         #region Power
 
         /// <summary>
-        /// Information about batteries
-        /// </summary>
-        internal struct Batteries
-        {
-            internal bool UseBatteries;
-            internal double MaxAvailableEC;
-            internal double MaxUsedEC;
-            internal double ECPerSecondConsumed;
-            internal double ECPerSecondGenerated;
-            internal double CurrentEC;
-
-            /// <summary>
-            /// Format fields into a string for the BonVoyageModule
-            /// </summary>
-            /// <returns></returns>
-            internal string GetBatteriesInfo()
-            {
-                return (UseBatteries ? "1" : "0") + "/" + MaxUsedEC.ToString() + "/" + ECPerSecondConsumed.ToString() + "/" + ECPerSecondGenerated.ToString() + "/" + CurrentEC.ToString();
-            }
-        }
-
-
-        /// <summary>
         /// Calculate available power from solar panels
         /// </summary>
         /// <returns></returns>
@@ -744,7 +704,6 @@ namespace BonVoyage
                 module.averageSpeedAtNight = averageSpeedAtNight;
                 module.manned = manned;
                 module.vesselHeightFromTerrain = vesselHeightFromTerrain;
-                module.batteries = batteries.GetBatteriesInfo();
             }
 
             return base.Activate();
@@ -812,7 +771,6 @@ namespace BonVoyage
                     batteries.CurrentEC = Math.Min(batteries.CurrentEC + batteries.ECPerSecondGenerated * deltaT, batteries.MaxUsedEC);
                 else // night
                     batteries.CurrentEC = Math.Max(batteries.CurrentEC - batteries.ECPerSecondConsumed * deltaT, 0);
-                BVModule.SetValue("batteries", batteries.GetBatteriesInfo());
             }
 
             // No moving at night, if there isn't enough power
