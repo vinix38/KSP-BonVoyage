@@ -146,6 +146,16 @@ namespace BonVoyage
             };
             displayedSystemCheckResults.Add(result);
 
+            result = new DisplayedSystemCheckResult
+            {
+                Toggle = true,
+                Text = Localizer.Format("#LOC_BV_Control_UseFuelCells"),
+                Tooltip = Localizer.Format("#LOC_BV_Control_UseFuelCellsTooltip"),
+                GetToggleValue = GetUseFuelCells,
+                ToggleSelectedCallback = UseFuelCellsChanged
+            };
+            displayedSystemCheckResults.Add(result);
+
             return displayedSystemCheckResults;
         }
 
@@ -200,10 +210,46 @@ namespace BonVoyage
                 batteries.MaxAvailableEC = GetAvailableEC_Batteries();
             else
                 batteries.MaxAvailableEC = 0;
-            batteries.MaxUsedEC = 0;
-            batteries.ECPerSecondConsumed = 0;
-            batteries.ECPerSecondGenerated = 0;
-            batteries.CurrentEC = 0;
+
+            // Get available EC from fuell cells
+            fuelCells.OutputValue = 0;
+            fuelCells.InputResources.Clear();
+            if (fuelCells.Use)
+            {
+                List<ModuleResourceConverter> mrc = vessel.FindPartModulesImplementing<ModuleResourceConverter>();
+                for (int i = 0; i < mrc.Count; i++)
+                {
+                    bool found = false;
+                    try
+                    {
+                        var ec = mrc[i].outputList.Find(x => x.ResourceName == "ElectricCharge");
+                        fuelCells.OutputValue = ec.Ratio;
+                        found = true;
+                    }
+                    catch
+                    {
+                        found = false;
+                    }
+
+                    if (found)
+                    {
+                        // Add input resources
+                        var iList = mrc[i].inputList;
+                        for (int r = 0; r < iList.Count; r++)
+                        {
+                            var ir = fuelCells.InputResources.Find(x => x.Name == iList[r].ResourceName);
+                            if (ir == null)
+                            {
+                                ir = new Resource();
+                                ir.Name = iList[r].ResourceName;
+                                fuelCells.InputResources.Add(ir);
+                            }
+                            ir.Ratio += iList[r].Ratio;
+                        }
+                    }
+                }
+            }
+            electricPower_Other += fuelCells.OutputValue;
 
             // Manned
             manned = (vessel.GetCrewCount() > 0);
@@ -682,10 +728,27 @@ namespace BonVoyage
                 return false;
             }
 
+            // Get fuel amount if fuel cells are used
+            if (fuelCells.Use)
+            {
+                IResourceBroker broker = new ResourceBroker();
+                var iList = fuelCells.InputResources;
+                for (int i = 0; i < iList.Count; i++)
+                {
+                    iList[i].MaximumAmountAvailable += broker.AmountAvailable(vessel.rootPart, iList[i].Name, 1, ResourceFlowMode.ALL_VESSEL);
+
+                    if (iList[i].MaximumAmountAvailable == 0)
+                    {
+                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NotEnoughFuel"), 5f).color = Color.yellow;
+                        return false;
+                    }
+                }
+            }
+
             // Power production
             if (requiredPower > (electricPower_Solar + electricPower_Other))
             {
-                // If required power is greater then total power generated, then average speed can be lowered up to 75%
+                // If required power is greater than total power generated, then average speed can be lowered up to 75%
                 double speedReduction = (requiredPower - (electricPower_Solar + electricPower_Other)) / requiredPower;
 
                 if (speedReduction > 0.75)
@@ -921,6 +984,30 @@ namespace BonVoyage
         internal void UseBatteriesChanged(bool value)
         {
             batteries.UseBatteries = value;
+            if (!value)
+                fuelCells.Use = false;
+        }
+
+
+        /// <summary>
+        /// Return status of fuel cells usage
+        /// </summary>
+        /// <returns></returns>
+        internal bool GetUseFuelCells()
+        {
+            return fuelCells.Use;
+        }
+
+
+        /// <summary>
+        /// Set fuel cells usage
+        /// </summary>
+        /// <param name="value"></param>
+        internal void UseFuelCellsChanged(bool value)
+        {
+            fuelCells.Use = value;
+            if (value)
+                batteries.UseBatteries = true;
         }
 
     }

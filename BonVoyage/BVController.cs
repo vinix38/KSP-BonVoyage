@@ -79,6 +79,7 @@ namespace BonVoyage
         internal event EventHandler OnStateChanged;
 
         internal Batteries batteries = new Batteries(); // Information about batteries
+        internal Converter fuelCells = new Converter(); // Information about fuel cells
 
         #endregion
 
