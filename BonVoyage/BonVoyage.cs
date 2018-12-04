@@ -299,17 +299,23 @@ namespace BonVoyage
                         break;
                     }
                 }
-
-                // Move only a rover
-                if ((controller != null) && (controller is RoverController))
+                
+                if (controller != null)
                 {
-                    // Only rovers with active controller or rovers that just arrived at the destination
-                    if (controller.Active || controller.Arrived)
+                    // Move only a rover
+                    if (controller is RoverController)
                     {
-                        // Stabilize only if another stabilizer is not present
-                        if (!otherStabilizerPresent)
-                            StabilizeVessel.AddVesselToStabilize(vessel, controller.RotationVector, Configuration.DisableRotation);
+                        // Only rovers with active controller or rovers that just arrived at the destination
+                        if (controller.Active || controller.Arrived)
+                        {
+                            // Stabilize only if another stabilizer is not present
+                            if (!otherStabilizerPresent)
+                                StabilizeVessel.AddVesselToStabilize(vessel, controller.RotationVector, Configuration.DisableRotation);
+                        }
                     }
+
+                    // Deduct resources
+                    controller.ProcessResources();
                 }
             }
         }

@@ -735,7 +735,7 @@ namespace BonVoyage
                 var iList = fuelCells.InputResources;
                 for (int i = 0; i < iList.Count; i++)
                 {
-                    iList[i].MaximumAmountAvailable += broker.AmountAvailable(vessel.rootPart, iList[i].Name, 1, ResourceFlowMode.ALL_VESSEL);
+                    iList[i].MaximumAmountAvailable = broker.AmountAvailable(vessel.rootPart, iList[i].Name, 1, ResourceFlowMode.ALL_VESSEL);
 
                     if (iList[i].MaximumAmountAvailable == 0)
                     {
@@ -826,10 +826,33 @@ namespace BonVoyage
                 speedMultiplier = 1.0;
 
             double deltaT = currentTime - lastTimeUpdated; // Time delta from the last update
+            double deltaTOver = 0; // deltaT which is calculated from a value over the maximum resource amout available
 
             // Compute increase or decrease in EC from the last update
             if (batteries.UseBatteries)
             {
+                // Process fuel cells before batteries
+                if (fuelCells.Use 
+                    && ((angle > 90) 
+                        || (batteries.ECPerSecondGenerated - fuelCells.OutputValue <= 0)
+                        || (batteries.CurrentEC < batteries.MaxUsedEC))) // Night, not enough solar power or we need to recharge batteries
+                {
+                    var iList = fuelCells.InputResources;
+                    for (int i = 0; i < iList.Count; i++)
+                    {
+                        iList[i].CurrentAmountUsed += iList[i].Ratio * deltaT;
+                        if (iList[i].CurrentAmountUsed > iList[i].MaximumAmountAvailable)
+                            deltaTOver = Math.Max(deltaTOver, (iList[i].CurrentAmountUsed - iList[i].MaximumAmountAvailable) / iList[i].Ratio);
+                    }
+                    if (deltaTOver > 0)
+                    {
+                        deltaT -= deltaTOver;
+                        // Reduce the amount of used resources
+                        for (int i = 0; i < iList.Count; i++)
+                            iList[i].CurrentAmountUsed -= iList[i].Ratio * deltaTOver;
+                    }
+                }
+
                 if (angle <= 90) // day
                     batteries.CurrentEC = Math.Min(batteries.CurrentEC + batteries.ECPerSecondGenerated * deltaT, batteries.MaxUsedEC);
                 else // night
@@ -922,6 +945,29 @@ namespace BonVoyage
             }
 
             Save(currentTime);
+
+            // Stop the rover, we don't have enough of fuel
+            if (deltaTOver > 0)
+            {
+                active = false;
+                arrived = true;
+                BVModule.SetValue("active", "False");
+                BVModule.SetValue("arrived", "True");
+                BVModule.SetValue("pathEncoded", "");
+
+                // Dewarp
+                if (Configuration.AutomaticDewarp)
+                {
+                    if (TimeWarp.CurrentRate > 3) // Instant drop to 50x warp
+                        TimeWarp.SetRate(3, true);
+                    if (TimeWarp.CurrentRate > 0) // Gradual drop out of warp
+                        TimeWarp.SetRate(0, false);
+                    ScreenMessages.PostScreenMessage(vessel.vesselName + " " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_NotEnoughFuel"), 5f).color = Color.red;
+                }
+
+                NotifyNotEnoughFuel();
+                State = VesselState.Idle;
+            }
         }
 
 
@@ -957,11 +1003,26 @@ namespace BonVoyage
         private void NotifyArrival()
         {
             MessageSystem.Message message = new MessageSystem.Message(
-                "Rover arrived", // title
+                Localizer.Format("#LOC_BV_Title_RoverArrived"), // title
                 "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_VesselArrived") + " " + vessel.mainBody.bodyDisplayName.Replace("^N", "") + ".\n<color=#AED6EE>"
                 + Localizer.Format("#LOC_BV_Control_Lat") + ": " + targetLatitude.ToString("F2") + "</color>\n<color=#AED6EE>" + Localizer.Format("#LOC_BV_Control_Lon") + ": " + targetLongitude.ToString("F2") + "</color>", // message
                 MessageSystemButton.MessageButtonColor.GREEN,
                 MessageSystemButton.ButtonIcons.COMPLETE
+            );
+            MessageSystem.Instance.AddMessage(message);
+        }
+
+
+        /// <summary>
+        /// Notify, that rover has not enough fuel
+        /// </summary>
+        private void NotifyNotEnoughFuel()
+        {
+            MessageSystem.Message message = new MessageSystem.Message(
+                Localizer.Format("#LOC_BV_Title_RoverStopped"), // title
+                "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_NotEnoughFuel") + ".\n<color=#AED6EE>", // message
+                MessageSystemButton.MessageButtonColor.RED,
+                MessageSystemButton.ButtonIcons.ALERT
             );
             MessageSystem.Instance.AddMessage(message);
         }

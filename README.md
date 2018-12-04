@@ -2,6 +2,12 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.3 - Power of LOx
+### Changes
+- Fuel cells support
+- Added Reload button to the main window to refresh list of vessels without scene switch
+
+
 ## 0.14.2
 ### Changes
 - Unmanned rover must have an active connection to set a target or issue the GO command if you are using the CommNet or RemoteTech

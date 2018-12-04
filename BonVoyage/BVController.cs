@@ -465,6 +465,24 @@ namespace BonVoyage
             return true;
         }
 
+
+        /// <summary>
+        /// Deduct used amount from resource tanks
+        /// </summary>
+        internal void ProcessResources()
+        {
+            IResourceBroker broker = new ResourceBroker();
+            if (fuelCells.Use)
+            {
+                var iList = fuelCells.InputResources;
+                for (int i = 0; i < iList.Count; i++)
+                {
+                    iList[i].MaximumAmountAvailable -= broker.RequestResource(vessel.rootPart, iList[i].Name, iList[i].CurrentAmountUsed, 1, ResourceFlowMode.ALL_VESSEL);
+                    iList[i].CurrentAmountUsed = 0;
+                }
+            }
+        }
+
     }
 
 }
