@@ -2,6 +2,10 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.4
+- Recompile for KSP 1.7
+
+
 ## 0.14.3 - Power of LOx
 ### Changes
 - Fuel cells support
