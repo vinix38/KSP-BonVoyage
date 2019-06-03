@@ -2,6 +2,15 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.5
+### Fixes
+- Fixed bulk profile category
+- Fixed compatibility with KSPWheelTracks
+
+### Changes
+- Recompile for KSP 1.7.1
+
+
 ## 0.14.4
 - Recompile for KSP 1.7
 

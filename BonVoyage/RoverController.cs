@@ -543,11 +543,11 @@ namespace BonVoyage
                     if (!(bool)wheelTracks.Fields.GetValue("motorLocked"))
                     {
                         online += 2;
-                        powerRequired += (float)wheelTracks.Fields.GetValue("maxECDraw") * (float)wheelMotor.Fields.GetValue("motorOutput") / 100; // Motor output can be limited by a slider
+                        powerRequired += (float)wheelTracks.Fields.GetValue("maxECDraw") * (float)wheelTracks.Fields.GetValue("motorOutput") / 100; // Motor output can be limited by a slider
                         if (maxSafeSpeed > 0)
-                            maxSpeedSum += 2 * Math.Min((float)wheelMotor.Fields.GetValue("maxDrivenSpeed"), maxSafeSpeed);
+                            maxSpeedSum += 2 * Math.Min((float)wheelTracks.Fields.GetValue("maxDrivenSpeed"), maxSafeSpeed);
                         else
-                            maxSpeedSum += 2 * (float)wheelMotor.Fields.GetValue("maxDrivenSpeed");
+                            maxSpeedSum += 2 * (float)wheelTracks.Fields.GetValue("maxDrivenSpeed");
                     }
                 }
             }
