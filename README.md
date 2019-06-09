@@ -2,6 +2,11 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.6.1
+### Fixes
+- Fixed null ref for the new game
+
+
 ## 0.14.6
 ### Fixes
 - Some nullrefs and indexes out of range were fixed

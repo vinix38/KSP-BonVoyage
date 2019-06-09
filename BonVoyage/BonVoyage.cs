@@ -269,7 +269,8 @@ namespace BonVoyage
             if ((scene == GameScenes.FLIGHT) || (scene == GameScenes.SPACECENTER) || (scene == GameScenes.TRACKSTATION))
             {
                 LoadControllers();
-                BonVoyageScenario.Instance.LoadScenario();
+                if (BonVoyageScenario.Instance != null)
+                    BonVoyageScenario.Instance.LoadScenario();
             }
 
             GamePaused = false;
