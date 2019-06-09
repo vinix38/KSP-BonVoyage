@@ -2,6 +2,12 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.6
+### Fixes
+- Some nullrefs and indexes out of range were fixed
+- Fixed max speed check for Making History expansion foldable wheels (typo in the name of wheels)
+
+
 ## 0.14.5
 ### Fixes
 - Fixed bulk profile category

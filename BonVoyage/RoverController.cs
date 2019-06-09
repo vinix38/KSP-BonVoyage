@@ -448,8 +448,8 @@ namespace BonVoyage
                         online++;
                         double maxWheelSpeed = 0;
 
-                        // RoveMax M1 and RoveMax M1-F (Making History expansion) don't have max wheels speed defined, so we just set it to something sensible
-                        if ((wheelMotor.part.name == "roverWheel1") || (wheelMotor.part.name == "roverWheelM1-F "))
+                        // RoveMax M1 and RoveMax M1-F (Making History expansion) don't have max wheel's speed defined, so we just set it to something sensible
+                        if ((wheelMotor.part.name == "roverWheel1") || (wheelMotor.part.name == "roverWheelM1-F"))
                             maxWheelSpeed = 42;
                         else
                             maxWheelSpeed = wheelMotor.wheelSpeedMax;

@@ -727,7 +727,6 @@ namespace BonVoyage
                 vessel = FlightGlobals.Vessels[i];
                 ConfigNode vesselConfigNode = new ConfigNode();
                 vessel.protoVessel.Save(vesselConfigNode);
-
                 for (int k = 0; k < vessel.protoVessel.protoPartSnapshots.Count; k++)
                 {
                     part = vessel.protoVessel.protoPartSnapshots[k];
@@ -737,7 +736,13 @@ namespace BonVoyage
                         ConfigNode BVModule = module.moduleValues;
                         string vesselType = BVModule.GetValue("vesselType");
                         if (vessel.isActiveVessel)
-                            vesselType = vessel.FindPartModuleImplementing<BonVoyageModule>().vesselType;
+                        {
+                            BonVoyageModule m = vessel.FindPartModuleImplementing<BonVoyageModule>();
+                            if (m != null)
+                                vesselType = m.vesselType;
+                            else
+                                continue;
+                        }
                         BVController controller = null;
                         switch (vesselType)
                         {
