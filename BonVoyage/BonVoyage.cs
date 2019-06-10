@@ -758,6 +758,7 @@ namespace BonVoyage
                                 break;
                         }
                         BVControllers.Add(controller);
+                        break;
                     }
                 }
             }

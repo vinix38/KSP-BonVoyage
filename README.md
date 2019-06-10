@@ -2,9 +2,12 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
-## 0.14.6.1
+## 0.14.7
 ### Fixes
 - Fixed null ref for the new game
+- Fixed loading of controllers into the main window
+- Fixed issue with control window moving out of screen
+- Max speed of stock wheels (including Making History wheels) is reported properly
 
 
 ## 0.14.6
