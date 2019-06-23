@@ -2,6 +2,12 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.8
+### Changes
+- KSP 1.7.2 compatible
+- Fuel cells are switched off during a night, when they don't have enough power to recharge batteries (when they are used as a complement to solar panels), to not waste a fuel.
+
+
 ## 0.14.7
 ### Fixes
 - Fixed null ref for the new game

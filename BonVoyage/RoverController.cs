@@ -830,19 +830,22 @@ namespace BonVoyage
                         || (batteries.ECPerSecondGenerated - fuelCells.OutputValue <= 0)
                         || (batteries.CurrentEC < batteries.MaxUsedEC))) // Night, not enough solar power or we need to recharge batteries
                 {
-                    var iList = fuelCells.InputResources;
-                    for (int i = 0; i < iList.Count; i++)
+                    if (!((angle > 90) && (batteries.CurrentEC == 0))) // Don't use fuel cells, if it's night and current EC of batteries is zero. This means, that there isn't enough power to recharge them and fuel is wasted.
                     {
-                        iList[i].CurrentAmountUsed += iList[i].Ratio * deltaT;
-                        if (iList[i].CurrentAmountUsed > iList[i].MaximumAmountAvailable)
-                            deltaTOver = Math.Max(deltaTOver, (iList[i].CurrentAmountUsed - iList[i].MaximumAmountAvailable) / iList[i].Ratio);
-                    }
-                    if (deltaTOver > 0)
-                    {
-                        deltaT -= deltaTOver;
-                        // Reduce the amount of used resources
+                        var iList = fuelCells.InputResources;
                         for (int i = 0; i < iList.Count; i++)
-                            iList[i].CurrentAmountUsed -= iList[i].Ratio * deltaTOver;
+                        {
+                            iList[i].CurrentAmountUsed += iList[i].Ratio * deltaT;
+                            if (iList[i].CurrentAmountUsed > iList[i].MaximumAmountAvailable)
+                                deltaTOver = Math.Max(deltaTOver, (iList[i].CurrentAmountUsed - iList[i].MaximumAmountAvailable) / iList[i].Ratio);
+                        }
+                        if (deltaTOver > 0)
+                        {
+                            deltaT -= deltaTOver;
+                            // Reduce the amount of used resources
+                            for (int i = 0; i < iList.Count; i++)
+                                iList[i].CurrentAmountUsed -= iList[i].Ratio * deltaTOver;
+                        }
                     }
                 }
 
