@@ -194,22 +194,29 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if (currentController.vessel.situation == Vessel.Situations.LANDED)
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
                 {
-                    if (!currentController.CheckConnection())
-                        return;
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
 
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_FindingRoute", 5f));
-                    if (currentController.FindRoute(latitude, longitude))
-                    {
-                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteFound", 5f));
-                        RefreshStatsListLayout();
-                    }
-                    else
-                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteNotFound", 5f));
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if (!currentController.CheckConnection())
+                    return;
+
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_FindingRoute", 5f));
+                if (currentController.FindRoute(latitude, longitude))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteFound", 5f));
+                    RefreshStatsListLayout();
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f).color = Color.yellow;
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteNotFound", 5f));
             }
             else
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
@@ -223,13 +230,20 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if (currentController.vessel.situation == Vessel.Situations.LANDED)
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
                 {
-                    MapView.EnterMapView();
-                    BonVoyage.Instance.MapMode = true;
-                }
-                else
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                MapView.EnterMapView();
+                BonVoyage.Instance.MapMode = true;
             }
             else
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
@@ -243,6 +257,18 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
                 double[] cooordinates = Tools.GetCurrentTargetLatLon(currentController.vessel);
                 if (cooordinates[0] != double.MinValue)
                 {
@@ -264,6 +290,18 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
                 double[] cooordinates = Tools.GetCurrentWaypointLatLon(currentController.vessel);
                 if (cooordinates[0] != double.MinValue)
                 {

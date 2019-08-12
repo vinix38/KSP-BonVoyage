@@ -32,8 +32,8 @@ namespace BonVoyage
         /// Vessel type - 0 - rover, 1 - ship
         /// </summary>
         // localize, when ship part is ready
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Vessel type", category = "Bon Voyage")]
-        [UI_ChooseOption(scene = UI_Scene.None, options = new[] { "0", "1" }, display = new[] { "Rover", "Ship" })]
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Autopilot type", category = "Bon Voyage")]
+        [UI_ChooseOption(scene = UI_Scene.Flight | UI_Scene.Editor, options = new[] { "0", "1" }, display = new[] { "#LOC_BV_ContextMenu_VT_Rover", "#LOC_BV_ContextMenu_VT_Naval" })]
         public string vesselType = "0";
 
         /// <summary>
@@ -126,11 +126,12 @@ namespace BonVoyage
             Events["ToggleBVController"].guiName = (!shutdown ? Localizer.Format("#LOC_BV_ContextMenu_Shutdown") : Localizer.Format("#LOC_BV_ContextMenu_Activate"));
             if (HighLogic.LoadedSceneIsEditor)
             {
-                //Fields["vesselType"].guiActive = !shutdown;
+                Fields["vesselType"].guiActive = !shutdown;
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
-                //Fields["vesselType"].guiActive = !shutdown;
+                Fields["vesselType"].uiControlFlight.onFieldChanged = VesselTypeChanged;
+                Fields["vesselType"].guiActive = !shutdown;
                 Fields["rotationVector"].uiControlFlight.onFieldChanged = RotationVectorChanged;
                 Fields["rotationVector"].guiActive = !shutdown;
                 Events["BVControlPanel"].guiActive = !shutdown;
@@ -150,7 +151,7 @@ namespace BonVoyage
             Events["ToggleBVController"].guiName = (!shutdown ? Localizer.Format("#LOC_BV_ContextMenu_Shutdown") : Localizer.Format("#LOC_BV_ContextMenu_Activate"));
             if (!HighLogic.LoadedSceneIsEditor)
             {
-                //Fields["vesselType"].guiActive = !shutdown;
+                Fields["vesselType"].guiActive = !shutdown;
                 Fields["rotationVector"].guiActive = !shutdown;
                 Events["BVControlPanel"].guiActive = !shutdown;
                 if (shutdown)
@@ -166,7 +167,7 @@ namespace BonVoyage
             }
             else
             {
-                //Fields["vesselType"].guiActiveEditor = !shutdown;
+                Fields["vesselType"].guiActiveEditor = !shutdown;
             }
         }
 
@@ -216,6 +217,21 @@ namespace BonVoyage
                         break;
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Raised when vesselType field was changed
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="oldValue"></param>
+        private void VesselTypeChanged(BaseField field, object oldValue)
+        {
+            BonVoyage.Instance.LoadControllers();
+            if (BonVoyage.Instance.ControlViewVisible)
+                BonVoyage.Instance.ToggleControlWindow();
+            if (BonVoyage.Instance.MainViewVisible)
+                BonVoyage.Instance.MainModel.RefreshVesselListLayout();
         }
 
         #endregion
