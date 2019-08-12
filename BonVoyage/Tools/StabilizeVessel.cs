@@ -94,6 +94,24 @@ namespace BonVoyage
 
             v.SetRotation(rotation);
         }
+        public static void Rotate(Vessel v, Vector3d _rotation)
+        {
+            v.ResetCollisionIgnores();
+            
+            var from = _rotation;
+            var to = GeoUtils.GetTerrainNormal(v.latitude, v.longitude, v.altitude, v.mainBody);
+
+            Quaternion rotation = Quaternion.FromToRotation(from, to);
+
+            v.SetRotation(rotation);
+
+            v.ResetGroundContact();
+            v.IgnoreGForces(20);
+            v.SetWorldVelocity(Vector3.zero);
+            v.angularMomentum = Vector3.zero;
+            v.angularVelocity = Vector3.zero;
+            VesselSleep(v);
+        }
 
 
         /// <summary>
