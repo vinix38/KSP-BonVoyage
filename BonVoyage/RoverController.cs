@@ -295,7 +295,7 @@ namespace BonVoyage
             {
                 maxSpeedBase = wheelTestResult.maxSpeedSum / wheelTestResult.online;
                 wheelsPercentualModifier = Math.Min(70, (40 + 5 * wheelTestResult.online));
-                averageSpeed = maxSpeedBase * wheelsPercentualModifier / 100 * (1 + crewSpeedBonus / 100);
+                averageSpeed = maxSpeedBase * Convert.ToDouble(wheelsPercentualModifier) / 100 * (1 + Convert.ToDouble(crewSpeedBonus) / 100);
             }
             else
                 averageSpeed = 0;
