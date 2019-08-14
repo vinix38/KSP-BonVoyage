@@ -84,6 +84,19 @@ namespace BonVoyage
                     }
                     controllerNode.AddNode(subNode);
 
+                    subNode = new ConfigNode("PROPELLANTS");
+                    ConfigNode propellantNode;
+                    for (int r = 0; r < controllers[i].propellants.Count; r++)
+                    {
+                        propellantNode = new ConfigNode("FUEL");
+                        propellantNode.AddValue("name", controllers[i].propellants[r].Name);
+                        propellantNode.AddValue("fuelFlow", controllers[i].propellants[r].FuelFlow);
+                        propellantNode.AddValue("maximumAmount", controllers[i].propellants[r].MaximumAmountAvailable);
+                        propellantNode.AddValue("currentAmount", controllers[i].propellants[r].CurrentAmountUsed);
+                        subNode.AddNode(propellantNode);
+                    }
+                    controllerNode.AddNode(subNode);
+
                     gameNode.AddNode(controllerNode);
                 }
             }
@@ -132,6 +145,22 @@ namespace BonVoyage
                                     ir.MaximumAmountAvailable = Convert.ToDouble(resources[r].GetValue("maximumAmount"));
                                     ir.CurrentAmountUsed = Convert.ToDouble(resources[r].GetValue("currentAmount"));
                                     controller.fuelCells.InputResources.Add(ir);
+                                }
+                            }
+
+                            subNode = controllerNode.GetNode("PROPELLANTS");
+                            if (subNode != null)
+                            {
+                                var propellants = subNode.GetNodes("FUEL");
+                                controller.propellants.Clear();
+                                for (int r = 0; r < propellants.Length; r++)
+                                {
+                                    Fuel ir = new Fuel();
+                                    ir.Name = propellants[r].GetValue("name");
+                                    ir.FuelFlow = Convert.ToDouble(propellants[r].GetValue("fuelFlow"));
+                                    ir.MaximumAmountAvailable = Convert.ToDouble(propellants[r].GetValue("maximumAmount"));
+                                    ir.CurrentAmountUsed = Convert.ToDouble(propellants[r].GetValue("currentAmount"));
+                                    controller.propellants.Add(ir);
                                 }
                             }
                         }

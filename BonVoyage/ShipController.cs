@@ -32,6 +32,13 @@ namespace BonVoyage
         private double angle; // Angle between the main body and the main sun
         private double maxSpeedBase; // maximum speed without modifiers
         private int crewSpeedBonus; // Speed modifier based on the available crew
+        EngineTestResult engineTestResult = new EngineTestResult(); // Result of a test of engines
+
+        // Basic values
+        private double thrust0 = 350; // 350kN
+        private double speed0 = 50; // 50m/s
+        private double mass0 = 25; // 25t
+        private double density0 = 1.11; // 1.11 - half of density of water plus half of density of air on Kerbin
 
         #endregion
 
@@ -83,7 +90,8 @@ namespace BonVoyage
                 Tooltip =
                     Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
                         + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
-                        + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
+                        + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s\n"
+                        + Localizer.Format("#LOC_BV_Control_UsedThrust") + ": " + engineTestResult.maxThrustSum.ToString("F") + " kN"
             };
             displayedSystemCheckResults.Add(result);
 
@@ -114,11 +122,12 @@ namespace BonVoyage
         /// </summary>
         internal override void SystemCheck()
         {
-            Debug.LogWarning("BV: air density = " + FlightGlobals.getAtmDensity(FlightGlobals.getStaticPressure(), FlightGlobals.getExternalTemperature()));
-            Debug.LogWarning("BV: air density ASL = " + vessel.mainBody.atmDensityASL);
-            Debug.LogWarning("BV: water density ASL = " + vessel.mainBody.oceanDensity);
-
             base.SystemCheck();
+
+            // Test stock engines
+            EngineTestResult testResultStockEngines = CheckStockEngines();
+            // Sum it (for future tests of non stock engines or different types of engines - jets, rocket etc.)
+            engineTestResult.maxThrustSum = testResultStockEngines.maxThrustSum;
 
             // Manned
             manned = (vessel.GetCrewCount() > 0);
@@ -159,8 +168,16 @@ namespace BonVoyage
                     crewSpeedBonus = 2 * maxScoutLevel; // up to 10% for a Scout (Scouts disregard safety)
             }
 
-            //// Test value = 50 m/s
-            maxSpeedBase = 50;
+            // Compute max speed - based on the drag equation
+            double Z = (density0 / (0.5 * vessel.mainBody.atmDensityASL + 0.5 * vessel.mainBody.oceanDensity)) * (mass0 / vessel.GetTotalMass()) * (engineTestResult.maxThrustSum / thrust0);
+            maxSpeedBase = Math.Sqrt(Z) * speed0;
+            if (maxSpeedBase > speed0) // We are over max allowed speed, then we need to decrease max available thrust
+            {
+                maxSpeedBase = speed0;
+                engineTestResult.maxThrustSum = engineTestResult.maxThrustSum / Z;
+                for (int p = 0; p < propellants.Count; p++)
+                    propellants[p].FuelFlow = propellants[p].FuelFlow / Z;
+            }
 
             averageSpeed = 0.7 * maxSpeedBase * (1 + Convert.ToDouble(crewSpeedBonus) / 100);
 
@@ -173,7 +190,75 @@ namespace BonVoyage
         }
 
 
-        #region Motors
+        #region Engines
+
+        /// <summary>
+        /// Result of the test of wheels
+        /// </summary>
+        private struct EngineTestResult
+        {
+            internal double maxThrustSum; // Sum of max thrusts of all enabled engines
+
+            internal EngineTestResult(double maxThrustSum)
+            {
+                this.maxThrustSum = maxThrustSum;
+            }
+        }
+
+
+        /// <summary>
+        /// Test stock engines implementing standard modules ModuleEnginesFX, ModuleEngines
+        /// </summary>
+        /// <returns></returns>
+        private EngineTestResult CheckStockEngines()
+        {
+            double maxThrustSum = 0;
+            propellants.Clear();
+            
+            // Get jet engines modules
+            List<Part> jets = new List<Part>();
+            for (int i = 0; i < vessel.parts.Count; i++)
+            {
+                var part = vessel.parts[i];
+                if (part.Modules.Contains("ModuleEnginesFX"))
+                    jets.Add(part);
+            }
+
+            for (int i = 0; i < jets.Count; i++)
+            {
+                List<ModuleEnginesFX> enginesFx = jets[i].FindModulesImplementing<ModuleEnginesFX>();
+                if (enginesFx != null)
+                {
+                    for (int k = 0; k < enginesFx.Count; k++)
+                    {
+                        if (!enginesFx[k].engineShutdown && enginesFx[k].isOperational)
+                        {
+                            // Max thrust
+                            maxThrustSum += enginesFx[k].maxThrust * enginesFx[k].thrustPercentage / 100;
+
+                            // Propellants used in ISP computation - what is not used is usually air
+                            for (int p = 0; p < enginesFx[k].propellants.Count; p++)
+                            {
+                                if (!enginesFx[k].propellants[p].ignoreForIsp)
+                                {
+                                    var ir = propellants.Find(x => x.Name == enginesFx[k].propellants[p].name);
+                                    if (ir == null)
+                                    {
+                                        ir = new Fuel();
+                                        ir.Name = enginesFx[k].propellants[p].name;
+                                        propellants.Add(ir);
+                                    }
+                                    ir.FuelFlow += enginesFx[k].getMaxFuelFlow(enginesFx[k].propellants[p]) * enginesFx[k].thrustPercentage / 100;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new EngineTestResult(maxThrustSum);
+        }
+
         #endregion
 
 
@@ -189,6 +274,26 @@ namespace BonVoyage
             }
 
             SystemCheck();
+            
+            // At least one engine must be on
+            if (engineTestResult.maxThrustSum == 0)
+            {
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_EnginesNotOnline"), 5f).color = Color.yellow;
+                return false;
+            }
+
+            // Get fuel amount
+            IResourceBroker broker = new ResourceBroker();
+            for (int i = 0; i < propellants.Count; i++)
+            {
+                propellants[i].MaximumAmountAvailable = broker.AmountAvailable(vessel.rootPart, propellants[i].Name, 1, ResourceFlowMode.ALL_VESSEL);
+
+                if (propellants[i].MaximumAmountAvailable == 0)
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NotEnoughFuel"), 5f).color = Color.yellow;
+                    return false;
+                }
+            }
 
             BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
             if (module != null)
@@ -258,6 +363,21 @@ namespace BonVoyage
                 speedMultiplier = 1.0;
 
             double deltaT = currentTime - lastTimeUpdated; // Time delta from the last update
+            double deltaTOver = 0; // deltaT which is calculated from a value over the maximum propellant amout available
+
+            for (int i = 0; i < propellants.Count; i++)
+            {
+                propellants[i].CurrentAmountUsed += propellants[i].FuelFlow * deltaT;
+                if (propellants[i].CurrentAmountUsed > propellants[i].MaximumAmountAvailable)
+                    deltaTOver = Math.Max(deltaTOver, (propellants[i].CurrentAmountUsed - propellants[i].MaximumAmountAvailable) / propellants[i].FuelFlow);
+            }
+            if (deltaTOver > 0)
+            {
+                deltaT -= deltaTOver;
+                // Reduce the amount of used propellants
+                for (int i = 0; i < propellants.Count; i++)
+                    propellants[i].CurrentAmountUsed -= propellants[i].FuelFlow * deltaTOver;
+            }
 
             double deltaS = AverageSpeed * deltaT; // Distance delta from the last update
             distanceTravelled += deltaS;
@@ -336,11 +456,34 @@ namespace BonVoyage
             }
 
             Save(currentTime);
+
+            // Stop the ship, we don't have enough of propellant
+            if (deltaTOver > 0)
+            {
+                active = false;
+                arrived = true;
+                BVModule.SetValue("active", "False");
+                BVModule.SetValue("arrived", "True");
+                BVModule.SetValue("pathEncoded", "");
+
+                // Dewarp
+                if (Configuration.AutomaticDewarp)
+                {
+                    if (TimeWarp.CurrentRate > 3) // Instant drop to 50x warp
+                        TimeWarp.SetRate(3, true);
+                    if (TimeWarp.CurrentRate > 0) // Gradual drop out of warp
+                        TimeWarp.SetRate(0, false);
+                    ScreenMessages.PostScreenMessage(vessel.vesselName + " " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_NotEnoughFuel"), 5f).color = Color.red;
+                }
+
+                NotifyNotEnoughFuel();
+                State = VesselState.Idle;
+            }
         }
 
 
         /// <summary>
-        /// Save move of a rover. We need to prevent hitting an active vessel.
+        /// Save move of a ship. We need to prevent hitting an active vessel.
         /// </summary>
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
@@ -375,6 +518,21 @@ namespace BonVoyage
                 + Localizer.Format("#LOC_BV_Control_Lat") + ": " + targetLatitude.ToString("F2") + "</color>\n<color=#AED6EE>" + Localizer.Format("#LOC_BV_Control_Lon") + ": " + targetLongitude.ToString("F2") + "</color>", // message
                 MessageSystemButton.MessageButtonColor.GREEN,
                 MessageSystemButton.ButtonIcons.COMPLETE
+            );
+            MessageSystem.Instance.AddMessage(message);
+        }
+
+
+        /// <summary>
+        /// Notify, that ship has not enough fuel
+        /// </summary>
+        private void NotifyNotEnoughFuel()
+        {
+            MessageSystem.Message message = new MessageSystem.Message(
+                Localizer.Format("#LOC_BV_Title_ShipStopped"), // title
+                "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_NotEnoughFuel") + ".\n<color=#AED6EE>", // message
+                MessageSystemButton.MessageButtonColor.RED,
+                MessageSystemButton.ButtonIcons.ALERT
             );
             MessageSystem.Instance.AddMessage(message);
         }

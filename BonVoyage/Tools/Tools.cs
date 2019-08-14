@@ -110,8 +110,8 @@ namespace BonVoyage
                     if (error < (targetBody.pqsController.radiusMax - targetBody.pqsController.radiusMin) / 100)
                     {
                         return new double[2] {
-                            (targetBody.GetLatitude(surfacePoint) + 360) % 360,
-                            (targetBody.GetLongitude(surfacePoint) + 360) % 360
+                            targetBody.GetLatitude(surfacePoint),
+                            targetBody.GetLongitude(surfacePoint)
                         };
                     }
                     else

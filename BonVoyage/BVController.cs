@@ -80,6 +80,7 @@ namespace BonVoyage
 
         internal Batteries batteries = new Batteries(); // Information about batteries
         internal Converter fuelCells = new Converter(); // Information about fuel cells
+        internal List<Fuel> propellants = new List<Fuel>(); // Information about propellants
 
         #endregion
 
@@ -472,6 +473,7 @@ namespace BonVoyage
         internal void ProcessResources()
         {
             IResourceBroker broker = new ResourceBroker();
+
             if (fuelCells.Use)
             {
                 var iList = fuelCells.InputResources;
@@ -480,6 +482,12 @@ namespace BonVoyage
                     iList[i].MaximumAmountAvailable -= broker.RequestResource(vessel.rootPart, iList[i].Name, iList[i].CurrentAmountUsed, 1, ResourceFlowMode.ALL_VESSEL);
                     iList[i].CurrentAmountUsed = 0;
                 }
+            }
+
+            for (int i = 0; i < propellants.Count; i++)
+            {
+                propellants[i].MaximumAmountAvailable -= broker.RequestResource(vessel.rootPart, propellants[i].Name, propellants[i].CurrentAmountUsed, 1, ResourceFlowMode.ALL_VESSEL);
+                propellants[i].CurrentAmountUsed = 0;
             }
         }
 

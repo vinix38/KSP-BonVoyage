@@ -55,6 +55,7 @@
     <Compile Include="BonVoyageScenario.cs" />
     <Compile Include="BVController.cs" />
     <Compile Include="Converter.cs" />
+    <Compile Include="Fuel.cs" />
     <Compile Include="GUI\CommonWindowProperties.cs" />
     <Compile Include="GUI\ControlWindowModel.cs" />
     <Compile Include="GUI\ControlWindowView.cs" />

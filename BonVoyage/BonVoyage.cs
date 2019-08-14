@@ -285,7 +285,7 @@ namespace BonVoyage
         /// <param name="vessel"></param>
         public void OnVesselGoOffRails(Vessel vessel)
         {
-            if (vessel.situation == Vessel.Situations.LANDED)
+            if ((vessel.situation == Vessel.Situations.LANDED) || (vessel.situation == Vessel.Situations.SPLASHED))
             {
                 if (vessel.isEVA) // Kerbals
                     return;
