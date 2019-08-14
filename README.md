@@ -3,6 +3,14 @@ Automagic Industries brings you a new autopilot, which reduces driving accidents
 
 # Changelog
 ## 0.14.8
+### Fixes
+- Fixed coordinates when a target is selected on the map
+
+### Changes
+- KSP 1.7.3 compatible
+
+
+## 0.14.8
 ### Changes
 - KSP 1.7.2 compatible
 - Fuel cells are switched off during a night, when they don't have enough power to recharge batteries (when they are used as a complement to solar panels), to not waste a fuel.
