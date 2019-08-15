@@ -91,68 +91,73 @@ namespace BonVoyage
 
         #region Status window texts
 
-        internal override List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal override List<DisplayedSystemCheckResult[]> GetDisplayedSystemCheckResults()
         {
             base.GetDisplayedSystemCheckResults();
 
-            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
-                Text = averageSpeed.ToString("F") + " m/s",
-                Tooltip = 
-                    averageSpeed > 0
-                    ?
-                    Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
-                        + Localizer.Format("#LOC_BV_Control_WheelsModifier") + ": " + wheelsPercentualModifier.ToString("F") + "%\n"
-                        + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
-                        + (SpeedReduction > 0 ? Localizer.Format("#LOC_BV_Control_PowerPenalty") + ": " + (SpeedReduction > 75 ? "100" : SpeedReduction.ToString("F")) + "%\n" : "")
-                        + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
-                    :
-                    Localizer.Format("#LOC_BV_Control_WheelsNotOnline")
+            DisplayedSystemCheckResult[] result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
+                    Text = averageSpeed.ToString("F") + " m/s",
+                    Tooltip =
+                        averageSpeed > 0
+                        ?
+                        Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
+                            + Localizer.Format("#LOC_BV_Control_WheelsModifier") + ": " + wheelsPercentualModifier.ToString("F") + "%\n"
+                            + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
+                            + (SpeedReduction > 0 ? Localizer.Format("#LOC_BV_Control_PowerPenalty") + ": " + (SpeedReduction > 75 ? "100" : SpeedReduction.ToString("F")) + "%\n" : "")
+                            + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
+                        :
+                        Localizer.Format("#LOC_BV_Control_WheelsNotOnline")
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_GeneratedPower"),
-                Text = (electricPower_Solar + electricPower_Other).ToString("F"),
-                Tooltip = Localizer.Format("#LOC_BV_Control_SolarPower") + ": " + electricPower_Solar.ToString("F") + "\n" + Localizer.Format("#LOC_BV_Control_GeneratorPower") + ": " + electricPower_Other.ToString("F") + "\n"
-                    + Localizer.Format("#LOC_BV_Control_UseBatteries_Usage") + ": " + (batteries.UseBatteries ? (batteries.MaxUsedEC.ToString("F0") + " / " + batteries.MaxAvailableEC.ToString("F0") + " EC") : Localizer.Format("#LOC_BV_Control_No"))
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_GeneratedPower"),
+                    Text = (electricPower_Solar + electricPower_Other).ToString("F"),
+                    Tooltip = Localizer.Format("#LOC_BV_Control_SolarPower") + ": " + electricPower_Solar.ToString("F") + "\n" + Localizer.Format("#LOC_BV_Control_GeneratorPower") + ": " + electricPower_Other.ToString("F") + "\n"
+                        + Localizer.Format("#LOC_BV_Control_UseBatteries_Usage") + ": " + (batteries.UseBatteries ? (batteries.MaxUsedEC.ToString("F0") + " / " + batteries.MaxAvailableEC.ToString("F0") + " EC") : Localizer.Format("#LOC_BV_Control_No"))
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_RequiredPower"),
-                Text = requiredPower.ToString("F") 
-                    + (SpeedReduction == 0 ? "" : 
-                        (((SpeedReduction > 0) && (SpeedReduction <= 75)) 
-                            ? " (" + Localizer.Format("#LOC_BV_Control_PowerReduced") + " " + SpeedReduction.ToString("F") + "%)" 
-                            : " (" + Localizer.Format("#LOC_BV_Control_NotEnoughPower") + ")")),
-                Tooltip = ""
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_RequiredPower"),
+                    Text = requiredPower.ToString("F")
+                        + (SpeedReduction == 0 ? "" :
+                            (((SpeedReduction > 0) && (SpeedReduction <= 75))
+                                ? " (" + Localizer.Format("#LOC_BV_Control_PowerReduced") + " " + SpeedReduction.ToString("F") + "%)"
+                                : " (" + Localizer.Format("#LOC_BV_Control_NotEnoughPower") + ")")),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = true,
-                Text = Localizer.Format("#LOC_BV_Control_UseBatteries"),
-                Tooltip = Localizer.Format("#LOC_BV_Control_UseBatteries_Tooltip"),
-                GetToggleValue = GetUseBatteries,
-                ToggleSelectedCallback = UseBatteriesChanged
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = Localizer.Format("#LOC_BV_Control_UseBatteries"),
+                    Tooltip = Localizer.Format("#LOC_BV_Control_UseBatteries_Tooltip"),
+                    GetToggleValue = GetUseBatteries,
+                    ToggleSelectedCallback = UseBatteriesChanged
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = true,
-                Text = Localizer.Format("#LOC_BV_Control_UseFuelCells"),
-                Tooltip = Localizer.Format("#LOC_BV_Control_UseFuelCellsTooltip"),
-                GetToggleValue = GetUseFuelCells,
-                ToggleSelectedCallback = UseFuelCellsChanged
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = Localizer.Format("#LOC_BV_Control_UseFuelCells"),
+                    Tooltip = Localizer.Format("#LOC_BV_Control_UseFuelCellsTooltip"),
+                    GetToggleValue = GetUseFuelCells,
+                    ToggleSelectedCallback = UseFuelCellsChanged
+                }
             };
             displayedSystemCheckResults.Add(result);
 

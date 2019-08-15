@@ -33,6 +33,7 @@ namespace BonVoyage
         private double maxSpeedBase; // maximum speed without modifiers
         private int crewSpeedBonus; // Speed modifier based on the available crew
         EngineTestResult engineTestResult = new EngineTestResult(); // Result of a test of engines
+        private int throttle = 100; // Allowed values: 100, 75, 50, 25
 
         // Basic values
         private double thrust0 = 350; // 350kN
@@ -78,20 +79,68 @@ namespace BonVoyage
 
         #region Status window texts
 
-        internal override List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal override List<DisplayedSystemCheckResult[]> GetDisplayedSystemCheckResults()
         {
             base.GetDisplayedSystemCheckResults();
 
-            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
-                Text = averageSpeed.ToString("F") + " m/s",
-                Tooltip =
-                    Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
+            DisplayedSystemCheckResult[] result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult
+                {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
+                    Text = averageSpeed.ToString("F") + " m/s",
+                    Tooltip = Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
                         + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
                         + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s\n"
                         + Localizer.Format("#LOC_BV_Control_UsedThrust") + ": " + engineTestResult.maxThrustSum.ToString("F") + " kN"
+                }
+            };
+            displayedSystemCheckResults.Add(result);
+
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult
+                {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_Throttle"),
+                    Text = "",
+                    Tooltip = Localizer.Format("#LOC_BV_Control_Throttle_Tooltip")
+                }
+            };
+            displayedSystemCheckResults.Add(result);
+
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = "100%",
+                    Tooltip = "",
+                    GetToggleValue = GetThrottle100,
+                    ToggleSelectedCallback = UseThrottle100
+                },
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = "75%",
+                    Tooltip = "",
+                    GetToggleValue = GetThrottle75,
+                    ToggleSelectedCallback = UseThrottle75
+                },
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = "50%",
+                    Tooltip = "",
+                    GetToggleValue = GetThrottle50,
+                    ToggleSelectedCallback = UseThrottle50
+                }
+            };
+            displayedSystemCheckResults.Add(result);
+
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = "25%",
+                    Tooltip = "",
+                    GetToggleValue = GetThrottle25,
+                    ToggleSelectedCallback = UseThrottle25
+                }
             };
             displayedSystemCheckResults.Add(result);
 
@@ -128,6 +177,11 @@ namespace BonVoyage
             EngineTestResult testResultStockEngines = CheckStockEngines();
             // Sum it (for future tests of non stock engines or different types of engines - jets, rocket etc.)
             engineTestResult.maxThrustSum = testResultStockEngines.maxThrustSum;
+
+            // Throttle
+            engineTestResult.maxThrustSum = engineTestResult.maxThrustSum * (Convert.ToDouble(throttle) / 100);
+            for (int p = 0; p < propellants.Count; p++)
+                propellants[p].FuelFlow = propellants[p].FuelFlow * (Convert.ToDouble(throttle) / 100);
 
             // Manned
             manned = (vessel.GetCrewCount() > 0);
@@ -215,7 +269,7 @@ namespace BonVoyage
             double maxThrustSum = 0;
             propellants.Clear();
             
-            // Get jet engines modules
+            // Get jet engines' modules
             List<Part> jets = new List<Part>();
             for (int i = 0; i < vessel.parts.Count; i++)
             {
@@ -255,6 +309,22 @@ namespace BonVoyage
                     }
                 }
             }
+
+
+            // Get rocket engines' modules
+            List<Part> rockets = new List<Part>();
+            for (int i = 0; i < vessel.parts.Count; i++)
+            {
+                var part = vessel.parts[i];
+                if (part.Modules.Contains("ModuleEngines"))
+                    rockets.Add(part);
+            }
+
+            for (int i = 0; i < rockets.Count; i++)
+            {
+
+            }
+
 
             return new EngineTestResult(maxThrustSum);
         }
@@ -367,16 +437,16 @@ namespace BonVoyage
 
             for (int i = 0; i < propellants.Count; i++)
             {
-                propellants[i].CurrentAmountUsed += propellants[i].FuelFlow * deltaT;
+                propellants[i].CurrentAmountUsed += propellants[i].FuelFlow * deltaT * speedMultiplier * speedMultiplier; // If speed is reduced, then thrust and subsequently fuel flow are reduced by square (from drag equation)
                 if (propellants[i].CurrentAmountUsed > propellants[i].MaximumAmountAvailable)
-                    deltaTOver = Math.Max(deltaTOver, (propellants[i].CurrentAmountUsed - propellants[i].MaximumAmountAvailable) / propellants[i].FuelFlow);
+                    deltaTOver = Math.Max(deltaTOver, (propellants[i].CurrentAmountUsed - propellants[i].MaximumAmountAvailable) / (propellants[i].FuelFlow * speedMultiplier * speedMultiplier));
             }
             if (deltaTOver > 0)
             {
                 deltaT -= deltaTOver;
                 // Reduce the amount of used propellants
                 for (int i = 0; i < propellants.Count; i++)
-                    propellants[i].CurrentAmountUsed -= propellants[i].FuelFlow * deltaTOver;
+                    propellants[i].CurrentAmountUsed -= propellants[i].FuelFlow * deltaTOver * speedMultiplier * speedMultiplier;
             }
 
             double deltaS = AverageSpeed * deltaT; // Distance delta from the last update
@@ -535,6 +605,50 @@ namespace BonVoyage
                 MessageSystemButton.ButtonIcons.ALERT
             );
             MessageSystem.Instance.AddMessage(message);
+        }
+
+
+        /// <summary>
+        /// Return status of throttle
+        /// </summary>
+        /// <returns></returns>
+        internal bool GetThrottle100()
+        {
+            return throttle == 100;
+        }
+        internal bool GetThrottle75()
+        {
+            return throttle == 75;
+        }
+        internal bool GetThrottle50()
+        {
+            return throttle == 50;
+        }
+        internal bool GetThrottle25()
+        {
+            return throttle == 25;
+        }
+
+
+        /// <summary>
+        /// Set throttle level
+        /// </summary>
+        /// <param name="value"></param>
+        internal void UseThrottle100(bool value)
+        {
+            throttle = 100;
+        }
+        internal void UseThrottle75(bool value)
+        {
+            throttle = 75;
+        }
+        internal void UseThrottle50(bool value)
+        {
+            throttle = 50;
+        }
+        internal void UseThrottle25(bool value)
+        {
+            throttle = 25;
         }
 
     }

@@ -2,6 +2,14 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.14.9
+### Fixes
+- Fixed coordinates when a target is selected on the map
+
+### Changes
+- KSP 1.7.3 compatible
+
+	
 ## 0.14.8
 ### Changes
 - KSP 1.7.2 compatible

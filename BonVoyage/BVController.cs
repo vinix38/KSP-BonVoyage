@@ -88,7 +88,7 @@ namespace BonVoyage
         #region Private and protected properties
 
         protected ConfigNode BVModule; // Config node of BonVoyageModule
-        protected List<DisplayedSystemCheckResult> displayedSystemCheckResults;
+        protected List<DisplayedSystemCheckResult[]> displayedSystemCheckResults;
         protected int mainStarIndex; // Vessel's main star's index in the FlightGlobals.Bodies
 
         // Config values
@@ -132,7 +132,7 @@ namespace BonVoyage
         {
             vessel = v;
             BVModule = module;
-            displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
+            displayedSystemCheckResults = new List<DisplayedSystemCheckResult[]>();
 
             // Load values from config if it isn't the first run of the mod (we are reseting vessel on the first run)
             if (!Configuration.FirstRun)
@@ -239,37 +239,40 @@ namespace BonVoyage
 
         #region Status window texts
 
-        internal virtual List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal virtual List<DisplayedSystemCheckResult[]> GetDisplayedSystemCheckResults()
         {
             if (displayedSystemCheckResults == null) // Just to be sure
-                displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
+                displayedSystemCheckResults = new List<DisplayedSystemCheckResult[]>();
 
             displayedSystemCheckResults.Clear();
 
-            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
-                Text = targetLatitude.ToString("0.####"),
-                Tooltip = ""
+            DisplayedSystemCheckResult[] result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
+                    Text = targetLatitude.ToString("0.####"),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
-                Text = targetLongitude.ToString("0.####"),
-                Tooltip = ""
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
+                    Text = targetLongitude.ToString("0.####"),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_Distance"),
-                Text = Tools.ConvertDistanceToText(RemainingDistanceToTarget),
-                Tooltip = ""
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_Distance"),
+                    Text = Tools.ConvertDistanceToText(RemainingDistanceToTarget),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
