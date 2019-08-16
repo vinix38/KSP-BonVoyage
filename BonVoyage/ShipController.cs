@@ -41,6 +41,18 @@ namespace BonVoyage
         private double mass0 = 25; // 25t
         private double density0 = 1.11; // 1.11 - half of density of water plus half of density of air on Kerbin
 
+        // Reduction of speed based on difference between required and available power in percents
+        private double SpeedReduction
+        {
+            get
+            {
+                double speedReduction = 0;
+                if (requiredPower > (electricPower_Solar + electricPower_Other))
+                    speedReduction = Math.Sqrt((requiredPower - (electricPower_Solar + electricPower_Other)) / requiredPower) * 100;
+                return speedReduction;
+            }
+        }
+
         #endregion
 
 
@@ -96,6 +108,25 @@ namespace BonVoyage
                 }
             };
             displayedSystemCheckResults.Add(result);
+
+            if (requiredPower > 0)
+            {
+                double speedReduction = SpeedReduction;
+                result = new DisplayedSystemCheckResult[] {
+                    new DisplayedSystemCheckResult {
+                        Toggle = false,
+                        Label = Localizer.Format("#LOC_BV_Control_ElectricPower"),
+                        Text = requiredPower.ToString("F") + " / " + (electricPower_Solar + electricPower_Other).ToString("F"),
+                        Tooltip = Localizer.Format("#LOC_BV_Control_RequiredPower") + ": " + requiredPower.ToString("F")
+                            + (speedReduction == 0 ? "" :
+                                (((speedReduction > 0) && (speedReduction <= 87))
+                                    ? " (" + Localizer.Format("#LOC_BV_Control_PowerReduced") + " " + speedReduction.ToString("F") + "%)"
+                                    : " (" + Localizer.Format("#LOC_BV_Control_NotEnoughPower") + ")")) + "\n"
+                            + Localizer.Format("#LOC_BV_Control_SolarPower") + ": " + electricPower_Solar.ToString("F") + "\n" + Localizer.Format("#LOC_BV_Control_GeneratorPower") + ": " + electricPower_Other.ToString("F")
+                    }
+                };
+                displayedSystemCheckResults.Add(result);
+            }
 
             result = new DisplayedSystemCheckResult[] {
                 new DisplayedSystemCheckResult
@@ -177,8 +208,10 @@ namespace BonVoyage
             EngineTestResult testResultStockEngines = CheckStockEngines();
             // Sum it (for future tests of non stock engines or different types of engines - jets, rocket etc.)
             engineTestResult.maxThrustSum = testResultStockEngines.maxThrustSum;
+            engineTestResult.powerRequired = testResultStockEngines.powerRequired;
 
             // Throttle
+            requiredPower = engineTestResult.powerRequired * (Convert.ToDouble(throttle) / 100);
             engineTestResult.maxThrustSum = engineTestResult.maxThrustSum * (Convert.ToDouble(throttle) / 100);
             for (int p = 0; p < propellants.Count; p++)
                 propellants[p].FuelFlow = propellants[p].FuelFlow * (Convert.ToDouble(throttle) / 100);
@@ -229,6 +262,7 @@ namespace BonVoyage
             {
                 maxSpeedBase = speed0;
                 engineTestResult.maxThrustSum = engineTestResult.maxThrustSum / Z;
+                requiredPower = requiredPower / Z;
                 for (int p = 0; p < propellants.Count; p++)
                     propellants[p].FuelFlow = propellants[p].FuelFlow / Z;
             }
@@ -239,8 +273,32 @@ namespace BonVoyage
             if (!manned)
                 averageSpeed = averageSpeed * 0.2;
 
-            //// Base average speed at night is the same as average speed - for now
-            averageSpeedAtNight = averageSpeed;
+            // Base average speed at night is the same as average speed, if there is other power source. Zero otherwise.
+            if (electricPower_Other > 0.0)
+                averageSpeedAtNight = averageSpeed;
+            else
+                averageSpeedAtNight = 0;
+
+            // If required power is greater then total power generated, then average speed can be lowered up to 87% (square root of (1 - powerReduction))
+            if (requiredPower > (electricPower_Solar + electricPower_Other))
+            {
+                double powerReduction = (requiredPower - (electricPower_Solar + electricPower_Other)) / requiredPower;
+                if (powerReduction <= 0.75)
+                {
+                    averageSpeed = averageSpeed * Math.Sqrt(1 - powerReduction);
+                    engineTestResult.maxThrustSum = engineTestResult.maxThrustSum * (1 - powerReduction);
+                }
+            }
+
+            // If required power is greater then other power generated, then average speed at night can be lowered up to 87% (square root of (1 - powerReduction))
+            if (requiredPower > electricPower_Other)
+            {
+                double powerReduction = (requiredPower - electricPower_Other) / requiredPower;
+                if (powerReduction <= 0.75)
+                    averageSpeedAtNight = averageSpeedAtNight * Math.Sqrt(1 - powerReduction);
+                else
+                    averageSpeedAtNight = 0;
+            }
         }
 
 
@@ -252,10 +310,12 @@ namespace BonVoyage
         private struct EngineTestResult
         {
             internal double maxThrustSum; // Sum of max thrusts of all enabled engines
+            internal double powerRequired; // Total power required
 
-            internal EngineTestResult(double maxThrustSum)
+            internal EngineTestResult(double maxThrustSum, double powerRequired)
             {
                 this.maxThrustSum = maxThrustSum;
+                this.powerRequired = powerRequired;
             }
         }
 
@@ -266,6 +326,7 @@ namespace BonVoyage
         /// <returns></returns>
         private EngineTestResult CheckStockEngines()
         {
+            double powerRequired = 0;
             double maxThrustSum = 0;
             propellants.Clear();
             
@@ -295,6 +356,13 @@ namespace BonVoyage
                             {
                                 if (!enginesFx[k].propellants[p].ignoreForIsp)
                                 {
+                                    // For electric engines - save required power and don't add it to propellants
+                                    if (enginesFx[k].propellants[p].name == "ElectricCharge")
+                                    {
+                                        powerRequired += enginesFx[k].getMaxFuelFlow(enginesFx[k].propellants[p]) * enginesFx[k].thrustPercentage / 100;
+                                        continue;
+                                    }
+
                                     var ir = propellants.Find(x => x.Name == enginesFx[k].propellants[p].name);
                                     if (ir == null)
                                     {
@@ -350,7 +418,7 @@ namespace BonVoyage
             }
 
 
-            return new EngineTestResult(maxThrustSum);
+            return new EngineTestResult(maxThrustSum, powerRequired);
         }
 
         #endregion
@@ -385,6 +453,19 @@ namespace BonVoyage
                 if (propellants[i].MaximumAmountAvailable == 0)
                 {
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_NotEnoughFuel"), 5f).color = Color.yellow;
+                    return false;
+                }
+            }
+
+            // Power production
+            if (requiredPower > (electricPower_Solar + electricPower_Other))
+            {
+                // If required power is greater than total power generated, then average speed can be lowered up to 87% (square root of (1 - powerReduction))
+                double powerReduction = (requiredPower - (electricPower_Solar + electricPower_Other)) / requiredPower;
+
+                if (powerReduction > 0.75)
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_LowPowerShip"), 5f).color = Color.yellow;
                     return false;
                 }
             }
@@ -459,6 +540,15 @@ namespace BonVoyage
 
             double deltaT = currentTime - lastTimeUpdated; // Time delta from the last update
             double deltaTOver = 0; // deltaT which is calculated from a value over the maximum propellant amout available
+
+            // No moving at night, if there isn't enough power
+            if ((angle > 90) && (averageSpeedAtNight == 0.0))
+            {
+                State = VesselState.AwaitingSunlight;
+                lastTimeUpdated = currentTime;
+                BVModule.SetValue("lastTimeUpdated", currentTime.ToString());
+                return;
+            }
 
             for (int i = 0; i < propellants.Count; i++)
             {
