@@ -20,6 +20,7 @@ namespace BonVoyage
         public const string Name = "BonVoyage"; // Name of the mod
 
         internal MainWindowModel MainModel; // Main view's model
+        internal bool MainViewVisible { get { return mainViewVisible; } }
         internal SettingsWindowModel SettingsModel; // Settings view's model
         internal ControlWindowModel ControlModel; // Control view's model
         internal bool ControlViewVisible { get { return controlViewVisible; } }
@@ -284,7 +285,7 @@ namespace BonVoyage
         /// <param name="vessel"></param>
         public void OnVesselGoOffRails(Vessel vessel)
         {
-            if (vessel.situation == Vessel.Situations.LANDED)
+            if ((vessel.situation == Vessel.Situations.LANDED) || (vessel.situation == Vessel.Situations.SPLASHED))
             {
                 if (vessel.isEVA) // Kerbals
                     return;
@@ -312,6 +313,16 @@ namespace BonVoyage
                             // Stabilize only if another stabilizer is not present
                             if (!otherStabilizerPresent)
                                 StabilizeVessel.AddVesselToStabilize(vessel, controller.RotationVector, Configuration.DisableRotation);
+                        }
+                    }
+
+                    if (controller is ShipController)
+                    {
+                        // Only ships with active controller or ships that just arrived at the destination
+                        if (controller.Active || controller.Arrived)
+                        {
+                            if (!Configuration.DisableRotation)
+                                StabilizeVessel.Rotate(vessel, controller.RotationVector);
                         }
                     }
 

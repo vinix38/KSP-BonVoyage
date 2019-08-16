@@ -176,7 +176,7 @@ namespace BonVoyage
 
                     case TileTypes.Ocean:
                         return neighbours.Where(
-                            n => (n.Altitude <= 0)
+                            n => (n.Altitude <= 0 && mainBody.ocean)
                         );
 
                     default:

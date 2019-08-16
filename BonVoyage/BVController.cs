@@ -78,8 +78,12 @@ namespace BonVoyage
         internal virtual double AverageSpeed { get { return 0; } }
         internal event EventHandler OnStateChanged;
 
+        internal double electricPower_Solar; // Electric power from solar panels
+        internal double electricPower_Other; // Electric power from other power sources
+        internal double requiredPower; // Power required by wheels and engines
         internal Batteries batteries = new Batteries(); // Information about batteries
         internal Converter fuelCells = new Converter(); // Information about fuel cells
+        internal List<Fuel> propellants = new List<Fuel>(); // Information about propellants
 
         #endregion
 
@@ -87,7 +91,7 @@ namespace BonVoyage
         #region Private and protected properties
 
         protected ConfigNode BVModule; // Config node of BonVoyageModule
-        protected List<DisplayedSystemCheckResult> displayedSystemCheckResults;
+        protected List<DisplayedSystemCheckResult[]> displayedSystemCheckResults;
         protected int mainStarIndex; // Vessel's main star's index in the FlightGlobals.Bodies
 
         // Config values
@@ -131,7 +135,7 @@ namespace BonVoyage
         {
             vessel = v;
             BVModule = module;
-            displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
+            displayedSystemCheckResults = new List<DisplayedSystemCheckResult[]>();
 
             // Load values from config if it isn't the first run of the mod (we are reseting vessel on the first run)
             if (!Configuration.FirstRun)
@@ -183,6 +187,9 @@ namespace BonVoyage
 
             lastTimeUpdated = 0;
             mainStarIndex = 0; // In the most cases The Sun
+            electricPower_Solar = 0;
+            electricPower_Other = 0;
+            requiredPower = 0;
         }
 
 
@@ -238,37 +245,40 @@ namespace BonVoyage
 
         #region Status window texts
 
-        internal virtual List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal virtual List<DisplayedSystemCheckResult[]> GetDisplayedSystemCheckResults()
         {
             if (displayedSystemCheckResults == null) // Just to be sure
-                displayedSystemCheckResults = new List<DisplayedSystemCheckResult>();
+                displayedSystemCheckResults = new List<DisplayedSystemCheckResult[]>();
 
             displayedSystemCheckResults.Clear();
 
-            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
-                Text = targetLatitude.ToString("0.####"),
-                Tooltip = ""
+            DisplayedSystemCheckResult[] result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_TargetLat"),
+                    Text = targetLatitude.ToString("0.####"),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
-                Text = targetLongitude.ToString("0.####"),
-                Tooltip = ""
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_TargetLon"),
+                    Text = targetLongitude.ToString("0.####"),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_Distance"),
-                Text = Tools.ConvertDistanceToText(RemainingDistanceToTarget),
-                Tooltip = ""
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_Distance"),
+                    Text = Tools.ConvertDistanceToText(RemainingDistanceToTarget),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
@@ -330,7 +340,130 @@ namespace BonVoyage
         internal virtual void SystemCheck()
         {
             mainStarIndex = Tools.GetMainStar(vessel).flightGlobalsIndex;
+
+            // Get power production
+            electricPower_Solar = GetAvailablePower_Solar();
+            electricPower_Other = GetAvailablePower_Other();
         }
+
+
+        #region Power
+
+        /// <summary>
+        /// Calculate available power from solar panels
+        /// </summary>
+        /// <returns></returns>
+        private double GetAvailablePower_Solar()
+        {
+            // Kopernicus sets the right values for PhysicsGlobals.SolarLuminosity and PhysicsGlobals.SolarLuminosityAtHome so we can use them in all cases
+            double solarPower = 0;
+            double distanceToSun = Vector3d.Distance(vessel.GetWorldPos3D(), FlightGlobals.Bodies[mainStarIndex].position);
+            double solarFlux = PhysicsGlobals.SolarLuminosity / (4 * Math.PI * distanceToSun * distanceToSun); // f = L / SA = L / 4π r2 (Wm-2)
+            float multiplier = 1;
+
+            for (int i = 0; i < vessel.parts.Count; ++i)
+            {
+                ModuleDeployableSolarPanel solarPanel = vessel.parts[i].FindModuleImplementing<ModuleDeployableSolarPanel>();
+                if (solarPanel == null)
+                    continue;
+
+                if ((solarPanel.deployState != ModuleDeployablePart.DeployState.BROKEN) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTED) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTING))
+                {
+                    if (solarPanel.useCurve) // Power curve
+                        multiplier = solarPanel.powerCurve.Evaluate((float)distanceToSun);
+                    else // solar flux at current distance / solar flux at 1AU (Kerbin in stock, other value in Kopernicus)
+                        multiplier = (float)(solarFlux / PhysicsGlobals.SolarLuminosityAtHome);
+                    solarPower += solarPanel.chargeRate * multiplier;
+                }
+            }
+
+            return solarPower;
+        }
+
+
+        /// <summary>
+        /// Calculate available power from generators and reactors
+        /// </summary>
+        /// <returns></returns>
+        private double GetAvailablePower_Other()
+        {
+            double otherPower = 0;
+
+            // Go through all parts and get power from generators and reactors
+            for (int i = 0; i < vessel.parts.Count; ++i)
+            {
+                var part = vessel.parts[i];
+
+                // Standard RTG
+                ModuleGenerator powerModule = part.FindModuleImplementing<ModuleGenerator>();
+                if (powerModule != null)
+                {
+                    if (powerModule.generatorIsActive || powerModule.isAlwaysActive)
+                    {
+                        // Go through resources and get EC power
+                        for (int j = 0; j < powerModule.resHandler.outputResources.Count; ++j)
+                        {
+                            var resource = powerModule.resHandler.outputResources[j];
+                            if (resource.name == "ElectricCharge")
+                                otherPower += resource.rate * powerModule.efficiency;
+                        }
+                    }
+                }
+
+                // Other generators
+                PartModuleList modules = part.Modules;
+                for (int j = 0; j < modules.Count; ++j)
+                {
+                    var module = modules[j];
+
+                    // Near future fission reactors
+                    if (module.moduleName == "FissionGenerator")
+                        otherPower += double.Parse(module.Fields.GetValue("CurrentGeneration").ToString());
+
+                    // KSP Interstellar generators
+                    if ((module.moduleName == "ThermalElectricEffectGenerator") || (module.moduleName == "IntegratedThermalElectricPowerGenerator") || (module.moduleName == "ThermalElectricPowerGenerator")
+                        || (module.moduleName == "IntegratedChargedParticlesPowerGenerator") || (module.moduleName == "ChargedParticlesPowerGenerator") || (module.moduleName == "FNGenerator"))
+                    {
+                        if (bool.Parse(module.Fields.GetValue("IsEnabled").ToString()))
+                        {
+                            //otherPower += double.Parse(module.Fields.GetValue("maxElectricdtps").ToString()); // Doesn't work as expected
+
+                            string maxPowerStr = module.Fields.GetValue("MaxPowerStr").ToString();
+                            double maxPower = 0;
+
+                            if (maxPowerStr.Contains("GW"))
+                                maxPower = double.Parse(maxPowerStr.Replace(" GW", "")) * 1000000;
+                            else if (maxPowerStr.Contains("MW"))
+                                maxPower = double.Parse(maxPowerStr.Replace(" MW", "")) * 1000;
+                            else
+                                maxPower = double.Parse(maxPowerStr.Replace(" KW", ""));
+
+                            otherPower += maxPower;
+                        }
+                    }
+                }
+
+                // WBI reactors, USI reactors and MKS Power Pack
+                ModuleResourceConverter converterModule = part.FindModuleImplementing<ModuleResourceConverter>();
+                if (converterModule != null)
+                {
+                    if (converterModule.ModuleIsActive()
+                        && ((converterModule.ConverterName == "Nuclear Reactor") || (converterModule.ConverterName == "Reactor") || (converterModule.ConverterName == "Generator")))
+                    {
+                        for (int j = 0; j < converterModule.outputList.Count; ++j)
+                        {
+                            var resource = converterModule.outputList[j];
+                            if (resource.ResourceName == "ElectricCharge")
+                                otherPower += resource.Ratio * converterModule.GetEfficiencyMultiplier();
+                        }
+                    }
+                }
+            }
+
+            return otherPower;
+        }
+
+        #endregion
 
 
         /// <summary>
@@ -472,6 +605,7 @@ namespace BonVoyage
         internal void ProcessResources()
         {
             IResourceBroker broker = new ResourceBroker();
+
             if (fuelCells.Use)
             {
                 var iList = fuelCells.InputResources;
@@ -480,6 +614,12 @@ namespace BonVoyage
                     iList[i].MaximumAmountAvailable -= broker.RequestResource(vessel.rootPart, iList[i].Name, iList[i].CurrentAmountUsed, 1, ResourceFlowMode.ALL_VESSEL);
                     iList[i].CurrentAmountUsed = 0;
                 }
+            }
+
+            for (int i = 0; i < propellants.Count; i++)
+            {
+                propellants[i].MaximumAmountAvailable -= broker.RequestResource(vessel.rootPart, propellants[i].Name, propellants[i].CurrentAmountUsed, 1, ResourceFlowMode.ALL_VESSEL);
+                propellants[i].CurrentAmountUsed = 0;
             }
         }
 

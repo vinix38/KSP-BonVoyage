@@ -29,9 +29,6 @@ namespace BonVoyage
 
         private double speedMultiplier;
         private double angle; // Angle between the main body and the main sun
-        private double electricPower_Solar; // Electric power from solar panels
-        private double electricPower_Other; // Electric power from other power sources
-        private double requiredPower; // Power required by wheels
         private double maxSpeedBase; // maximum speed without modifiers
         private int wheelsPercentualModifier; // Speed modifier based on wheels
         private int crewSpeedBonus; // Speed modifier based on the available crew
@@ -70,9 +67,6 @@ namespace BonVoyage
 
             speedMultiplier = 1.0;
             angle = 0;
-            electricPower_Solar = 0;
-            electricPower_Other = 0;
-            requiredPower = 0;
             maxSpeedBase = 0;
             wheelsPercentualModifier = 0;
             crewSpeedBonus = 0;
@@ -91,68 +85,74 @@ namespace BonVoyage
 
         #region Status window texts
 
-        internal override List<DisplayedSystemCheckResult> GetDisplayedSystemCheckResults()
+        internal override List<DisplayedSystemCheckResult[]> GetDisplayedSystemCheckResults()
         {
             base.GetDisplayedSystemCheckResults();
 
-            DisplayedSystemCheckResult result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
-                Text = averageSpeed.ToString("F") + " m/s",
-                Tooltip = 
-                    averageSpeed > 0
-                    ?
-                    Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
-                        + Localizer.Format("#LOC_BV_Control_WheelsModifier") + ": " + wheelsPercentualModifier.ToString("F") + "%\n"
-                        + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
-                        + (SpeedReduction > 0 ? Localizer.Format("#LOC_BV_Control_PowerPenalty") + ": " + (SpeedReduction > 75 ? "100" : SpeedReduction.ToString("F")) + "%\n" : "")
-                        + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
-                    :
-                    Localizer.Format("#LOC_BV_Control_WheelsNotOnline")
+            DisplayedSystemCheckResult[] result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
+                    Text = averageSpeed.ToString("F") + " m/s",
+                    Tooltip =
+                        averageSpeed > 0
+                        ?
+                        Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
+                            + Localizer.Format("#LOC_BV_Control_WheelsModifier") + ": " + wheelsPercentualModifier.ToString("F") + "%\n"
+                            + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
+                            + (SpeedReduction > 0 ? Localizer.Format("#LOC_BV_Control_PowerPenalty") + ": " + (SpeedReduction > 75 ? "100" : SpeedReduction.ToString("F")) + "%\n" : "")
+                            + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
+                        :
+                        Localizer.Format("#LOC_BV_Control_WheelsNotOnline")
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_GeneratedPower"),
-                Text = (electricPower_Solar + electricPower_Other).ToString("F"),
-                Tooltip = Localizer.Format("#LOC_BV_Control_SolarPower") + ": " + electricPower_Solar.ToString("F") + "\n" + Localizer.Format("#LOC_BV_Control_GeneratorPower") + ": " + electricPower_Other.ToString("F") + "\n"
-                    + Localizer.Format("#LOC_BV_Control_UseBatteries_Usage") + ": " + (batteries.UseBatteries ? (batteries.MaxUsedEC.ToString("F0") + " / " + batteries.MaxAvailableEC.ToString("F0") + " EC") : Localizer.Format("#LOC_BV_Control_No"))
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_GeneratedPower"),
+                    Text = (electricPower_Solar + electricPower_Other).ToString("F"),
+                    Tooltip = Localizer.Format("#LOC_BV_Control_SolarPower") + ": " + electricPower_Solar.ToString("F") + "\n" + Localizer.Format("#LOC_BV_Control_GeneratorPower") + ": " + electricPower_Other.ToString("F") + "\n"
+                        + Localizer.Format("#LOC_BV_Control_UseBatteries_Usage") + ": " + (batteries.UseBatteries ? (batteries.MaxUsedEC.ToString("F0") + " / " + batteries.MaxAvailableEC.ToString("F0") + " EC") : Localizer.Format("#LOC_BV_Control_No"))
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = false,
-                Label = Localizer.Format("#LOC_BV_Control_RequiredPower"),
-                Text = requiredPower.ToString("F") 
-                    + (SpeedReduction == 0 ? "" : 
-                        (((SpeedReduction > 0) && (SpeedReduction <= 75)) 
-                            ? " (" + Localizer.Format("#LOC_BV_Control_PowerReduced") + " " + SpeedReduction.ToString("F") + "%)" 
-                            : " (" + Localizer.Format("#LOC_BV_Control_NotEnoughPower") + ")")),
-                Tooltip = ""
+            double speedReduction = SpeedReduction;
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = false,
+                    Label = Localizer.Format("#LOC_BV_Control_RequiredPower"),
+                    Text = requiredPower.ToString("F")
+                        + (speedReduction == 0 ? "" :
+                            (((speedReduction > 0) && (speedReduction <= 75))
+                                ? " (" + Localizer.Format("#LOC_BV_Control_PowerReduced") + " " + speedReduction.ToString("F") + "%)"
+                                : " (" + Localizer.Format("#LOC_BV_Control_NotEnoughPower") + ")")),
+                    Tooltip = ""
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = true,
-                Text = Localizer.Format("#LOC_BV_Control_UseBatteries"),
-                Tooltip = Localizer.Format("#LOC_BV_Control_UseBatteries_Tooltip"),
-                GetToggleValue = GetUseBatteries,
-                ToggleSelectedCallback = UseBatteriesChanged
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = Localizer.Format("#LOC_BV_Control_UseBatteries"),
+                    Tooltip = Localizer.Format("#LOC_BV_Control_UseBatteries_Tooltip"),
+                    GetToggleValue = GetUseBatteries,
+                    ToggleSelectedCallback = UseBatteriesChanged
+                }
             };
             displayedSystemCheckResults.Add(result);
 
-            result = new DisplayedSystemCheckResult
-            {
-                Toggle = true,
-                Text = Localizer.Format("#LOC_BV_Control_UseFuelCells"),
-                Tooltip = Localizer.Format("#LOC_BV_Control_UseFuelCellsTooltip"),
-                GetToggleValue = GetUseFuelCells,
-                ToggleSelectedCallback = UseFuelCellsChanged
+            result = new DisplayedSystemCheckResult[] {
+                new DisplayedSystemCheckResult {
+                    Toggle = true,
+                    Text = Localizer.Format("#LOC_BV_Control_UseFuelCells"),
+                    Tooltip = Localizer.Format("#LOC_BV_Control_UseFuelCellsTooltip"),
+                    GetToggleValue = GetUseFuelCells,
+                    ToggleSelectedCallback = UseFuelCellsChanged
+                }
             };
             displayedSystemCheckResults.Add(result);
 
@@ -200,10 +200,6 @@ namespace BonVoyage
 
             // Generally, moving at high speed requires less power than wheels' max consumption. Maximum required power of controller will 35% of wheels power requirement 
             requiredPower = wheelTestResult.powerRequired / 100 * 35;
-
-            // Get power production
-            electricPower_Solar = GetAvailablePower_Solar();
-            electricPower_Other = GetAvailablePower_Other();
 
             // Get available EC from batteries
             if (batteries.UseBatteries)
@@ -295,7 +291,7 @@ namespace BonVoyage
             {
                 maxSpeedBase = wheelTestResult.maxSpeedSum / wheelTestResult.online;
                 wheelsPercentualModifier = Math.Min(70, (40 + 5 * wheelTestResult.online));
-                averageSpeed = maxSpeedBase * wheelsPercentualModifier / 100 * (1 + crewSpeedBonus / 100);
+                averageSpeed = maxSpeedBase * Convert.ToDouble(wheelsPercentualModifier) / 100 * (1 + Convert.ToDouble(crewSpeedBonus) / 100);
             }
             else
                 averageSpeed = 0;
@@ -554,121 +550,6 @@ namespace BonVoyage
         #region Power
 
         /// <summary>
-        /// Calculate available power from solar panels
-        /// </summary>
-        /// <returns></returns>
-        private double GetAvailablePower_Solar()
-        {
-            // Kopernicus sets the right values for PhysicsGlobals.SolarLuminosity and PhysicsGlobals.SolarLuminosityAtHome so we can use them in all cases
-            double solarPower = 0;
-            double distanceToSun = Vector3d.Distance(vessel.GetWorldPos3D(), FlightGlobals.Bodies[mainStarIndex].position);
-            double solarFlux = PhysicsGlobals.SolarLuminosity / (4 * Math.PI * distanceToSun * distanceToSun); // f = L / SA = L / 4π r2 (Wm-2)
-            float multiplier = 1;
-
-            for (int i = 0; i < vessel.parts.Count; ++i)
-            {
-                ModuleDeployableSolarPanel solarPanel = vessel.parts[i].FindModuleImplementing<ModuleDeployableSolarPanel>();
-                if (solarPanel == null)
-                    continue;
-
-                if ((solarPanel.deployState != ModuleDeployablePart.DeployState.BROKEN) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTED) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTING))
-                {
-                    if (solarPanel.useCurve) // Power curve
-                        multiplier = solarPanel.powerCurve.Evaluate((float)distanceToSun);
-                    else // solar flux at current distance / solar flux at 1AU (Kerbin in stock, other value in Kopernicus)
-                        multiplier = (float)(solarFlux / PhysicsGlobals.SolarLuminosityAtHome);
-                    solarPower += solarPanel.chargeRate * multiplier;
-                }
-            }
-
-            return solarPower;
-        }
-
-
-        /// <summary>
-        /// Calculate available power from generators and reactors
-        /// </summary>
-        /// <returns></returns>
-        private double GetAvailablePower_Other()
-        {
-            double otherPower = 0;
-
-            // Go through all parts and get power from generators and reactors
-            for (int i = 0; i < vessel.parts.Count; ++i)
-            {
-                var part = vessel.parts[i];
-
-                // Standard RTG
-                ModuleGenerator powerModule = part.FindModuleImplementing<ModuleGenerator>();
-                if (powerModule != null)
-                {
-                    if (powerModule.generatorIsActive || powerModule.isAlwaysActive)
-                    {
-                        // Go through resources and get EC power
-                        for (int j = 0; j < powerModule.resHandler.outputResources.Count; ++j)
-                        {
-                            var resource = powerModule.resHandler.outputResources[j];
-                            if (resource.name == "ElectricCharge")
-                                otherPower += resource.rate * powerModule.efficiency;
-                        }
-                    }
-                }
-                
-                // Other generators
-                PartModuleList modules = part.Modules;
-                for (int j = 0; j < modules.Count; ++j)
-                {
-                    var module = modules[j];
-
-                    // Near future fission reactors
-                    if (module.moduleName == "FissionGenerator")
-                        otherPower += double.Parse(module.Fields.GetValue("CurrentGeneration").ToString());
-
-                    // KSP Interstellar generators
-                    if ((module.moduleName == "ThermalElectricEffectGenerator") || (module.moduleName == "IntegratedThermalElectricPowerGenerator") || (module.moduleName == "ThermalElectricPowerGenerator") 
-                        || (module.moduleName == "IntegratedChargedParticlesPowerGenerator") || (module.moduleName == "ChargedParticlesPowerGenerator") || (module.moduleName == "FNGenerator"))
-                    {
-                        if (bool.Parse(module.Fields.GetValue("IsEnabled").ToString()))
-                        {
-                            //otherPower += double.Parse(module.Fields.GetValue("maxElectricdtps").ToString()); // Doesn't work as expected
-
-                            string maxPowerStr = module.Fields.GetValue("MaxPowerStr").ToString();
-                            double maxPower = 0;
-
-                            if (maxPowerStr.Contains("GW"))
-                                maxPower = double.Parse(maxPowerStr.Replace(" GW", "")) * 1000000;
-                            else if (maxPowerStr.Contains("MW"))
-                                maxPower = double.Parse(maxPowerStr.Replace(" MW", "")) * 1000;
-                            else
-                                maxPower = double.Parse(maxPowerStr.Replace(" KW", ""));
-
-                            otherPower += maxPower;
-                        }
-                    }
-                }
-                
-                // WBI reactors, USI reactors and MKS Power Pack
-                ModuleResourceConverter converterModule = part.FindModuleImplementing<ModuleResourceConverter>();
-                if (converterModule != null)
-                {
-                    if (converterModule.ModuleIsActive()
-                        && ((converterModule.ConverterName == "Nuclear Reactor") || (converterModule.ConverterName == "Reactor") || (converterModule.ConverterName == "Generator")))
-                    {
-                        for (int j = 0; j < converterModule.outputList.Count; ++j)
-                        {
-                            var resource = converterModule.outputList[j];
-                            if (resource.ResourceName == "ElectricCharge")
-                                otherPower += resource.Ratio * converterModule.GetEfficiencyMultiplier();
-                        }
-                    }
-                }
-            }
-
-            return otherPower;
-        }
-
-
-        /// <summary>
         /// Get maximum available EC from batteries
         /// </summary>
         /// <returns></returns>
@@ -746,7 +627,7 @@ namespace BonVoyage
 
                 if (speedReduction > 0.75)
                 {
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_LowPower"), 5f).color = Color.yellow;
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_LowPowerRover"), 5f).color = Color.yellow;
                     return false;
                 }
             }

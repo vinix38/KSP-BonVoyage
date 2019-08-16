@@ -194,22 +194,29 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if (currentController.vessel.situation == Vessel.Situations.LANDED)
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
                 {
-                    if (!currentController.CheckConnection())
-                        return;
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
 
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_FindingRoute", 5f));
-                    if (currentController.FindRoute(latitude, longitude))
-                    {
-                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteFound", 5f));
-                        RefreshStatsListLayout();
-                    }
-                    else
-                        ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteNotFound", 5f));
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if (!currentController.CheckConnection())
+                    return;
+
+                ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_FindingRoute", 5f));
+                if (currentController.FindRoute(latitude, longitude))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteFound", 5f));
+                    RefreshStatsListLayout();
                 }
                 else
-                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f).color = Color.yellow;
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_RouteNotFound", 5f));
             }
             else
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
@@ -223,13 +230,20 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if (currentController.vessel.situation == Vessel.Situations.LANDED)
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
                 {
-                    MapView.EnterMapView();
-                    BonVoyage.Instance.MapMode = true;
-                }
-                else
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                MapView.EnterMapView();
+                BonVoyage.Instance.MapMode = true;
             }
             else
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_ControllerNotValid", 5f)).color = Color.yellow;
@@ -243,6 +257,18 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
                 double[] cooordinates = Tools.GetCurrentTargetLatLon(currentController.vessel);
                 if (cooordinates[0] != double.MinValue)
                 {
@@ -264,6 +290,18 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
+                    return;
+                }
+
+                if ((currentController.GetControllerType() == 1) && (currentController.vessel.situation != Vessel.Situations.SPLASHED))
+                {
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Splashed", 5f)).color = Color.yellow;
+                    return;
+                }
+
                 double[] cooordinates = Tools.GetCurrentWaypointLatLon(currentController.vessel);
                 if (cooordinates[0] != double.MinValue)
                 {
@@ -283,39 +321,35 @@ namespace BonVoyage
         /// </summary>
         /// <param name="result"></param>
         /// <returns>DialogGUIHorizontalLayout row</returns>
-        private DialogGUIHorizontalLayout CreateListLayoutRow(DisplayedSystemCheckResult result)
+        private DialogGUIHorizontalLayout CreateListLayoutRow(DisplayedSystemCheckResult[] result)
         {
-            DialogGUIHorizontalLayout row = null;
+            DialogGUIHorizontalLayout row = new DialogGUIHorizontalLayout();
 
-            if (result.Toggle)
+            for (int i = 0; i < result.Length; i++)
             {
-                row = new DialogGUIHorizontalLayout(
-                    (result.Tooltip.Length > 0)
-                    ?
-                    TooltipExtension.DeferTooltip(new DialogGUIToggle(result.GetToggleValue, result.Text, result.ToggleSelectedCallback) { tooltipText = result.Tooltip })
-                    :
-                    new DialogGUIToggle(result.GetToggleValue, result.Text, result.ToggleSelectedCallback)
-                );
-            }
-            else
-            {
-                if (result.Tooltip.Length > 0)
+                if (result[i].Toggle)
                 {
-                    row = new DialogGUIHorizontalLayout(
-                        new DialogGUILabel(result.Label + ":", 100f),
-                        new DialogGUILabel(result.Text),
-                        new DialogGUISpace(1f),
-                        // Add a button with transparent background and label style just to display a tooltip when hovering over it
-                        // Transparent sprite is needed to hide button borders
-                        TooltipExtension.DeferTooltip(new DialogGUIButton(CommonWindowProperties.transparent, "(?)", () => { }, 17f, 18f, false) { tooltipText = result.Tooltip, guiStyle = CommonWindowProperties.Style_Button_Label })
+                    row.AddChild(
+                        (result[i].Tooltip.Length > 0)
+                        ?
+                        TooltipExtension.DeferTooltip(new DialogGUIToggle(result[i].GetToggleValue, result[i].Text, result[i].ToggleSelectedCallback) { tooltipText = result[i].Tooltip })
+                        :
+                        new DialogGUIToggle(result[i].GetToggleValue, result[i].Text, result[i].ToggleSelectedCallback)
                     );
                 }
                 else
                 {
-                    row = new DialogGUIHorizontalLayout(
-                        new DialogGUILabel(result.Label + ":", 100f),
-                        new DialogGUILabel(result.Text)
-                    );
+                    row.AddChild(new DialogGUILabel(result[i].Label + ":", 100f));
+                    if (result[i].Text.Length > 0)
+                        row.AddChild(new DialogGUILabel(result[i].Text));
+                    if (result[i].Tooltip.Length > 0)
+                    {
+                        if (result[i].Text.Length > 0)
+                            row.AddChild(new DialogGUISpace(1f));
+                        // Add a button with transparent background and label style just to display a tooltip when hovering over it
+                        // Transparent sprite is needed to hide button borders
+                        row.AddChild(TooltipExtension.DeferTooltip(new DialogGUIButton(CommonWindowProperties.transparent, "(?)", () => { }, 17f, 18f, false) { tooltipText = result[i].Tooltip, guiStyle = CommonWindowProperties.Style_Button_Label }));
+                    }
                 }
             }
 
@@ -331,7 +365,7 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                List<DisplayedSystemCheckResult> resultsList = currentController.GetDisplayedSystemCheckResults();
+                List<DisplayedSystemCheckResult[]> resultsList = currentController.GetDisplayedSystemCheckResults();
 
                 DialogGUIBase[] list = new DialogGUIBase[1 + resultsList.Count];
                 int index = 0;
@@ -361,7 +395,7 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Refresh list of stats without
+        /// Refresh list of stats without closing and opening the window
         /// </summary>
         internal void RefreshStatsListLayout()
         {
@@ -381,7 +415,7 @@ namespace BonVoyage
             // Add rows
             if (currentController != null)
             {
-                List<DisplayedSystemCheckResult> resultsList = currentController.GetDisplayedSystemCheckResults();
+                List<DisplayedSystemCheckResult[]> resultsList = currentController.GetDisplayedSystemCheckResults();
 
                 for (int i = 0; i < resultsList.Count; i++)
                 {
