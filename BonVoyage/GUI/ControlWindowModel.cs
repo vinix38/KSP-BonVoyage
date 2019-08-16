@@ -339,10 +339,9 @@ namespace BonVoyage
                 }
                 else
                 {
-                    row.AddChildren(new DialogGUIBase[] {
-                        new DialogGUILabel(result[i].Label + ":", 100f),
-                        new DialogGUILabel(result[i].Text)
-                    });
+                    row.AddChild(new DialogGUILabel(result[i].Label + ":", 100f));
+                    if (result[i].Text.Length > 0)
+                        row.AddChild(new DialogGUILabel(result[i].Text));
                     if (result[i].Tooltip.Length > 0)
                     {
                         if (result[i].Text.Length > 0)

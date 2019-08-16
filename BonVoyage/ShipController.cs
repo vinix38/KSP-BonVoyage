@@ -322,7 +322,31 @@ namespace BonVoyage
 
             for (int i = 0; i < rockets.Count; i++)
             {
+                List<ModuleEngines> engines = rockets[i].FindModulesImplementing<ModuleEngines>();
+                for (int k = 0; k < engines.Count; k++)
+                {
+                    if (!engines[k].engineShutdown && engines[k].isOperational)
+                    {
+                        // Max thrust
+                        maxThrustSum += engines[k].MaxThrustOutputAtm(false, true, Convert.ToSingle(vessel.mainBody.atmPressureASL), vessel.atmosphericTemperature, vessel.mainBody.atmDensityASL);
 
+                        // Propellants used in ISP computation - what is not used is usually air
+                        for (int p = 0; p < engines[k].propellants.Count; p++)
+                        {
+                            if (!engines[k].propellants[p].ignoreForIsp)
+                            {
+                                var ir = propellants.Find(x => x.Name == engines[k].propellants[p].name);
+                                if (ir == null)
+                                {
+                                    ir = new Fuel();
+                                    ir.Name = engines[k].propellants[p].name;
+                                    propellants.Add(ir);
+                                }
+                                ir.FuelFlow += engines[k].getMaxFuelFlow(engines[k].propellants[p]) * engines[k].thrustPercentage / 100;
+                            }
+                        }
+                    }
+                }
             }
 
 
@@ -368,7 +392,8 @@ namespace BonVoyage
             BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
             if (module != null)
             {
-                vesselHeightFromTerrain = vessel.GetHeightFromSurface();
+                //vesselHeightFromTerrain = vessel.GetHeightFromSurface();
+                vesselHeightFromTerrain = 0;
 
                 module.averageSpeed = averageSpeed;
                 module.averageSpeedAtNight = averageSpeedAtNight;
