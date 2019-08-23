@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using Expansions.Serenity;
 
 namespace BonVoyage
 {
@@ -204,11 +205,12 @@ namespace BonVoyage
         {
             base.SystemCheck();
 
-            // Test stock engines
+            // Test engines and rotors
             EngineTestResult testResultStockEngines = CheckStockEngines();
-            // Sum it (for future tests of non stock engines or different types of engines - jets, rocket etc.)
-            engineTestResult.maxThrustSum = testResultStockEngines.maxThrustSum;
-            engineTestResult.powerRequired = testResultStockEngines.powerRequired;
+            EngineTestResult testResultBGRotors = CheckBGRotors();
+            // Sum it
+            engineTestResult.maxThrustSum = testResultStockEngines.maxThrustSum + testResultBGRotors.maxThrustSum;
+            engineTestResult.powerRequired = testResultStockEngines.powerRequired + testResultBGRotors.powerRequired;
 
             // Throttle
             requiredPower = engineTestResult.powerRequired * (Convert.ToDouble(throttle) / 100);
@@ -321,7 +323,7 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Test stock engines implementing standard modules ModuleEnginesFX, ModuleEngines
+        /// Test stock engines implementing standard modules ModuleEnginesFX and ModuleEngines
         /// </summary>
         /// <returns></returns>
         private EngineTestResult CheckStockEngines()
@@ -412,6 +414,65 @@ namespace BonVoyage
                                 }
                                 ir.FuelFlow += engines[k].getMaxFuelFlow(engines[k].propellants[p]) * engines[k].thrustPercentage / 100;
                             }
+                        }
+                    }
+                }
+            }
+
+
+            return new EngineTestResult(maxThrustSum, powerRequired);
+        }
+
+
+        /// <summary>
+        /// Test Breaking Ground DLC rotors implementing module ModuleRoboticServoRotor
+        /// </summary>
+        /// <returns></returns>
+        private EngineTestResult CheckBGRotors()
+        {
+            double powerRequired = 0;
+            double maxThrustSum = 0;
+
+            // Get rotors
+            List<Part> servoRotor = new List<Part>();
+            for (int i = 0; i < vessel.parts.Count; i++)
+            {
+                var part = vessel.parts[i];
+                if (part.Modules.Contains("ModuleRoboticServoRotor"))
+                    servoRotor.Add(part);
+            }
+
+            for (int i = 0; i < servoRotor.Count; i++)
+            {
+                List<ModuleRoboticServoRotor> rotors = servoRotor[i].FindModulesImplementing<ModuleRoboticServoRotor>();
+                for (int k = 0; k < rotors.Count; k++)
+                {
+                    if (rotors[k].servoIsMotorized && rotors[k].servoMotorIsEngaged)
+                    {
+                        // Max thrust
+                        maxThrustSum += rotors[k].maxMotorOutput * rotors[k].servoMotorSize / 100 / 9; // We need to change max thrust to be in line with the base values for jets
+
+                        for (int r = 0; r < rotors[k].resHandler.inputResources.Count; r++)
+                        {
+                            // Skip Air
+                            if (rotors[k].resHandler.inputResources[r].name == "IntakeAir")
+                                continue;
+
+                            // For EC - save required power and don't add it to propellants
+                            if (rotors[k].resHandler.inputResources[r].name == "ElectricCharge")
+                            {
+                                powerRequired += rotors[k].maxMotorOutput * 4 / 3 * rotors[k].baseResourceConsumptionRate * rotors[k].resHandler.inputResources[r].rate * rotors[k].servoMotorSize / 100;
+                                continue;
+                            }
+
+                            var ir = propellants.Find(x => x.Name == rotors[k].resHandler.inputResources[r].name);
+                            if (ir == null)
+                            {
+                                ir = new Fuel();
+                                ir.Name = rotors[k].resHandler.inputResources[r].name;
+                                propellants.Add(ir);
+                            }
+                            ir.FuelFlow += rotors[k].maxMotorOutput * 4 / 3 * rotors[k].baseResourceConsumptionRate * rotors[k].resHandler.inputResources[r].rate * rotors[k].servoMotorSize / 100;
                         }
                     }
                 }

@@ -14,7 +14,7 @@ namespace BonVoyage
         #region internal properties
 
         /// <summary>
-        /// Automatic dewarp
+        /// First run
         /// </summary>
         internal static bool FirstRun
         {
@@ -56,7 +56,7 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Automatic dewarp
+        /// Disable rotation
         /// </summary>
         internal static bool DisableRotation
         {

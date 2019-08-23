@@ -2,6 +2,11 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.5.1
+### Changes
+- Suport of servo rotors from the Breaking Ground DLC for ship controller
+
+
 ## 0.5.0 - Come all you young sailormen, listen to me
 ### Changes
 - We are ready to extend our operations to the water
