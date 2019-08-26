@@ -103,7 +103,7 @@ namespace BonVoyage
                     Label = Localizer.Format("#LOC_BV_Control_AverageSpeed"),
                     Text = averageSpeed.ToString("F") + " m/s",
                     Tooltip = Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
-                        + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
+                        + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": " + GetUnmannedSpeedPenalty().ToString() + "%\n")
                         + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s\n"
                         + Localizer.Format("#LOC_BV_Control_UsedThrust") + ": " + engineTestResult.maxThrustSum.ToString("F") + " kN"
                 }
@@ -271,9 +271,9 @@ namespace BonVoyage
 
             averageSpeed = 0.7 * maxSpeedBase * (1 + Convert.ToDouble(crewSpeedBonus) / 100);
 
-            // Unmanned ships drive with 80% speed penalty
+            // Unmanned ships will drive with the speed penalty based on available tech
             if (!manned)
-                averageSpeed = averageSpeed * 0.2;
+                averageSpeed = averageSpeed * (100 - Convert.ToDouble(GetUnmannedSpeedPenalty())) / 100;
 
             // Base average speed at night is the same as average speed, if there is other power source. Zero otherwise.
             if (electricPower_Other > 0.0)

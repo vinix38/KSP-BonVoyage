@@ -204,6 +204,22 @@ namespace BonVoyage
             return -1;
         }
 
+
+        internal static bool TechIsAvailable(string techId)
+        {
+            if ((HighLogic.CurrentGame.Mode != Game.Modes.CAREER) && (HighLogic.CurrentGame.Mode != Game.Modes.SCIENCE_SANDBOX))
+                return true;
+
+            if (ResearchAndDevelopment.Instance == null)
+                return false;
+            
+            var techstate = ResearchAndDevelopment.Instance.GetTechState(techId);
+            if (techstate != null)
+                return techstate.state == RDTech.State.Available;
+
+            return false;
+        }
+
     }
 
 }

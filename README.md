@@ -2,6 +2,12 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.5.2
+### Changes
+- BonVoyage modul added to RoveMate by default
+- Added part upgrades which raise the speed of unmanned rovers and ships. The last upgrade is only for Community Tech Tree.
+
+
 ## 0.5.1
 ### Changes
 - Suport of servo rotors from the Breaking Ground DLC for ship controller

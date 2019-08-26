@@ -99,7 +99,7 @@ namespace BonVoyage
                         ?
                         Localizer.Format("#LOC_BV_Control_SpeedBase") + ": " + maxSpeedBase.ToString("F") + " m/s\n"
                             + Localizer.Format("#LOC_BV_Control_WheelsModifier") + ": " + wheelsPercentualModifier.ToString("F") + "%\n"
-                            + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": 80%\n")
+                            + (manned ? Localizer.Format("#LOC_BV_Control_DriverBonus") + ": " + crewSpeedBonus.ToString() + "%\n" : Localizer.Format("#LOC_BV_Control_UnmannedPenalty") + ": " + GetUnmannedSpeedPenalty().ToString() + "%\n")
                             + (SpeedReduction > 0 ? Localizer.Format("#LOC_BV_Control_PowerPenalty") + ": " + (SpeedReduction > 75 ? "100" : SpeedReduction.ToString("F")) + "%\n" : "")
                             + Localizer.Format("#LOC_BV_Control_SpeedAtNight") + ": " + averageSpeedAtNight.ToString("F") + " m/s"
                         :
@@ -296,9 +296,9 @@ namespace BonVoyage
             else
                 averageSpeed = 0;
 
-            // Unmanned rovers drive with 80% speed penalty
+            // Unmanned rovers drive with the speed penalty based on available tech
             if (!manned)
-                averageSpeed = averageSpeed * 0.2;
+                averageSpeed = averageSpeed * (100 - Convert.ToDouble(GetUnmannedSpeedPenalty())) / 100;
 
             // Base average speed at night is the same as average speed, if there is other power source. Zero otherwise.
             if (electricPower_Other > 0.0)

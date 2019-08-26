@@ -623,6 +623,29 @@ namespace BonVoyage
             }
         }
 
+
+        /// <summary>
+        /// Get speed penalty for unmanned ship based on tech available
+        /// </summary>
+        /// <returns></returns>
+        internal int GetUnmannedSpeedPenalty()
+        {
+            if (Tools.TechIsAvailable("artificialIntelligence"))
+                return 20;
+            else
+            {
+                if (Tools.TechIsAvailable("automation"))
+                    return 40;
+                else
+                {
+                    if (Tools.TechIsAvailable("unmannedTech"))
+                        return 60;
+                    else
+                        return 80;
+                }
+            }
+        }
+
     }
 
 }
