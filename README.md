@@ -2,6 +2,11 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.5.3
+### Changes
+- Cheats for infinite electricity and propellant are accepted (your game, your rules)
+
+
 ## 0.5.2
 ### Changes
 - BonVoyage modul added to RoveMate by default

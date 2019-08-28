@@ -630,6 +630,8 @@ namespace BonVoyage
         /// <returns></returns>
         internal int GetUnmannedSpeedPenalty()
         {
+            //PartUpgradeManager.Handler.IsUnlocked("");
+
             if (Tools.TechIsAvailable("artificialIntelligence"))
                 return 20;
             else

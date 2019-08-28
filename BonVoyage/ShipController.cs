@@ -275,6 +275,10 @@ namespace BonVoyage
             if (!manned)
                 averageSpeed = averageSpeed * (100 - Convert.ToDouble(GetUnmannedSpeedPenalty())) / 100;
 
+            // Cheats
+            if (CheatOptions.InfiniteElectricity)
+                electricPower_Other = requiredPower;
+
             // Base average speed at night is the same as average speed, if there is other power source. Zero otherwise.
             if (electricPower_Other > 0.0)
                 averageSpeedAtNight = averageSpeed;
@@ -611,18 +615,21 @@ namespace BonVoyage
                 return;
             }
 
-            for (int i = 0; i < propellants.Count; i++)
+            if (!CheatOptions.InfinitePropellant)
             {
-                propellants[i].CurrentAmountUsed += propellants[i].FuelFlow * deltaT * speedMultiplier * speedMultiplier; // If speed is reduced, then thrust and subsequently fuel flow are reduced by square (from drag equation)
-                if (propellants[i].CurrentAmountUsed > propellants[i].MaximumAmountAvailable)
-                    deltaTOver = Math.Max(deltaTOver, (propellants[i].CurrentAmountUsed - propellants[i].MaximumAmountAvailable) / (propellants[i].FuelFlow * speedMultiplier * speedMultiplier));
-            }
-            if (deltaTOver > 0)
-            {
-                deltaT -= deltaTOver;
-                // Reduce the amount of used propellants
                 for (int i = 0; i < propellants.Count; i++)
-                    propellants[i].CurrentAmountUsed -= propellants[i].FuelFlow * deltaTOver * speedMultiplier * speedMultiplier;
+                {
+                    propellants[i].CurrentAmountUsed += propellants[i].FuelFlow * deltaT * speedMultiplier * speedMultiplier; // If speed is reduced, then thrust and subsequently fuel flow are reduced by square (from drag equation)
+                    if (propellants[i].CurrentAmountUsed > propellants[i].MaximumAmountAvailable)
+                        deltaTOver = Math.Max(deltaTOver, (propellants[i].CurrentAmountUsed - propellants[i].MaximumAmountAvailable) / (propellants[i].FuelFlow * speedMultiplier * speedMultiplier));
+                }
+                if (deltaTOver > 0)
+                {
+                    deltaT -= deltaTOver;
+                    // Reduce the amount of used propellants
+                    for (int i = 0; i < propellants.Count; i++)
+                        propellants[i].CurrentAmountUsed -= propellants[i].FuelFlow * deltaTOver * speedMultiplier * speedMultiplier;
+                }
             }
 
             double deltaS = AverageSpeed * deltaT; // Distance delta from the last update

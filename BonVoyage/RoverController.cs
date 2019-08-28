@@ -247,6 +247,10 @@ namespace BonVoyage
             }
             electricPower_Other += fuelCells.OutputValue;
 
+            // Cheats
+            if (CheatOptions.InfiniteElectricity)
+                electricPower_Other = requiredPower;
+
             // Manned
             manned = (vessel.GetCrewCount() > 0);
 
@@ -703,10 +707,11 @@ namespace BonVoyage
             double deltaTOver = 0; // deltaT which is calculated from a value over the maximum resource amout available
 
             // Compute increase or decrease in EC from the last update
-            if (batteries.UseBatteries)
+            if (!CheatOptions.InfiniteElectricity && batteries.UseBatteries)
             {
                 // Process fuel cells before batteries
-                if (fuelCells.Use 
+                if (!CheatOptions.InfinitePropellant 
+                    && fuelCells.Use 
                     && ((angle > 90) 
                         || (batteries.ECPerSecondGenerated - fuelCells.OutputValue <= 0)
                         || (batteries.CurrentEC < batteries.MaxUsedEC))) // Night, not enough solar power or we need to recharge batteries
