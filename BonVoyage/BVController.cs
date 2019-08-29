@@ -630,22 +630,23 @@ namespace BonVoyage
         /// <returns></returns>
         internal int GetUnmannedSpeedPenalty()
         {
-            //PartUpgradeManager.Handler.IsUnlocked("");
-
-            if (Tools.TechIsAvailable("artificialIntelligence"))
-                return 20;
-            else
+            BonVoyageModule module = vessel.FindPartModuleImplementing<BonVoyageModule>();
+            if (module != null)
             {
-                if (Tools.TechIsAvailable("automation"))
-                    return 40;
-                else
+                switch (module.techLevel)
                 {
-                    if (Tools.TechIsAvailable("unmannedTech"))
+                    case 2: // unmannedTech
                         return 60;
-                    else
+                    case 3: // automation
+                        return 40;
+                    case 4: // artificialIntelligence
+                        return 20;
+                    default: // no tech
                         return 80;
                 }
             }
+
+            return 80;
         }
 
     }

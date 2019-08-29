@@ -11,6 +11,12 @@ namespace BonVoyage
         #region KSP Fields
 
         /// <summary>
+        /// Tech level for unmanned autopilot
+        /// </summary>
+        [KSPField(isPersistant = true)]
+        public int techLevel = 1;
+
+        /// <summary>
         /// BonVoyage controller is active (moving vessel)
         /// </summary>
         [KSPField(isPersistant = true)]
@@ -31,8 +37,7 @@ namespace BonVoyage
         /// <summary>
         /// Vessel type - 0 - rover, 1 - ship
         /// </summary>
-        // localize, when ship part is ready
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Autopilot type", category = "Bon Voyage")]
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_BV_ContextMenu_VT", category = "Bon Voyage")]
         [UI_ChooseOption(scene = UI_Scene.Flight | UI_Scene.Editor, options = new[] { "0", "1" }, display = new[] { "#LOC_BV_ContextMenu_VT_Rover", "#LOC_BV_ContextMenu_VT_Naval" })]
         public string vesselType = "0";
 
@@ -113,7 +118,22 @@ namespace BonVoyage
         /// <returns>Module info</returns>
         public override string GetInfo()
         {
-            return "Bon Voyage Controller";
+            string info = "<color=#B7FE00><b>Bon Voyage Controller</b></color>";
+
+            switch (techLevel)
+            {
+                case 2:
+                    info += "\n\n" + Localizer.Format("#LOC_BV_Part_Description_v2");
+                    break;
+                case 3:
+                    info += "\n\n" + Localizer.Format("#LOC_BV_Part_Description_v3");
+                    break;
+                case 4:
+                    info += "\n\n" + Localizer.Format("#LOC_BV_Part_Description_v4");
+                    break;
+            }
+
+            return info;
         }
 
 
