@@ -274,6 +274,8 @@ namespace BonVoyage
                 {
                     latitude = (cooordinates[0] + 360) % 360;
                     longitude = (cooordinates[1] + 360) % 360;
+
+                    SetButtonClicked();
                 }
                 else
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_TargetNotValid", 5f)).color = Color.yellow;
@@ -307,6 +309,8 @@ namespace BonVoyage
                 {
                     latitude = (cooordinates[0] + 360) % 360;
                     longitude = (cooordinates[1] + 360) % 360;
+
+                    SetButtonClicked();
                 }
                 else
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_WaypointNotValid", 5f)).color = Color.yellow;

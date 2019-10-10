@@ -500,7 +500,7 @@ namespace BonVoyage
                 if (MainModel == null) // Create model for the Main View
                     MainModel = new MainWindowModel();
                 
-                MainView = new MainWindowView(MainModel, ToggleSettingsWindow, ToggleControlWindow, () => { appLauncherButton.SetFalse(true); });
+                MainView = new MainWindowView(MainModel, ToggleSettingsWindow, ToggleControlWindow, () => { if (appLauncherButton != null) appLauncherButton.SetFalse(true); else ToggleMainWindow(); });
                 MainView.Show();
             }
         }

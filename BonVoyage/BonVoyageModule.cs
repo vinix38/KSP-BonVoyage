@@ -286,13 +286,14 @@ namespace BonVoyage
                     // On left mouse click send coordinates and exit map mode
                     if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                     {
+                        BonVoyage.Instance.MapMode = false;
+                        MapView.ExitMapView();
                         if (BonVoyage.Instance.ControlModel != null)
                         {
                             BonVoyage.Instance.ControlModel.Latitude = latLon[0].ToString();
                             BonVoyage.Instance.ControlModel.Longitude = latLon[1].ToString();
+                            BonVoyage.Instance.ControlModel.SetButtonClicked();
                         }
-                        BonVoyage.Instance.MapMode = false;
-                        MapView.ExitMapView();
                     }
                 }
             }

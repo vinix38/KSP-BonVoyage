@@ -322,6 +322,7 @@ namespace BonVoyage
                 targetLatitude = targetLat;
                 targetLongitude = targetLon;
                 distanceToTarget = dist;
+                distanceTravelled = 0;
                 path = PathUtils.HexToWaypoint(pathFinder.path);
                 result = true;
             }

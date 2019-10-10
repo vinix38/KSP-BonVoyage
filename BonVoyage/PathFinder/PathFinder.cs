@@ -160,13 +160,6 @@ namespace BonVoyage
             {
                 switch (tileTypes)
                 {
-                    case TileTypes.Land | TileTypes.Ocean:
-                        return neighbours.Where(
-                            n => 
-                            ((n.Altitude - tile.Altitude) < StepSize / 2) &&
-                            ((n.Altitude - tile.Altitude) > 0 - StepSize / 2)
-                        );
-
                     case TileTypes.Land:
                         return neighbours.Where(
                             n => (n.Altitude >= 0 || !mainBody.ocean) &&
@@ -177,6 +170,13 @@ namespace BonVoyage
                     case TileTypes.Ocean:
                         return neighbours.Where(
                             n => (n.Altitude <= 0 && mainBody.ocean)
+                        );
+
+                    case TileTypes.Land | TileTypes.Ocean:
+                        return neighbours.Where(
+                            n =>
+                            ((n.Altitude - tile.Altitude) < StepSize / 2) &&
+                            ((n.Altitude - tile.Altitude) > 0 - StepSize / 2)
                         );
 
                     default:

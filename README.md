@@ -2,6 +2,15 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 0.5.4
+### Changes
+- Path is computed immediately after selecting a target (point on map, current target or waypoint)
+
+### Fixes
+- Fixed null ref when closing main window after hiding the application button
+- Fixed distance display in the control panel after setting a route
+
+
 ## 0.5.3
 ### Changes
 - Cheats for infinite electricity and propellant are accepted (your game, your rules)
