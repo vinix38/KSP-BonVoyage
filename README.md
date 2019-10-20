@@ -2,6 +2,11 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 1.0.0
+### Changes
+- KSP 1.8 compatibility
+
+
 ## 0.5.4
 ### Changes
 - Path is computed immediately after selecting a target (point on map, current target or waypoint)
