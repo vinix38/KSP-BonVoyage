@@ -14,7 +14,8 @@ namespace BonVoyage
         private static int stabilizationTicks = 50;
 
         // If downmovement is below this value, leave the vessel as is
-        private static float minDownMovement = 0.05f;
+        //private static float minDownMovement = 0.05f;
+        private static float minDownMovement = 0.5f;
         // Minimum upmovement in case we're beneath the ground
         private static float upMovementStep = 0.2f;
         // Max upmovement in case upward movement is required; should cancel moving the craft to space in case we messed the things up

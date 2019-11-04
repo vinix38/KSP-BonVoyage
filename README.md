@@ -2,6 +2,12 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 1.0.1
+### Changes
+- Minimum height of a rover over the terrain was changed to avoid some clipping issues
+- KSP 1.8.1 compatibility
+
+
 ## 1.0.0
 ### Changes
 - KSP 1.8 compatibility
