@@ -313,6 +313,11 @@ namespace BonVoyage
                             // Stabilize only if another stabilizer is not present
                             if (!otherStabilizerPresent)
                                 StabilizeVessel.AddVesselToStabilize(vessel, controller.RotationVector, Configuration.DisableRotation);
+                            else // only rotate
+                            {
+                                if (!Configuration.DisableRotation)
+                                    StabilizeVessel.Rotate(vessel, controller.RotationVector);
+                            }
                         }
                     }
 
