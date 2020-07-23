@@ -25,7 +25,7 @@ namespace BonVoyage
         internal ControlWindowModel ControlModel; // Control view's model
         internal bool ControlViewVisible { get { return controlViewVisible; } }
 
-        internal List<BVController> BVControllers; // Controllers list
+        internal Dictionary<Guid, BVController> BVControllers; // Controllers list
 
         internal bool GamePaused; // Is game paused?
         internal bool ShowUI; // Is UI vissible? (F2 pressed)
@@ -102,7 +102,7 @@ namespace BonVoyage
             MapMode = false;
             lastUpdate = DateTime.Now;
 
-            BVControllers = new List<BVController>();
+            BVControllers = new Dictionary<Guid, BVController>();
 
             Configuration.Load();
         }
@@ -292,16 +292,8 @@ namespace BonVoyage
                 if (vessel.packed) // No physics
                     return;
 
-                BVController controller = null;
-                for (int i = 0; i < BVControllers.Count; i++)
-                {
-                    if (BVControllers[i].vessel.id == vessel.id)
-                    {
-                        controller = BVControllers[i];
-                        break;
-                    }
-                }
-                
+                BVController controller = GetControllerOfVessel(vessel);
+				
                 if (controller != null)
                 {
                     // Move only a rover
@@ -673,8 +665,8 @@ namespace BonVoyage
             
             lastUpdate = DateTime.Now;
             double currentTime = Planetarium.GetUniversalTime();
-            for (int i = 0; i < BVControllers.Count; i++)
-                BVControllers[i].Update(currentTime);
+			foreach(BVController controller in BVControllers.Values)
+                controller.Update(currentTime);
         }
 
 
@@ -714,14 +706,10 @@ namespace BonVoyage
         /// </summary>
         internal void SetShutdownState(Guid vesselId, bool value)
         {
-            for (int i = 0; i < BVControllers.Count; i++)
-            {
-                if (BVControllers[i].vessel.id == vesselId)
-                {
-                    BVControllers[i].Shutdown = value;
-                    break;
-                }
-            }
+            BVController controller;
+			if(BVControllers.TryGetValue(vesselId, out controller))
+                controller.Shutdown = value;
+
             if (MainView != null)
                 MainModel.RefreshVesselListLayout();
             if ((ControlView != null) && value)
@@ -773,7 +761,7 @@ namespace BonVoyage
                                 controller = new RoverController(vessel, BVModule);
                                 break;
                         }
-                        BVControllers.Add(controller);
+                        BVControllers[vessel.id] = controller;
                         break;
                     }
                 }
@@ -791,15 +779,9 @@ namespace BonVoyage
             bool active = false;
             if (HighLogic.LoadedSceneIsFlight)
             {
-                for (int i = 0; i < BVControllers.Count; i++)
-                {
-                    if (BVControllers[i].vessel.id == v.id)
-                    {
-                        if (!BVControllers[i].Shutdown)
-                            active = true;
-                        break;
-                    }
-                }
+                BVController controller = GetControllerOfVessel(v);
+                if (controller != null && !controller.Shutdown)
+                    active = true;
             }
             return active;
         }
@@ -812,15 +794,14 @@ namespace BonVoyage
         /// <returns></returns>
         internal BVController GetControllerOfVessel(Vessel v)
         {
-            for (int i = 0; i < BVControllers.Count; i++)
-            {
-                if (BVControllers[i].vessel.id == v.id)
-                    return BVControllers[i];
-            }
+            return GetControllerOfVessel(v.id);
+        }
+        internal BVController GetControllerOfVessel(Guid vesselId)
+        {
+            if (BVControllers.ContainsKey(vesselId))
+                return BVControllers[vesselId];
             return null;
         }
-
-
 
         /// <summary>
         /// Actions, when autopilot was activated

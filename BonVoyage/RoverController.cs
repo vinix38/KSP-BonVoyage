@@ -579,7 +579,7 @@ namespace BonVoyage
         /// </summary>
         internal override bool Activate()
         {
-            if (vessel.situation != Vessel.Situations.LANDED)
+            if (vessel.situation != Vessel.Situations.LANDED && vessel.situation != Vessel.Situations.PRELAUNCH)
             {
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed"), 5f).color = Color.yellow;
                 return false;
@@ -707,7 +707,7 @@ namespace BonVoyage
             double deltaTOver = 0; // deltaT which is calculated from a value over the maximum resource amout available
 
             // Compute increase or decrease in EC from the last update
-            if (!CheatOptions.InfiniteElectricity && batteries.UseBatteries)
+            if (!CheatOptions.InfiniteElectricity && batteries.UseBatteries && !DetectKerbalism.Found())
             {
                 // Process fuel cells before batteries
                 if (!CheatOptions.InfinitePropellant 
@@ -829,7 +829,7 @@ namespace BonVoyage
             Save(currentTime);
 
             // Stop the rover, we don't have enough of fuel
-            if (deltaTOver > 0)
+            if (deltaTOver > 0 || batteries.CurrentEC <= 0.1)
             {
                 active = false;
                 arrived = true;
@@ -844,10 +844,14 @@ namespace BonVoyage
                         TimeWarp.SetRate(3, true);
                     if (TimeWarp.CurrentRate > 0) // Gradual drop out of warp
                         TimeWarp.SetRate(0, false);
-                    ScreenMessages.PostScreenMessage(vessel.vesselName + " " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_NotEnoughFuel"), 5f).color = Color.red;
+                    ScreenMessages.PostScreenMessage(vessel.vesselName + " " + Localizer.Format("#LOC_BV_Warning_Stopped") + ".", 5f).color = Color.red;
                 }
 
-                NotifyNotEnoughFuel();
+                if (batteries.CurrentEC <= 0.1)
+                    NotifyBatteryEmpty();
+				else
+	                NotifyNotEnoughFuel();
+
                 State = VesselState.Idle;
             }
         }
@@ -909,6 +913,20 @@ namespace BonVoyage
             MessageSystem.Instance.AddMessage(message);
         }
 
+
+        /// <summary>
+        /// Notify, that rover has not enough fuel
+        /// </summary>
+        private void NotifyBatteryEmpty()
+        {
+            MessageSystem.Message message = new MessageSystem.Message(
+                Localizer.Format("#LOC_BV_Title_RoverStopped"), // title
+                "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_LowPowerShip") + ".\n<color=#AED6EE>", // message
+                MessageSystemButton.MessageButtonColor.RED,
+                MessageSystemButton.ButtonIcons.ALERT
+            );
+            MessageSystem.Instance.AddMessage(message);
+        }
 
         /// <summary>
         /// Return status of batteries usage

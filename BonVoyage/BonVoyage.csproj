@@ -106,12 +106,17 @@
     <Compile Include="Tools\StabilizeVessel.cs" />
     <Compile Include="Tools\ToolbarWrapper.cs" />
     <Compile Include="Tools\Tools.cs" />
+    <Compile Include="Tools\Kerbalism.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Content Include="Issues.txt" />
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "$(SolutionDir)GameData\BonVoyage\plugins\$(TargetName).dll"</PostBuildEvent>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Program</StartAction>
+    <StartProgram>..\..\..\..\..\usr\bin\wine</StartProgram>
+    <StartArguments>/home/realgecko/Development/KSP/KSP_x64.exe</StartArguments>
+    <StartWorkingDirectory>..\..\..\..\..\home\realgecko\Development\KSP\</StartWorkingDirectory>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
 </Project>

@@ -194,7 +194,7 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED && currentController.vessel.situation != Vessel.Situations.PRELAUNCH))
                 {
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
                     return;
@@ -230,7 +230,7 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED && currentController.vessel.situation != Vessel.Situations.PRELAUNCH))
                 {
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
                     return;
@@ -257,7 +257,7 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED && currentController.vessel.situation != Vessel.Situations.PRELAUNCH))
                 {
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
                     return;
@@ -292,7 +292,7 @@ namespace BonVoyage
         {
             if (currentController != null)
             {
-                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED))
+                if ((currentController.GetControllerType() == 0) && (currentController.vessel.situation != Vessel.Situations.LANDED && currentController.vessel.situation != Vessel.Situations.PRELAUNCH))
                 {
                     ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_Landed", 5f)).color = Color.yellow;
                     return;

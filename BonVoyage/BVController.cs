@@ -368,6 +368,10 @@ namespace BonVoyage
                 if (solarPanel == null)
                     continue;
 
+                // this doesn't account for solar panel orientation, it will always assume full exposure for all panels.
+                // this should be fixed, maybe by stealing some code from here
+				// https://github.com/Kerbalism/Kerbalism/blob/94bf6e8dd016900404086a713fdf68c235c6a7c9/src/Kerbalism/Modules/SolarPanelFixer.cs#L886
+
                 if ((solarPanel.deployState != ModuleDeployablePart.DeployState.BROKEN) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTED) && (solarPanel.deployState != ModuleDeployablePart.DeployState.RETRACTING))
                 {
                     if (solarPanel.useCurve) // Power curve
@@ -491,6 +495,7 @@ namespace BonVoyage
                 module.distanceToTarget = distanceToTarget;
                 module.distanceTravelled = distanceTravelled;
                 module.pathEncoded = PathUtils.EncodePath(path);
+                module.requiredPower = requiredPower;
 
                 BonVoyage.Instance.AutopilotActivated(true);
                 ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_BonVoyage"), 5f);
@@ -509,6 +514,7 @@ namespace BonVoyage
             if (module != null)
             {
                 active = false;
+                requiredPower = 0;
                 targetLatitude = 0;
                 targetLongitude = 0;
                 distanceToTarget = 0;
@@ -521,6 +527,7 @@ namespace BonVoyage
                 module.distanceToTarget = distanceToTarget;
                 module.distanceTravelled = distanceTravelled;
                 module.pathEncoded = "";
+                module.requiredPower = requiredPower;
 
                 BonVoyage.Instance.AutopilotActivated(false);
             }
@@ -605,6 +612,9 @@ namespace BonVoyage
         /// </summary>
         internal void ProcessResources()
         {
+			// leave resource processing to Kerbalism if it is there
+            if (DetectKerbalism.Found()) return;
+
             IResourceBroker broker = new ResourceBroker();
 
             if (fuelCells.Use)
