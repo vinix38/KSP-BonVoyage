@@ -263,7 +263,7 @@ namespace BonVoyage
             if (listLength > 1) // anything is checked
             {
                 int counter = 1;
-				foreach(BVController controller in BonVoyage.Instance.BVControllers.Values)
+				foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
                 {
                     DialogGUIHorizontalLayout row = CreateListLayoutRow(controller); 
                     if (row != null)
@@ -323,7 +323,7 @@ namespace BonVoyage
                 }
 
                 // Add rows
-				foreach(BVController controller in BonVoyage.Instance.BVControllers.Values)
+				foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
 				{
                     controller.OnStateChanged -= OnControllerStateChanged; // Clear possible event
                     DialogGUIHorizontalLayout row = CreateListLayoutRow(controller);

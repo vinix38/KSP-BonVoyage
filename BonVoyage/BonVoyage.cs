@@ -665,7 +665,7 @@ namespace BonVoyage
             
             lastUpdate = DateTime.Now;
             double currentTime = Planetarium.GetUniversalTime();
-			foreach(BVController controller in BVControllers.Values)
+			foreach (BVController controller in BVControllers.Values)
                 controller.Update(currentTime);
         }
 
@@ -707,7 +707,7 @@ namespace BonVoyage
         internal void SetShutdownState(Guid vesselId, bool value)
         {
             BVController controller;
-			if(BVControllers.TryGetValue(vesselId, out controller))
+			if (BVControllers.TryGetValue(vesselId, out controller))
                 controller.Shutdown = value;
 
             if (MainView != null)
@@ -802,6 +802,7 @@ namespace BonVoyage
                 return BVControllers[vesselId];
             return null;
         }
+
 
         /// <summary>
         /// Actions, when autopilot was activated

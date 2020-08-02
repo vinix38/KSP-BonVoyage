@@ -93,7 +93,7 @@ namespace BonVoyage
         public double averageSpeedAtNight = 0;
 
         /// <summary>
-        /// Average vessel speed at night
+        /// Power requiered to operate
         /// </summary>
         [KSPField(isPersistant = true)]
         public double requiredPower = 0;
@@ -307,34 +307,36 @@ namespace BonVoyage
             }
         }
 
+
+        // For Kerbalism
         private static string localizedTitle = null;
 
-        /// <summary> This will be called by Kerbalism. See https://github.com/Kerbalism/Kerbalism/wiki/TechGuide-~-C%23-API </summary>
-        public static string BackgroundUpdate(Vessel v,
-            ProtoPartSnapshot part_snapshot, ProtoPartModuleSnapshot module_snapshot,
-            PartModule proto_part_module, Part proto_part,
-            Dictionary<string, double> availableResources, List<KeyValuePair<string, double>> resourceChangeRequest,
-            double elapsed_s)
+        /// <summary>
+        /// This will be called by Kerbalism. See https://github.com/Kerbalism/Kerbalism/wiki/TechGuide-~-C%23-API
+        /// </summary>
+        public static string BackgroundUpdate(Vessel v, ProtoPartSnapshot part_snapshot, ProtoPartModuleSnapshot module_snapshot, PartModule proto_part_module, Part proto_part, Dictionary<string, double> availableResources, 
+            List<KeyValuePair<string, double>> resourceChangeRequest, double elapsed_s)
         {
             BVController controller = BonVoyage.Instance.GetControllerOfVessel(v);
             if (controller == null)
                 return "";
 
             if (controller.Active)
-			{
+            {
                 double requiredPower = Proto.GetDouble(module_snapshot, "requiredPower", 0);
                 resourceChangeRequest.Add(new KeyValuePair<string, double>("ElectricCharge", -requiredPower / 10.0));
             }
 
             double availableEc;
             if (availableResources.TryGetValue("ElectricCharge", out availableEc))
-				controller.batteries.CurrentEC = availableEc;
+                controller.batteries.CurrentEC = availableEc;
 
-			if (string.IsNullOrEmpty(localizedTitle))
+            if (string.IsNullOrEmpty(localizedTitle))
                 localizedTitle = Localizer.Format("#LOC_BV_Autopilot");
 
             return localizedTitle;
         }
+        // For Kerbalism
     }
 
 }

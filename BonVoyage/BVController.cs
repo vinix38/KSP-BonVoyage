@@ -612,8 +612,9 @@ namespace BonVoyage
         /// </summary>
         internal void ProcessResources()
         {
-			// leave resource processing to Kerbalism if it is there
-            if (DetectKerbalism.Found()) return;
+			// Leave resource processing to Kerbalism if it is there
+            if (DetectKerbalism.Found())
+                return;
 
             IResourceBroker broker = new ResourceBroker();
 

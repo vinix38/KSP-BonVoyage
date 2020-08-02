@@ -51,7 +51,7 @@ namespace BonVoyage
         {
             gameNode.ClearNodes();
 
-			foreach(BVController controller in BonVoyage.Instance.BVControllers.Values)
+			foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
 			{
                 if (controller.vessel == null)
                     continue;
@@ -84,14 +84,15 @@ namespace BonVoyage
                 controllerNode.AddNode(subNode);
 
                 subNode = new ConfigNode("PROPELLANTS");
+                List<Fuel> props = controller.propellants;
                 ConfigNode propellantNode;
-                for (int r = 0; r < controller.propellants.Count; r++)
+                for (int r = 0; r < props.Count; r++)
                 {
                     propellantNode = new ConfigNode("FUEL");
-                    propellantNode.AddValue("name", controller.propellants[r].Name);
-                    propellantNode.AddValue("fuelFlow", controller.propellants[r].FuelFlow);
-                    propellantNode.AddValue("maximumAmount", controller.propellants[r].MaximumAmountAvailable);
-                    propellantNode.AddValue("currentAmount", controller.propellants[r].CurrentAmountUsed);
+                    propellantNode.AddValue("name", props[r].Name);
+                    propellantNode.AddValue("fuelFlow", props[r].FuelFlow);
+                    propellantNode.AddValue("maximumAmount", props[r].MaximumAmountAvailable);
+                    propellantNode.AddValue("currentAmount", props[r].CurrentAmountUsed);
                     subNode.AddNode(propellantNode);
                 }
                 controllerNode.AddNode(subNode);
@@ -108,7 +109,7 @@ namespace BonVoyage
         {
             if (scenarioNode != null)
             {
-				foreach(BVController controller in BonVoyage.Instance.BVControllers.Values)
+				foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
                 {
                     if (controller.vessel == null)
                         continue;

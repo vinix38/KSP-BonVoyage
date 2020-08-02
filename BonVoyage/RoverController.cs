@@ -921,7 +921,7 @@ namespace BonVoyage
         {
             MessageSystem.Message message = new MessageSystem.Message(
                 Localizer.Format("#LOC_BV_Title_RoverStopped"), // title
-                "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_LowPowerShip") + ".\n<color=#AED6EE>", // message
+                "<color=#74B4E2>" + vessel.vesselName + "</color> " + Localizer.Format("#LOC_BV_Warning_Stopped") + ". " + Localizer.Format("#LOC_BV_Warning_LowPowerRover") + ".\n<color=#AED6EE>", // message
                 MessageSystemButton.MessageButtonColor.RED,
                 MessageSystemButton.ButtonIcons.ALERT
             );
