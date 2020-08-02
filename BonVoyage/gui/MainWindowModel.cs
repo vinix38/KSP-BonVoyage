@@ -107,21 +107,18 @@ namespace BonVoyage
         /// <param name="vesselId"></param>
         private void SwitchToVessel(Guid vesselId)
         {
-            for (int i = 0; i < BonVoyage.Instance.BVControllers.Count; i++)
+            BVController controller = BonVoyage.Instance.GetControllerOfVessel(vesselId);
+            if (controller == null)
+				return;
+            Vessel v = controller.vessel;
+            if (v.loaded)
             {
-                if (BonVoyage.Instance.BVControllers[i].vessel.id == vesselId)
-                {
-                    Vessel v = BonVoyage.Instance.BVControllers[i].vessel;
-                    if (v.loaded)
-                    {
-                        FlightGlobals.SetActiveVessel(v);
-                    }
-                    else
-                    {
-                        GamePersistence.SaveGame("persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
-                        FlightDriver.StartAndFocusVessel("persistent", FlightGlobals.Vessels.IndexOf(v));
-                    }
-                }
+                FlightGlobals.SetActiveVessel(v);
+            }
+            else
+            {
+                GamePersistence.SaveGame("persistent", HighLogic.SaveFolder, SaveMode.OVERWRITE);
+                FlightDriver.StartAndFocusVessel("persistent", FlightGlobals.Vessels.IndexOf(v));
             }
         }
 
@@ -142,17 +139,15 @@ namespace BonVoyage
         /// </summary>
         /// <param name="controllerIndex"></param>
         /// <returns></returns>
-        private string GetSpeed(int controllerIndex)
+        private string GetSpeed(BVController controller)
         {
             string result = "-";
-            if (controllerIndex < BonVoyage.Instance.BVControllers.Count)
-            {
-                BVController controller = BonVoyage.Instance.BVControllers[controllerIndex];
+            if (controller == null)
+                return result;
 
-                if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
-                {
-                    result = controller.AverageSpeed.ToString("0.##") + " m/s";
-                }
+            if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
+            {
+                result = controller.AverageSpeed.ToString("0.##") + " m/s";
             }
             return result;
         }
@@ -163,17 +158,15 @@ namespace BonVoyage
         /// </summary>
         /// <param name="controllerIndex"></param>
         /// <returns></returns>
-        private string GetDistanceToTarget(int controllerIndex)
+        private string GetDistanceToTarget(BVController controller)
         {
             string result = "-";
-            if (controllerIndex < BonVoyage.Instance.BVControllers.Count)
-            {
-                BVController controller = BonVoyage.Instance.BVControllers[controllerIndex];
+            if (controller == null)
+                return result;
 
-                if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
-                {
-                    result = Tools.ConvertDistanceToText(controller.RemainingDistanceToTarget);
-                }
+            if ((controller.GetVesselState() == VesselState.Moving) || (controller.GetVesselState() == VesselState.AwaitingSunlight))
+            {
+                result = Tools.ConvertDistanceToText(controller.RemainingDistanceToTarget);
             }
             return result;
         }
@@ -184,7 +177,7 @@ namespace BonVoyage
         /// </summary>
         /// <param name="controller"></param>
         /// <returns>DialogGUIHorizontalLayout row or null if controller state don't equals to selected filter</returns>
-        private DialogGUIHorizontalLayout CreateListLayoutRow(BVController controller, int index)
+        private DialogGUIHorizontalLayout CreateListLayoutRow(BVController controller)
         {
             DialogGUIHorizontalLayout row = null;
 
@@ -220,9 +213,9 @@ namespace BonVoyage
                     new DialogGUISpace(10f),
                     new DialogGUILabel(controller.vessel.mainBody.bodyDisplayName.Replace("^N", ""), 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                     new DialogGUISpace(10f),
-                    new DialogGUILabel(delegate { return GetSpeed(index); }, 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUILabel(delegate { return GetSpeed(controller); }, 60f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                     new DialogGUISpace(10f),
-                    new DialogGUILabel(delegate { return GetDistanceToTarget(index); }, 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
+                    new DialogGUILabel(delegate { return GetDistanceToTarget(controller); }, 90f) { guiStyle = CommonWindowProperties.Style_Label_Normal_Center },
                     new DialogGUISpace(10f),
                     (
                         !controller.vessel.isActiveVessel
@@ -251,10 +244,10 @@ namespace BonVoyage
         {
             // Count disabled controllers
             int disabledControllersCount = 0;
-            int controllersCount = BonVoyage.Instance.BVControllers.Count;
-            for (int i = 0; i < controllersCount; i++)
-            {
-                if (BonVoyage.Instance.BVControllers[i].Shutdown)
+            int controllersCount = BonVoyage.Instance.BVControllers.Count();
+            foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
+			{
+                if (controller.Shutdown)
                     disabledControllersCount++;
             }
 
@@ -270,9 +263,9 @@ namespace BonVoyage
             if (listLength > 1) // anything is checked
             {
                 int counter = 1;
-                for (int i = 0; i < controllersCount; i++)
+				foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
                 {
-                    DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i], i); 
+                    DialogGUIHorizontalLayout row = CreateListLayoutRow(controller); 
                     if (row != null)
                     {
                         list[counter] = row;
@@ -302,9 +295,8 @@ namespace BonVoyage
         internal void ClearVesselListLayout()
         {
             // Clear events
-            int controllersCount = BonVoyage.Instance.BVControllers.Count;
-            for (int i = 0; i < controllersCount; i++)
-                BonVoyage.Instance.BVControllers[i].OnStateChanged -= OnControllerStateChanged;
+			foreach(BVController controller in BonVoyage.Instance.BVControllers.Values)
+                controller.OnStateChanged -= OnControllerStateChanged;
 
             vesselListLayout = null;
         }
@@ -331,11 +323,10 @@ namespace BonVoyage
                 }
 
                 // Add rows
-                int controllersCount = BonVoyage.Instance.BVControllers.Count;
-                for (int i = 0; i < controllersCount; i++)
-                {
-                    BonVoyage.Instance.BVControllers[i].OnStateChanged -= OnControllerStateChanged; // Clear possible event
-                    DialogGUIHorizontalLayout row = CreateListLayoutRow(BonVoyage.Instance.BVControllers[i], i);
+				foreach (BVController controller in BonVoyage.Instance.BVControllers.Values)
+				{
+                    controller.OnStateChanged -= OnControllerStateChanged; // Clear possible event
+                    DialogGUIHorizontalLayout row = CreateListLayoutRow(controller);
                     if (row != null)
                     {
                         rows.Add(row);
