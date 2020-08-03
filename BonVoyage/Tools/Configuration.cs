@@ -152,6 +152,20 @@ namespace BonVoyage
             }
         }
 
+
+        /// <summary>
+        /// Show biome on map
+        /// </summary>
+        internal static bool ShowBiome
+        {
+            get { return configuration.GetValue<bool>("showBiome", false); }
+            set
+            {
+                configuration.SetValue("showBiome", value);
+                configuration.save();
+            }
+        }
+
         #endregion
 
 

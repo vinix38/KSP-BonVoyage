@@ -9,6 +9,7 @@ namespace BonVoyage
     {
         private bool dewarpChecked = false;
         private bool disableRotation = false;
+        private bool showBiome = false;
         private bool kspSkin = true;
         private bool kspToolbarChecked = true;
         private bool toolbarContinuedChecked = false;
@@ -25,6 +26,8 @@ namespace BonVoyage
             else
                 kspSkin = true;
             dewarpChecked = Configuration.AutomaticDewarp;
+            disableRotation = Configuration.DisableRotation;
+            showBiome = Configuration.ShowBiome;
             kspToolbarChecked = Configuration.KSPToolbar;
             toolbarContinuedChecked = Configuration.ToolbarContinued;
         }
@@ -69,6 +72,27 @@ namespace BonVoyage
         internal bool GeDisableRotationToggleState()
         {
             return disableRotation;
+        }
+
+
+        /// <summary>
+        /// Show biome checkbox
+        /// </summary>
+        /// <param name="value"></param>
+        internal void ShowBiomeChecked(bool value)
+        {
+            showBiome = value;
+            Configuration.ShowBiome = value;
+        }
+
+
+        /// <summary>
+        /// Get the state of show biome toggle
+        /// </summary>
+        /// <returns></returns>
+        internal bool GeShowBiomeToggleState()
+        {
+            return showBiome;
         }
 
 

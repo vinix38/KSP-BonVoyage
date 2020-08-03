@@ -6,6 +6,7 @@ Automagic Industries brings you a new autopilot, which reduces driving accidents
 ### Changes
 - Kerbalism compatibility
 - Critter Crawler compatibility
+- Added the option to show biome info in the map view on or off. Off by default.
 - KSP 1.9.1 compatibility
 
 ### Fixes

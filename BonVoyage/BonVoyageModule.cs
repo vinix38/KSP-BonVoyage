@@ -288,8 +288,8 @@ namespace BonVoyage
                     GUI.Label(
                         new Rect(Input.mousePosition.x + 20, Screen.height - Input.mousePosition.y, 200, 55),
                         Localizer.Format("#LOC_BV_Control_Lat") + ": " + latLon[0].ToString("F") + "\n" +
-                        Localizer.Format("#LOC_BV_Control_Lon") + ": " + latLon[1].ToString("F") + "\n" +
-                        Localizer.Format("#LOC_BV_Control_Biome") + ": " + ScienceUtil.GetExperimentBiome(vessel.mainBody, latLon[0], latLon[1])
+                        Localizer.Format("#LOC_BV_Control_Lon") + ": " + latLon[1].ToString("F") + 
+                        (Configuration.ShowBiome ? "\n" + Localizer.Format("#LOC_BV_Control_Biome") + ": " + ScienceUtil.GetExperimentBiome(vessel.mainBody, latLon[0], latLon[1]) : "")
                     );
                     // On left mouse click send coordinates and exit map mode
                     if (Event.current.type == EventType.MouseUp && Event.current.button == 0)

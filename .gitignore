@@ -43,12 +43,6 @@ BonVoyage/Issues.txt
 BonVoyage/BonVoyage.csproj
 .vs/BonVoyage/v15/Server/sqlite3/db.lock
 .vs/BonVoyage/v15/Server/sqlite3/storage.ide
-thread images/active.png
-thread images/BVWindow.png
-thread images/controller_window.png
-thread images/controller_window_2.png
-thread images/controller_window_3.png
-thread images/message.png
-thread images/settings.png
+thread images/
 .vs/BonVoyage/v15/Server/sqlite3/storage.ide-shm
 .vs/BonVoyage/v15/Server/sqlite3/storage.ide-wal
