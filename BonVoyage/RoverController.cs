@@ -219,7 +219,7 @@ namespace BonVoyage
                     try
                     {
                         var ec = mrc[i].outputList.Find(x => x.ResourceName == "ElectricCharge");
-                        fuelCells.OutputValue = ec.Ratio;
+                        fuelCells.OutputValue += ec.Ratio;
                         found = true;
                     }
                     catch

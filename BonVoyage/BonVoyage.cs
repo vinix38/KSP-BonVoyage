@@ -280,7 +280,8 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Move and rotate a rover
+        /// Move and rotate a rover or a ship
+        /// Process resources
         /// </summary>
         /// <param name="vessel"></param>
         public void OnVesselGoOffRails(Vessel vessel)
