@@ -513,18 +513,18 @@ namespace BonVoyage
                 }
 
                 // Check motorized wheels
-                PartModule wheelMotor = partModules.Find(t => t.moduleName == "KSPWheelMotor");
-                if (wheelMotor != null)
+                List<PartModule> wheelMotors = partModules.FindAll(t => t.moduleName == "KSPWheelMotor");
+                for (int m = 0; m < wheelMotors.Count; m++)
                 {
                     // Wheel is on
-                    if (!(bool)wheelMotor.Fields.GetValue("motorLocked"))
+                    if (!(bool)wheelMotors[m].Fields.GetValue("motorLocked"))
                     {
                         online++;
-                        powerRequired += (float)wheelMotor.Fields.GetValue("maxECDraw") * (float)wheelMotor.Fields.GetValue("motorOutput") / 100; // Motor output can be limited by a slider
+                        powerRequired += (float)wheelMotors[m].Fields.GetValue("maxECDraw") * (float)wheelMotors[m].Fields.GetValue("motorOutput") / 100; // Motor output can be limited by a slider
                         if (maxSafeSpeed > 0)
-                            maxSpeedSum += Math.Min((float)wheelMotor.Fields.GetValue("maxDrivenSpeed"), maxSafeSpeed);
+                            maxSpeedSum += Math.Min((float)wheelMotors[m].Fields.GetValue("maxDrivenSpeed"), maxSafeSpeed);
                         else
-                            maxSpeedSum += (float)wheelMotor.Fields.GetValue("maxDrivenSpeed");
+                            maxSpeedSum += (float)wheelMotors[m].Fields.GetValue("maxDrivenSpeed");
                     }
                 }
 
@@ -541,6 +541,15 @@ namespace BonVoyage
                             maxSpeedSum += 2 * Math.Min((float)wheelTracks.Fields.GetValue("maxDrivenSpeed"), maxSafeSpeed);
                         else
                             maxSpeedSum += 2 * (float)wheelTracks.Fields.GetValue("maxDrivenSpeed");
+                    }
+                }
+                else // Special cases
+                {
+                    if (wheels[i].name.StartsWith("critterCrawler")) // Critter crawler has six legs with motors
+                    {
+                        damaged *= 6;
+                        inTheAir *= 6;
+                        operable *= 6;
                     }
                 }
             }
@@ -829,7 +838,7 @@ namespace BonVoyage
             Save(currentTime);
 
             // Stop the rover, we don't have enough of fuel
-            if (deltaTOver > 0 || batteries.CurrentEC <= 0.1)
+            if (deltaTOver > 0 || (!CheatOptions.InfiniteElectricity && batteries.UseBatteries && batteries.CurrentEC <= 0.1))
             {
                 active = false;
                 arrived = true;
@@ -847,7 +856,7 @@ namespace BonVoyage
                     ScreenMessages.PostScreenMessage(vessel.vesselName + " " + Localizer.Format("#LOC_BV_Warning_Stopped") + ".", 5f).color = Color.red;
                 }
 
-                if (batteries.CurrentEC <= 0.1)
+                if (!CheatOptions.InfiniteElectricity && batteries.UseBatteries && batteries.CurrentEC <= 0.1)
                     NotifyBatteryEmpty();
 				else
 	                NotifyNotEnoughFuel();

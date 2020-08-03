@@ -261,7 +261,7 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Reload list of controllers when new scene is loaded
+        /// Reload list of controllers when new scene is loaded.
         /// Deprecated?
         /// </summary>
         /// <param name="scenes"></param>

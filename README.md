@@ -5,6 +5,7 @@ Automagic Industries brings you a new autopilot, which reduces driving accidents
 ## 1.1.0
 ### Changes
 - Kerbalism compatibility
+- Critter Crawler compatibility
 - KSP 1.9.1 compatibility
 
 ### Fixes
