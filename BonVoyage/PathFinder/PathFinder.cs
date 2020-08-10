@@ -32,20 +32,6 @@ namespace BonVoyage
             }
         }
 
-        private class Tile
-        {
-            internal int x;
-            internal int y;
-            internal Hex hex;
-
-            internal Tile(int x, int y, Hex hex)
-            {
-                this.x = x;
-                this.y = y;
-                this.hex = hex;
-            }
-        }
-
         private Dictionary<int, Point> directions;
 
         private double startLatitude;

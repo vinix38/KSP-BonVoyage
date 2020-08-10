@@ -178,6 +178,30 @@ namespace BonVoyage
 
 
         /// <summary>
+        /// "Reverse Haversine" Formula - rad version.
+        /// https://gist.github.com/shayanjm/644d895c1fad80b49919
+        /// </summary>
+        /// <param name="latStart">Start latitude</param>
+        /// <param name="lonStart">Start longitude</param>
+        /// <param name="bearing">Bearing</param>
+        /// <param name="distance">Distance</param>
+        /// <param name="radius">Radius</param>
+        /// <returns>Latitude and longitude</returns>
+        internal static double[] GetLatitudeLongitudeRad(double latStart, double lonStart, double bearing, double distance, double radius)
+        {
+            var latEnd = Math.Asin(Math.Sin(latStart) * Math.Cos(distance / radius) +
+                Math.Cos(latStart) * Math.Sin(distance / radius) * Math.Cos(bearing));
+            var lonEnd = lonStart + Math.Atan2(Math.Sin(bearing) * Math.Sin(distance / radius) * Math.Cos(latStart),
+                Math.Cos(distance / radius) - Math.Sin(latStart) * Math.Sin(latEnd));
+
+            return new double[] {
+                latEnd,
+                lonEnd
+            };
+        }
+
+
+        /// <summary>
         /// Step back from target by 'step' meters.
         /// </summary>
         /// <param name="startLatitude">Start latitude</param>
@@ -195,19 +219,6 @@ namespace BonVoyage
             distanceToTarget -= step;
             double bearing = InitialBearing(startLatitude, startLongitude, endLatitude, endLongitude);
             return GetLatitudeLongitude(startLatitude, startLongitude, bearing, distanceToTarget, radius);
-        }
-
-        internal static double[] GetLatitudeLongitudeRad(double latStart, double lonStart, double bearing, double distance, double radius)
-        {
-            var latEnd = Math.Asin(Math.Sin(latStart) * Math.Cos(distance / radius) +
-                Math.Cos(latStart) * Math.Sin(distance / radius) * Math.Cos(bearing));
-            var lonEnd = lonStart + Math.Atan2(Math.Sin(bearing) * Math.Sin(distance / radius) * Math.Cos(latStart),
-                Math.Cos(distance / radius) - Math.Sin(latStart) * Math.Sin(latEnd));
-
-            return new double[] {
-                latEnd,
-                lonEnd
-            };
         }
 
 

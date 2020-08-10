@@ -166,6 +166,20 @@ namespace BonVoyage
             }
         }
 
+
+        /// <summary>
+        /// Show biome on map
+        /// </summary>
+        internal static double PathfinderTimer
+        {
+            get { return configuration.GetValue<double>("pathfinderTimer", 10); }
+            set
+            {
+                configuration.SetValue("pathfinderTimer", value);
+                configuration.save();
+            }
+        }
+
         #endregion
 
 

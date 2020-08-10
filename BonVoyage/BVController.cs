@@ -312,7 +312,7 @@ namespace BonVoyage
         protected bool FindRoute(double targetLat, double targetLon, TileTypes tileType)
         {
             bool result = false;
-
+            
             PathFinder pathFinder = new PathFinder(vessel.latitude, vessel.longitude, targetLat, targetLon, vessel.mainBody, tileType);
             pathFinder.FindPath();
 
