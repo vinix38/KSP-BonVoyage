@@ -2,11 +2,17 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 1.1.1 - New path
+### Changes
+- Pathfinder optimization - it's quicker :)
+- New configuration value for pathfinding timeout was added. Default value is 10 seconds. You can change it in config.xml of BonVoyage by changing the value on this line: <double name="pathfinderTimer">10</double>
+
+
 ## 1.1.0
 ### Changes
 - Kerbalism compatibility
 - Critter Crawler compatibility
-- Added the option to show biome info in the map view on or off. Off by default.
+- Added the option to show biome info in the map view. Off by default.
 - KSP 1.9.1 compatibility
 
 ### Fixes
