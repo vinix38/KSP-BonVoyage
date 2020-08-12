@@ -16,7 +16,6 @@ namespace BonVoyage
     /// Hexagonal grid for pathfinding will be used
     /// https://tbswithunity3d.wordpress.com/2012/02/23/hexagonal-grid-path-finding-using-a-algorithm/
     /// </summary>
-
     internal class PathFinder
     {
         internal const double StepSize = 1000;
@@ -138,9 +137,9 @@ namespace BonVoyage
                     newBearing = (newBearing - direction.Key + 360) % 360;
                     double altitude = GeoUtils.TerrainHeightAt(coords[0], coords[1], mainBody);
                     neighbour = new Hex(coords[0], coords[1], altitude, newBearing, tile.X + dirX, tile.Y + dirY, this);
+                    tiles.Add(neighbour);
                 }
                 neighbours.Add(neighbour);
-                tiles.Add(neighbour);
             }
             if (passable)
             {
