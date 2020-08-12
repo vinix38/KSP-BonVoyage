@@ -2,6 +2,13 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 1.2.0 - New path
+### Changes
+- Rebuild for KSP 1.10.1
+- Pathfinder optimization - it's quicker :)
+- New configuration value for pathfinding timeout was added. Default value is 10 seconds. You can change it in config.xml of BonVoyage by changing the value on this line: <double name="pathfinderTimer">10</double>
+
+
 ## 1.1.1 - New path
 ### Changes
 - Pathfinder optimization - it's quicker :)
