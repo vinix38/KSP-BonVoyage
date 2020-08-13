@@ -158,11 +158,20 @@ namespace BonVoyage
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
-                Fields["vesselType"].uiControlFlight.onFieldChanged = VesselTypeChanged;
-                Fields["vesselType"].guiActive = !shutdown;
-                Fields["rotationVector"].uiControlFlight.onFieldChanged = RotationVectorChanged;
-                Fields["rotationVector"].guiActive = !shutdown;
-                Events["BVControlPanel"].guiActive = !shutdown;
+                if (!vessel.isEVA)
+                {
+                    Fields["vesselType"].uiControlFlight.onFieldChanged = VesselTypeChanged;
+                    Fields["vesselType"].guiActive = !shutdown;
+                    Fields["rotationVector"].uiControlFlight.onFieldChanged = RotationVectorChanged;
+                    Fields["rotationVector"].guiActive = !shutdown;
+                    Events["BVControlPanel"].guiActive = !shutdown;
+                }
+                else
+                {
+                    Fields["vesselType"].guiActive = false;
+                    Fields["rotationVector"].guiActive = false;
+                    Events["ToggleBVController"].guiActive = false;
+                }
             }
         }
 

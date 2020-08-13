@@ -92,6 +92,7 @@
     <Compile Include="GUI\SettingsWindowView.cs" />
     <Compile Include="GUI\StyleConverter.cs" />
     <Compile Include="GUI\TooltipExtension.cs" />
+    <Compile Include="KerbalController.cs" />
     <Compile Include="PathFinder\Hex.cs" />
     <Compile Include="PathFinder\Path.cs" />
     <Compile Include="PathFinder\PathFinder.cs" />

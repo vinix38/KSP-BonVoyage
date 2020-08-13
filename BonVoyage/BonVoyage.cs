@@ -288,8 +288,8 @@ namespace BonVoyage
         {
             if ((vessel.situation == Vessel.Situations.LANDED) || (vessel.situation == Vessel.Situations.SPLASHED))
             {
-                if (vessel.isEVA) // Kerbals
-                    return;
+                //if (vessel.isEVA) // Kerbals
+                //    return;
                 if (vessel.packed) // No physics
                     return;
 
@@ -298,7 +298,7 @@ namespace BonVoyage
                 if (controller != null)
                 {
                     // Move only a rover
-                    if (controller is RoverController)
+                    if ((controller is RoverController) || ((controller is KerbalController) && (vessel.situation == Vessel.Situations.LANDED)))
                     {
                         // Only rovers with active controller or rovers that just arrived at the destination
                         if (controller.Active || controller.Arrived)
@@ -314,7 +314,7 @@ namespace BonVoyage
                         }
                     }
 
-                    if (controller is ShipController)
+                    if ((controller is ShipController) || ((controller is KerbalController) && (vessel.situation == Vessel.Situations.SPLASHED)))
                     {
                         // Only ships with active controller or ships that just arrived at the destination
                         if (controller.Active || controller.Arrived)
@@ -325,7 +325,8 @@ namespace BonVoyage
                     }
 
                     // Deduct resources
-                    controller.ProcessResources();
+                    if (!vessel.isEVA)
+                        controller.ProcessResources();
                 }
             }
         }
@@ -749,6 +750,8 @@ namespace BonVoyage
                             else
                                 continue;
                         }
+                        if (vessel.isEVA) // Kerbal on EVA
+                            vesselType = "2";
                         BVController controller = null;
                         switch (vesselType)
                         {
@@ -757,6 +760,9 @@ namespace BonVoyage
                                 break;
                             case "1": // ship
                                 controller = new ShipController(vessel, BVModule);
+                                break;
+                            case "2": // Kerbal
+                                controller = new KerbalController(vessel, BVModule);
                                 break;
                             default: // default to rover
                                 controller = new RoverController(vessel, BVModule);

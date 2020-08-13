@@ -2,6 +2,11 @@
 Automagic Industries brings you a new autopilot, which reduces driving accidents by 100%.
 
 # Changelog
+## 1.2.1
+### Changes
+- Kerbals can move behind the scene too (with a blinding speed of 0.5m/s)
+
+
 ## 1.2.0 - New path
 ### Changes
 - Rebuild for KSP 1.10.1

@@ -937,6 +937,7 @@ namespace BonVoyage
             MessageSystem.Instance.AddMessage(message);
         }
 
+
         /// <summary>
         /// Return status of batteries usage
         /// </summary>

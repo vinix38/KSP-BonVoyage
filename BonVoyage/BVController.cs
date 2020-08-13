@@ -584,7 +584,7 @@ namespace BonVoyage
         /// <returns></returns>
         internal bool CheckConnection()
         {
-            if (vessel.GetCrewCount() == 0) // Unmanned -> check connection
+            if ((vessel.GetCrewCount() == 0) && !vessel.isEVA) // Unmanned -> check connection
             {
                 // CommNet
                 if (vessel.Connection.ControlState != CommNet.VesselControlState.ProbeFull)
