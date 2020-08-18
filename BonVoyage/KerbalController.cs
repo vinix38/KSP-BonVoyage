@@ -100,7 +100,7 @@ namespace BonVoyage
         {
             base.SystemCheck();
 
-            averageSpeed = maxSpeedBase;
+            averageSpeed = maxSpeedBase * Math.Pow(9.81 * (vessel.mainBody.Radius * vessel.mainBody.Radius / vessel.mainBody.gravParameter), 1.0 / 3.0);
         }
 
 
