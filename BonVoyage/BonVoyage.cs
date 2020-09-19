@@ -297,10 +297,10 @@ namespace BonVoyage
 				
                 if (controller != null)
                 {
-                    // Move only a rover
+                    // Move only a rover or landed Kerbal
                     if ((controller is RoverController) || ((controller is KerbalController) && (vessel.situation == Vessel.Situations.LANDED)))
                     {
-                        // Only rovers with active controller or rovers that just arrived at the destination
+                        // Only rovers/Kerbals with active controller or rovers/Kerbals that just arrived at the destination
                         if (controller.Active || controller.Arrived)
                         {
                             // Stabilize only if another stabilizer is not present
@@ -314,9 +314,10 @@ namespace BonVoyage
                         }
                     }
 
+                    // Move only a ship or splashed Kerbal
                     if ((controller is ShipController) || ((controller is KerbalController) && (vessel.situation == Vessel.Situations.SPLASHED)))
                     {
-                        // Only ships with active controller or ships that just arrived at the destination
+                        // Only ships/Kerbals with active controller or ships/Kerbals that just arrived at the destination
                         if (controller.Active || controller.Arrived)
                         {
                             if (!Configuration.DisableRotation)

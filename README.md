@@ -5,6 +5,7 @@ Automagic Industries brings you a new autopilot, which reduces driving accidents
 ## 1.2.1
 ### Changes
 - Kerbals can move behind the scene too (with a blinding speed of 0.5m/s - depends on the celestial body)
+- Usage of batteries is switched off during system check and user is notified about it when there isn't enough of power to recharge a rover
 
 
 ## 1.2.0 - New path

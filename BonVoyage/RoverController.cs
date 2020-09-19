@@ -349,7 +349,13 @@ namespace BonVoyage
                     }
                 }
 
-                batteries.CurrentEC = batteries.MaxUsedEC; // We are starting at full available capacity
+                if (batteries.MaxUsedEC > 0)
+                    batteries.CurrentEC = batteries.MaxUsedEC; // We are starting at full available capacity
+                else
+                {
+                    UseBatteriesChanged(false);
+                    ScreenMessages.PostScreenMessage(Localizer.Format("#LOC_BV_Warning_CantUseBatteries") + " " + Localizer.Format("#LOC_BV_Warning_LowPowerRover") + ".", 5f).color = Color.yellow;
+                }
             }
         }
 
@@ -924,7 +930,7 @@ namespace BonVoyage
 
 
         /// <summary>
-        /// Notify, that rover has not enough fuel
+        /// Notify, that rover has empty batteries
         /// </summary>
         private void NotifyBatteryEmpty()
         {
