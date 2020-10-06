@@ -45,8 +45,8 @@ namespace BonVoyage
         /// <summary>
         /// Rotation vector
         /// </summary>
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "#LOC_BV_ContextMenu_RV", advancedTweakable = true, category = "Bon Voyage")]
-        [UI_ChooseOption(scene = UI_Scene.Flight, options = new[] { "0", "1", "2", "3", "4", "5" }, display = new[] { "#LOC_BV_ContextMenu_RV_Up", "#LOC_BV_ContextMenu_RV_Down", "#LOC_BV_ContextMenu_RV_Forward",
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "#LOC_BV_ContextMenu_RV", advancedTweakable = true, category = "Bon Voyage")]
+        [UI_ChooseOption(scene = UI_Scene.Flight | UI_Scene.Editor, options = new[] { "0", "1", "2", "3", "4", "5" }, display = new[] { "#LOC_BV_ContextMenu_RV_Up", "#LOC_BV_ContextMenu_RV_Down", "#LOC_BV_ContextMenu_RV_Forward",
             "#LOC_BV_ContextMenu_RV_Back", "#LOC_BV_ContextMenu_RV_Right", "#LOC_BV_ContextMenu_RV_Left" })]
         public string rotationVector = "3";
 
